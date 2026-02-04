@@ -8,6 +8,7 @@ import {
   Globe,
   ArrowRight
 } from "lucide-react"; 
+import ScrollReveal from "@/components/shared/ScrollReveal";
 
 export default function Services() {
   const services = [
@@ -56,7 +57,7 @@ export default function Services() {
   ];
 
   return (
-    <div className="w-full px-6 py-12 md:py-24 max-w-[1440px] mx-auto bg-gray-50/50 rounded-[3rem] my-12">
+    <ScrollReveal id="services" className="w-full px-6 py-12 md:py-24 max-w-[1440px] mx-auto bg-gray-50/50 rounded-[3rem] my-12">
       <div className="text-center max-w-3xl mx-auto mb-16">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">Our Academic Services</h2>
         <p className="text-gray-500 text-lg font-light">Comprehensive tutorial programs designed to fit your learning style and schedule.</p>
@@ -72,6 +73,6 @@ export default function Services() {
           </div>
         ))}
       </div>
-    </div>
+    </ScrollReveal>
   );
 }
