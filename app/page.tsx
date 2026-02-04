@@ -14,7 +14,7 @@ export default function Home() {
       
       <Navbar />
 
-      <main className="flex-grow flex flex-col items-center pt-40 md:pt-52 overflow-hidden">
+      <main className="flex-grow flex flex-col items-center pt-32 md:pt-52 overflow-hidden">
         
         <HeroSection />
 
