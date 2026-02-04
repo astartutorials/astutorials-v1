@@ -5,8 +5,8 @@ import CountUp from "@/components/shared/CountUp";
 export default function HeroSection() {
   return (
     <ScrollReveal id="home" className="text-center px-4 w-full max-w-7xl mx-auto">
-      <div className="mb-8 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] md:text-xs font-bold tracking-wide uppercase shadow-sm">
-        <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-blue-600 animate-pulse"></span>
+      <div className="mb-8 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-[#23457A] text-[10px] md:text-xs font-bold tracking-wide uppercase shadow-sm">
+        <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#23457A] animate-pulse"></span>
         Join 500+ Top Students
       </div>
       <h1 className="max-w-5xl mx-auto text-gray-900 mb-8 font-normal tracking-tighter leading-[1.1] text-[2.5rem] md:text-6xl lg:text-7xl">
