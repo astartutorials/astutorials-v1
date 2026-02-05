@@ -19,7 +19,6 @@ export default function ConfirmBookingPage() {
       
       <main className="max-w-[1440px] mx-auto px-6 md:px-10 pb-20">
         <div className="flex flex-col lg:flex-row gap-0 lg:gap-16">
-          {/* Sidebar - Fixed width on Desktop */}
           <div className="w-full lg:w-64 flex-shrink-0">
             <BookingSidebar currentStep={currentStep} />
           </div>
@@ -65,7 +64,7 @@ export default function ConfirmBookingPage() {
               </AnimatePresence>
             </div>
 
-            {/* Summary - Fixed width on Desktop handled inside component or wrapper */}
+     
             <div className="w-full lg:w-auto flex-shrink-0">
               <OrderSummary completed={currentStep === 3} />
             </div>
