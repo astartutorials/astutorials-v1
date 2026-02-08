@@ -21,7 +21,7 @@ export default function CompletePaymentPanel() {
         </div>
         <div className="flex items-center justify-between pt-4 text-sm font-semibold text-gray-900">
           <span>Total</span>
-          <span className="text-[var(--astar-red)]">NGN 5,075</span>
+          <span className="text-(--astar-red)">NGN 5,075</span>
         </div>
 
         <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-(--astar-red) px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700">
