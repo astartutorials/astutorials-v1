@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
-import { Poppins } from 'next/font/google'
+import { Space_Grotesk } from 'next/font/google'
 import './globals.css'
 
-const poppins = Poppins({ 
+const spaceGrotesk = Space_Grotesk({ 
   subsets: ['latin'], 
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
-  variable: '--font-poppins' 
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-space-grotesk' 
 })
 
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} font-sans`}>{children}</body>
+      <body className={`${spaceGrotesk.variable} font-sans`}>{children}</body>
     </html>
   )
 }
