@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
   --color-astar-red: #B53436;
   --color-astar-navy: #0B1120;
   --color-astar-bg: #FFFFFF;
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
 }
 :root {
   --astar-red: #D93025; 
@@ -15,7 +15,6 @@
 body {
   color: var(--astar-navy);
   background: var(--astar-bg);
-  font-family: var(--font-space-grotesk), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
