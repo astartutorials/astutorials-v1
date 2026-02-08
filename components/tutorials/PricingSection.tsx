@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function PricingSection() {
     return (
@@ -26,9 +27,12 @@ export default function PricingSection() {
                     <span className="text-gray-500 text-lg">/ session</span>
                 </div>
 
-                <button className="bg-[var(--astar-red)] text-white px-8 py-4 rounded-full font-bold text-lg inline-flex items-center gap-2 hover:bg-red-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <Link
+                    href="/tutorials/payment"
+                    className="bg-[var(--astar-red)] text-white px-8 py-4 rounded-full font-bold text-lg inline-flex items-center gap-2 hover:bg-red-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
                     Request Private Tutorial <ArrowRight size={20} />
-                </button>
+                </Link>
             </motion.div>
         </section>
     );

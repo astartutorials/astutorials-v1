@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import Navbar from '@/components/shared/Navbar'
-import Footer from '@/components/shared/Footer'
+import ClientFrame from '@/components/shared/ClientFrame'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -19,9 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans`}>
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+        <ClientFrame>{children}</ClientFrame>
       </body>
     </html>
   )
