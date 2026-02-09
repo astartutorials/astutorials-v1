@@ -12,7 +12,9 @@
   --astar-bg: #FFFFFF;
 }
 
+html,
 body {
+  font-family: var(--font-sans);
   color: var(--astar-navy);
   background: var(--astar-bg);
   -webkit-font-smoothing: antialiased;
