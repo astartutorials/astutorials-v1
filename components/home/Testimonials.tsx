@@ -1,7 +1,7 @@
-'use client';
-
+"use client"
 import { useRef } from "react";
 import { ArrowLeft, ArrowRight, Star } from "lucide-react"; 
+import ScrollReveal from "@/components/shared/ScrollReveal";
 
 export default function Testimonials() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -48,7 +48,7 @@ export default function Testimonials() {
   ];
 
   return (
-    <div className="w-full px-6 py-12 md:py-24 max-w-[1440px] mx-auto">
+    <ScrollReveal id="stories" className="w-full px-6 py-12 md:py-24 max-w-[1440px] mx-auto">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
         <div className="max-w-2xl">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">Student Success Stories</h2>
@@ -73,6 +73,6 @@ export default function Testimonials() {
           </div>
         ))}
       </div>
-    </div>
+    </ScrollReveal>
   );
 }

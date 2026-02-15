@@ -1,32 +1,29 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-astar-red: #D93025;
+  --color-astar-red: #B53436;
   --color-astar-navy: #0B1120;
   --color-astar-bg: #FFFFFF;
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
 }
-
-/* In Tailwind v4, variables defined in @theme become available 
-  as utility classes (e.g., bg-astar-red).
-*/
-
 :root {
-  /* Fallback standard vars if you prefer using var(--astar-red) manually */
   --astar-red: #D93025; 
   --astar-navy: #0B1120;
   --astar-bg: #FFFFFF;
 }
 
+html,
 body {
+  font-family: var(--font-sans);
   color: var(--astar-navy);
   background: var(--astar-bg);
-  font-family: var(--font-inter), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* @apply works automatically after importing "tailwindcss" 
-*/
 @layer components {
   .btn-primary {
     @apply bg-[var(--astar-red)] text-white hover:bg-red-700 transition-all duration-300 cursor-pointer;

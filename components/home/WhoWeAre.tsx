@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, Users, TrendingUp, Target, Award } from "lucide-react";
+import ScrollReveal from "@/components/shared/ScrollReveal";
 
 export default function WhoWeAre() {
   return (
-    <div className="w-full px-6 py-12 md:py-24 max-w-[1440px] mx-auto">
+    <ScrollReveal id="about" className="w-full px-6 py-12 md:py-24 max-w-[1440px] mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
         <div className="max-w-xl">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">Who We Are</h2>
@@ -12,7 +13,7 @@ export default function WhoWeAre() {
           </p>
           <Link href="#" className="btn-primary inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-base font-medium shadow-lg shadow-red-500/20 group">
             Learn More <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
+          </Link> 
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="group p-8 rounded-2xl bg-[var(--astar-red)] text-white relative overflow-hidden shadow-xl shadow-red-900/10 hover:shadow-2xl hover:shadow-red-900/20 hover:-translate-y-1 transition-all duration-300 cursor-default">
@@ -44,6 +45,6 @@ export default function WhoWeAre() {
           </div>
         </div>
       </div>
-    </div>
+    </ScrollReveal>
   );
 }

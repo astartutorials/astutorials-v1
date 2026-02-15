@@ -21,9 +21,20 @@ export default function Navbar() {
   const navItems = [
     { name: 'Home', href: '/' },
     { name: 'Tutoring', href: '/tutorials' },
-    { name: 'About Us', href: '#about' },
+    { name: 'About Us', href: '/#about' },
     { name: 'Careers', href: '/careers' },
   ];
+
+  const scrollToSection = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      const yOffset = -100;
+      const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <nav
@@ -35,22 +46,38 @@ export default function Navbar() {
       <div className="max-w-[1440px] mx-auto px-6 py-4 flex items-center justify-between relative">
 
         {/* --- LOGO AREA --- */}
-        <Link href="/" className="flex items-center gap-3 z-50 relative group">
-          <Image
-            src="/logo.png"
-            alt="A-Star Logo"
-            width={48}
-            height={48}
+        <Link 
+          href="/" 
+          className="flex items-center gap-3 z-50 relative group" 
+          onClick={(e) => {
+            if (window.location.pathname === '/') {
+              scrollToSection(e, 'home');
+            }
+          }}
+        >
+          <Image 
+            src="/logo.png" 
+            alt="A-Star Logo" 
+            width={48} 
+            height={48} 
             className="w-14 h-14 md:w-16 md:h-16 object-contain"
             priority
           />
-
         </Link>
 
         {/* --- DESKTOP MENU --- */}
         <div className="hidden md:flex items-center gap-8">
           {navItems.map((item) => (
-            <Link key={item.name} href={item.href} className="nav-link text-sm font-medium text-gray-600 hover:text-black transition-colors relative group">
+            <Link 
+              key={item.name} 
+              href={item.href}
+              onClick={(e) => {
+                if (item.href.startsWith('/#')) {
+                  scrollToSection(e, item.href.substring(2));
+                }
+              }}
+              className="nav-link text-sm font-medium text-gray-600 hover:text-black transition-colors relative group"
+            >
               {item.name}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[var(--astar-red)] transition-all duration-300 group-hover:w-full"></span>
             </Link>
@@ -91,11 +118,15 @@ export default function Navbar() {
       >
         <div className="p-6 flex flex-col gap-2">
           {navItems.map((item, idx) => (
-            <Link
-              key={item.name}
-              href={item.href}
+            <Link 
+              key={item.name} 
+              href={item.href} 
               className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors group"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={(e) => {
+                if (item.href.startsWith('/#')) {
+                  scrollToSection(e, item.href.substring(2));
+                }
+              }}
               style={{ transitionDelay: `${idx * 50}ms` }} // Stagger animation effect
             >
               <span className="text-lg font-semibold text-gray-800 group-hover:text-[var(--astar-red)] transition-colors">{item.name}</span>

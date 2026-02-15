@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 
 export default function BecomeTutor() {
   return (
-    <div className="w-full bg-[#1e40af] text-white py-20 px-6">
+    <div className="w-full bg-[#355EA9] text-white py-20 px-6">
       <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         {/* Left Content */}
         <div>

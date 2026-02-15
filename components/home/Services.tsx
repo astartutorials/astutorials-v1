@@ -8,7 +8,8 @@ import {
   FileText,
   Globe,
   ArrowRight
-} from "lucide-react";
+} from "lucide-react"; 
+import ScrollReveal from "@/components/shared/ScrollReveal";
 
 export default function Services() {
   const services = [
@@ -63,17 +64,17 @@ export default function Services() {
   ];
 
   return (
-    <div className="w-full px-6 py-12 md:py-24 max-w-[1440px] mx-auto bg-gray-50/50 rounded-[3rem] my-12">
+    <ScrollReveal id="services" className="w-full px-6 py-12 md:py-24 max-w-[1440px] mx-auto bg-gray-50/50 rounded-[3rem] my-12">
       <div className="text-center max-w-3xl mx-auto mb-16">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">Our Academic Services</h2>
         <p className="text-gray-500 text-lg font-light">Comprehensive tutorial programs designed to fit your learning style and schedule.</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {services.map((service, index) => (
-          <Link
-            key={index}
+          <Link 
+            key={index} 
             href={service.href}
-            className={`group relative p-8 rounded-3xl transition-all duration-300 hover:-translate-y-2 cursor-pointer ${service.highlight ? 'bg-blue-800 text-white shadow-xl shadow-blue-900/20' : 'bg-white border border-gray-100 text-gray-900 shadow-sm hover:shadow-xl hover:shadow-gray-200/40'}`}
+            className={`group relative p-8 rounded-3xl transition-all duration-300 hover:-translate-y-2 cursor-pointer ${service.highlight ? 'bg-[#355EA9] text-white shadow-xl shadow-blue-900/20' : 'bg-white border border-gray-100 text-gray-900 shadow-sm hover:shadow-xl hover:shadow-gray-200/40'}`}
           >
             {service.highlight && <service.icon className="absolute top-8 right-8 w-32 h-32 text-white/5 -rotate-12 pointer-events-none transition-transform duration-500 group-hover:scale-110" />}
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-xl transition-colors duration-300 ${service.highlight ? 'bg-white/10 text-white' : 'bg-red-50 text-[var(--astar-red)]'}`}><service.icon size={28} /></div>
@@ -83,6 +84,6 @@ export default function Services() {
           </Link>
         ))}
       </div>
-    </div>
+    </ScrollReveal>
   );
 }

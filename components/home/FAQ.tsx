@@ -1,7 +1,7 @@
-'use client';
-
+"use client"
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import ScrollReveal from "@/components/shared/ScrollReveal";
 
 export default function FAQ() {
   const [activeFaqIndex, setActiveFaqIndex] = useState<number | null>(null);
@@ -30,7 +30,7 @@ export default function FAQ() {
   ];
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-6 py-24 mb-20">
+    <ScrollReveal id="faq" className="w-full max-w-3xl mx-auto px-6 py-24 mb-20">
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 mb-4">
           Frequently Asked Questions
@@ -70,6 +70,6 @@ export default function FAQ() {
           </div>
         ))}
       </div>
-    </div>
+    </ScrollReveal>
   );
 }
