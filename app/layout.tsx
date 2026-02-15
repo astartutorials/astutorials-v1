@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Space_Grotesk } from 'next/font/google'
 import './globals.css'
+import ClientFrame from '@/components/shared/ClientFrame'
 
 const spaceGrotesk = Space_Grotesk({ 
   subsets: ['latin'], 
@@ -20,7 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={spaceGrotesk.variable}>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <ClientFrame>{children}</ClientFrame>
+      </body>
     </html>
   );
 }

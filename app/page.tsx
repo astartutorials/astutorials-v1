@@ -1,5 +1,3 @@
-import Navbar from "@/components/shared/Navbar";
-import Footer from "@/components/shared/Footer";
 import HeroSection from "@/components/home/HeroSection";
 import DashboardPreview from "@/components/home/DashboardPreview";
 import WhoWeAre from "@/components/home/WhoWeAre";
@@ -11,11 +9,9 @@ import FAQ from "@/components/home/FAQ";
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-[var(--astar-bg)] font-sans selection:bg-[var(--astar-red)] selection:text-white">
-      
-      <Navbar />
 
-      <main className="flex-grow flex flex-col items-center pt-32 md:pt-52 overflow-hidden">
-        
+      <section className="flex-grow flex flex-col items-center pt-32 md:pt-52 overflow-hidden">
+
         <HeroSection />
 
         <DashboardPreview />
@@ -30,9 +26,7 @@ export default function Home() {
 
         <FAQ />
 
-      </main>
-
-      <Footer />
+      </section>
     </div>
   );
 }
