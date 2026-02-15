@@ -5,6 +5,9 @@ import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import TutorialCard from '@/components/group-tutorials/TutorialCard';
 import TutorialToggle from '@/components/tutorials/TutorialToggle';
+import PricingSection from '@/components/tutorials/PricingSection';
+import FeaturesGrid from '@/components/tutorials/FeaturesGrid';
+import HowItWorks from '@/components/tutorials/HowItWorks';
 import { Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -144,18 +147,18 @@ export default function TutorialsPage() {
                     </motion.div>
                 </motion.div>
 
-                {/* Tutorials Grid */}
+                {/* Tutorials Content */}
                 <AnimatePresence mode="wait">
-                    <motion.div
-                        key={activeType}
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="hidden"
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
-                    >
-                        {activeType === 'group' ? (
-                            tutorials.map((tutorial, index) => (
+                    {activeType === 'group' ? (
+                        <motion.div
+                            key="group"
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="hidden"
+                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
+                        >
+                            {tutorials.map((tutorial, index) => (
                                 <motion.div key={index} variants={itemVariants}>
                                     <TutorialCard
                                         code={tutorial.code}
@@ -170,19 +173,22 @@ export default function TutorialsPage() {
                                         colorScheme={tutorial.colorScheme}
                                     />
                                 </motion.div>
-                            ))
-                        ) : (
-                            <motion.div 
-                                variants={itemVariants}
-                                className="col-span-full py-20 text-center"
-                            >
-                                <div className="bg-white/50 backdrop-blur-sm p-12 rounded-3xl border border-dashed border-slate-300">
-                                    <h3 className="text-xl font-bold text-slate-800 mb-2">Private Tutorials</h3>
-                                    <p className="text-slate-500">Private tutoring sessions are coming soon! Stay tuned.</p>
-                                </div>
-                            </motion.div>
-                        )}
-                    </motion.div>
+                            ))}
+                        </motion.div>
+                    ) : (
+                        <motion.div 
+                            key="private"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.4 }}
+                            className="space-y-16 md:space-y-24"
+                        >
+                            <PricingSection />
+                            <FeaturesGrid />
+                            <HowItWorks />
+                        </motion.div>
+                    )}
                 </AnimatePresence>
             </main>
 
