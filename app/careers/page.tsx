@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import CareersHero from "@/components/careers/CareersHero";
-import JobFilters from "@/components/careers/JobFilters";
 import JobCard, { JobPosition } from "@/components/careers/JobCard";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -19,7 +18,7 @@ const JOBS: JobPosition[] = [
     {
         id: "2",
         title: "Graphic Designer",
-        category: "Marketing", // Could be Content Creation, but mapping to filters
+        category: "Marketing",
         description: "Join our creative team to design educational materials, social media assets, and marketing collateral that inspires learning.",
         type: "Full-time",
         location: "Hybrid",
@@ -56,11 +55,6 @@ export default function CareersPage() {
             <div className="max-w-5xl mx-auto">
                 <CareersHero />
 
-                <JobFilters
-                    categories={CATEGORIES}
-                    activeCategory={activeCategory}
-                    onSelectCategory={setActiveCategory}
-                />
 
                 <motion.div layout className="flex flex-col gap-4">
                     <AnimatePresence mode="popLayout">

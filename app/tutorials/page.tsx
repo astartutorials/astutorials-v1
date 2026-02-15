@@ -138,12 +138,7 @@ export default function TutorialsPage() {
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="flex justify-center px-4"
                     >
-                        <div className="bg-white/80 backdrop-blur-sm border border-blue-100/50 text-slate-700 text-xs sm:text-sm font-medium py-4 px-6 sm:px-8 rounded-2xl inline-flex items-center gap-3 max-w-2xl shadow-sm">
-                            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                                <Info className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--astar-blue)]" />
-                            </div>
-                            <span className="text-left leading-relaxed">Group Sessions: Join fellow students for <span className="text-[var(--astar-red)] font-bold">₦1,000</span> per session. Secure your spot now.</span>
-                        </div>
+
                     </motion.div>
                 </motion.div>
 

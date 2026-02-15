@@ -19,7 +19,7 @@ export default function HeroSection() {
         Personalized tutoring designed specifically for Babcock University curriculums. Master complex topics today.
       </p>
       <div className="flex flex-row items-center justify-center gap-3 w-full max-w-md mx-auto mb-20 md:mb-32">
-        <Link href="#book" className="btn-primary flex-1 px-4 py-3.5 rounded-full text-sm md:text-base font-medium text-center shadow-xl shadow-red-500/10 whitespace-nowrap">
+        <Link href="/tutorials" className="btn-primary flex-1 px-4 py-3.5 rounded-full text-sm md:text-base font-medium text-center shadow-xl shadow-red-500/10 whitespace-nowrap">
           Book Now
         </Link>
         <Link href="#contact" className="btn-secondary flex-1 px-4 py-3.5 rounded-full text-sm md:text-base font-medium text-center whitespace-nowrap">
@@ -29,7 +29,7 @@ export default function HeroSection() {
       <div className="w-full max-w-5xl mx-auto mb-24 md:mb-32">
         <p className="text-xs md:text-sm text-gray-400 mb-10 font-medium uppercase tracking-wider">Trusted by students globally</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8 items-center justify-center opacity-80">
-          {[ { val: '500+', label: 'Active Students' }, { val: '98%', label: 'Pass Rate' }, { val: '50+', label: 'Expert Tutors' }, { val: '24', label: 'Support' } ].map((stat, i) => (
+          {[ { val: '6000+', label: 'Active Students' }, { val: '98%', label: 'Pass Rate' }, { val: '50+', label: 'Expert Tutors' }, { val: '24', label: 'Support' } ].map((stat, i) => (
             <div key={i} className="flex flex-col items-center">
               <span className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
                 <CountUp value={stat.val} />

@@ -19,9 +19,9 @@ export default function Navbar() {
 
   // Menu items list for cleaner mapping
   const navItems = [
-    { name: 'Home', href: '/' },
-    { name: 'Tutoring', href: '/tutorials' },
-    { name: 'About Us', href: '/#about' },
+    { name: 'Home', href: '/#home' },
+    { name: 'About', href: '/#about' },
+    { name: 'Services', href: '/#services' },
     { name: 'Careers', href: '/careers' },
   ];
 
@@ -72,7 +72,7 @@ export default function Navbar() {
               key={item.name} 
               href={item.href}
               onClick={(e) => {
-                if (item.href.startsWith('/#')) {
+                if (window.location.pathname === '/' && item.href.startsWith('/#')) {
                   scrollToSection(e, item.href.substring(2));
                 }
               }}
@@ -86,7 +86,7 @@ export default function Navbar() {
 
         {/* --- ACTIONS & MOBILE TOGGLE --- */}
         <div className="flex items-center gap-4">
-          <Link href="#" className="hidden md:block btn-primary px-6 py-2.5 rounded-full text-sm font-medium hover:shadow-lg hover:shadow-red-500/20 transform hover:-translate-y-0.5 transition-all">
+          <Link href="/tutorials" className="hidden md:block btn-primary px-6 py-2.5 rounded-full text-sm font-medium hover:shadow-lg hover:shadow-red-500/20 transform hover:-translate-y-0.5 transition-all">
             Get Started
           </Link>
 
@@ -123,7 +123,7 @@ export default function Navbar() {
               href={item.href} 
               className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors group"
               onClick={(e) => {
-                if (item.href.startsWith('/#')) {
+                if (window.location.pathname === '/' && item.href.startsWith('/#')) {
                   scrollToSection(e, item.href.substring(2));
                 }
               }}
@@ -137,7 +137,7 @@ export default function Navbar() {
           <hr className="my-2 border-gray-100" />
 
           <div className="flex flex-col gap-4 mt-2 px-2 pb-4">
-            <Link href="#" className="flex items-center justify-center w-full py-3.5 rounded-full btn-primary font-bold text-sm shadow-lg shadow-red-500/20">
+            <Link href="/tutorials" className="flex items-center justify-center w-full py-3.5 rounded-full btn-primary font-bold text-sm shadow-lg shadow-red-500/20">
               Book Now
             </Link>
           </div>
