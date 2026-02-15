@@ -13,7 +13,7 @@ export default function WhoWeAre() {
           </p>
           <Link href="#" className="btn-primary inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-base font-medium shadow-lg shadow-red-500/20 group">
             Learn More <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
+          </Link> 
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="group p-8 rounded-2xl bg-[var(--astar-red)] text-white relative overflow-hidden shadow-xl shadow-red-900/10 hover:shadow-2xl hover:shadow-red-900/20 hover:-translate-y-1 transition-all duration-300 cursor-default">
