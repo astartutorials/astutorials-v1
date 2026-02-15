@@ -1,12 +1,13 @@
 'use client';
 
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import TutorialCard from '@/components/TutorialCard';
+import Navbar from "@/components/shared/Navbar";
+import Footer from "@/components/shared/Footer";
+import TutorialCard from '@/components/group-tutorials/TutorialCard';
 import { Info } from 'lucide-react';
 
 export default function TutorialsPage() {
     const tutorials = [
+        // ... (tutorials array remains the same)
         {
             code: "COS 201",
             title: "Data Structures",
@@ -82,35 +83,37 @@ export default function TutorialsPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-white font-sans text-slate-900">
+        <div className="min-h-screen flex flex-col bg-[var(--astar-bg)] font-sans selection:bg-[var(--astar-red)] selection:text-white">
             <Navbar />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+            <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 pt-32 md:pt-40 pb-12 md:pb-20">
                 {/* Header */}
-                <div className="text-center mb-8 md:mb-10">
-                    <h1 className="text-3xl md:text-4xl font-bold text-blue-900 mb-4 md:mb-6">Tutorials</h1>
+                <div className="text-center mb-12 md:mb-16">
+                    <h1 className="text-4xl md:text-6xl font-bold text-[var(--astar-blue)] mb-6 md:mb-8 font-space tracking-tight">Tutorials</h1>
 
                     {/* Toggle */}
-                    <div className="inline-flex bg-gray-100 p-1 rounded-full mb-6 md:mb-8">
-                        <button className="px-4 sm:px-6 py-2 rounded-full bg-white text-blue-900 font-bold shadow-sm text-xs sm:text-sm">
+                    <div className="inline-flex bg-white/50 backdrop-blur-md p-1.5 rounded-full mb-8 md:mb-10 border border-slate-200">
+                        <button className="px-6 sm:px-10 py-3 rounded-full bg-[var(--astar-red)] text-white font-bold shadow-lg shadow-red-200/50 text-xs sm:text-sm transition-all hover:scale-105 active:scale-95">
                             Group Tutorials
                         </button>
-                        <button className="px-4 sm:px-6 py-2 rounded-full text-gray-500 font-medium text-xs sm:text-sm hover:text-gray-900 transition-colors">
+                        <button className="px-6 sm:px-10 py-3 rounded-full text-slate-500 font-medium text-xs sm:text-sm hover:text-slate-900 transition-colors">
                             Private Tutorials
                         </button>
                     </div>
 
                     {/* Info Banner */}
                     <div className="flex justify-center px-4">
-                        <div className="bg-blue-50 text-blue-900 text-xs sm:text-sm font-medium py-3 px-4 sm:px-6 rounded-xl inline-flex items-center gap-2 max-w-2xl">
-                            <Info className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700 flex-shrink-0" />
-                            <span className="text-left">Group Sessions: Join fellow students for ₦1,000 per session. Secure your spot now.</span>
+                        <div className="bg-white/80 backdrop-blur-sm border border-blue-100/50 text-slate-700 text-xs sm:text-sm font-medium py-4 px-6 sm:px-8 rounded-2xl inline-flex items-center gap-3 max-w-2xl shadow-sm">
+                            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                                <Info className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--astar-blue)]" />
+                            </div>
+                            <span className="text-left leading-relaxed">Group Sessions: Join fellow students for <span className="text-[var(--astar-red)] font-bold">₦1,000</span> per session. Secure your spot now.</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Tutorials Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
                     {tutorials.map((tutorial, index) => (
                         <TutorialCard
                             key={index}
