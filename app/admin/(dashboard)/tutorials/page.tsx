@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from "react";
 import { Search, Plus, Bell, ChevronRight, Calculator, FlaskConical, Gavel, Scale, TrendingUp, Building2 } from "lucide-react";
-import CreateTutorialModal from "@/components/admin/CreateTutorialModal";
+import { useRouter } from "next/navigation";
 
 const tutorials = [
+
   {
     id: 1,
     code: "CS-101",
@@ -26,7 +26,7 @@ const tutorials = [
     time: "02:00 PM",
     status: "Scheduled",
     statusColor: "bg-green-100 text-green-700",
-    icon: Calculator, // Using calc for math placeholder
+    icon: Calculator,
     iconColor: "bg-purple-100 text-purple-600"
   },
   {
@@ -50,7 +50,7 @@ const tutorials = [
     time: "11:30 AM",
     status: "Completed",
     statusColor: "bg-gray-100 text-gray-700",
-    icon: Scale, // Placeholder
+    icon: Scale,
     iconColor: "bg-teal-100 text-teal-600"
   },
   {
@@ -68,7 +68,7 @@ const tutorials = [
 ];
 
 export default function AdminTutorialsPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <div>
@@ -101,7 +101,7 @@ export default function AdminTutorialsPage() {
         </div>
         
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => router.push('/admin/create-tutorial')}
           className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[var(--astar-red)] text-white font-bold shadow-lg shadow-red-500/20 hover:shadow-red-500/30 transition-all w-full md:w-auto"
         >
           <Plus size={20} />
@@ -126,7 +126,11 @@ export default function AdminTutorialsPage() {
             {/* Table Body */}
             <div className="divide-y divide-gray-50">
               {tutorials.map((item) => (
-                <div key={item.id} className="grid grid-cols-12 gap-4 px-8 py-5 items-center hover:bg-gray-50/50 transition-colors group cursor-pointer">
+                <div 
+                  key={item.id} 
+                  onClick={() => router.push(`/admin/tutorials/${item.id}`)}
+                  className="grid grid-cols-12 gap-4 px-8 py-5 items-center hover:bg-gray-50/50 transition-colors group cursor-pointer"
+                >
                   
                   {/* Course Code */}
                   <div className="col-span-2 flex items-center gap-3">
@@ -182,8 +186,7 @@ export default function AdminTutorialsPage() {
         </div>
       </div>
 
-      {/* Modal */}
-      <CreateTutorialModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
     </div>
   );
 }
