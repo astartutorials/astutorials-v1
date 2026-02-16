@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Navbar from "@/components/shared/Navbar";
-import Footer from "@/components/shared/Footer";
 import TutorialCard from '@/components/group-tutorials/TutorialCard';
 import TutorialToggle from '@/components/tutorials/TutorialToggle';
 import PricingSection from '@/components/tutorials/PricingSection';
@@ -114,7 +112,6 @@ export default function TutorialsPage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-[var(--astar-bg)] font-sans selection:bg-[var(--astar-red)] selection:text-white">
-            <Navbar />
 
             <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 pt-32 md:pt-40 pb-12 md:pb-20 w-full">
                 {/* Header */}
@@ -186,8 +183,6 @@ export default function TutorialsPage() {
                     )}
                 </AnimatePresence>
             </main>
-
-            <Footer />
         </div>
     );
 }

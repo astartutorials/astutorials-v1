@@ -130,17 +130,10 @@ export default function Navbar() {
               style={{ transitionDelay: `${idx * 50}ms` }} // Stagger animation effect
             >
               <span className="text-lg font-semibold text-gray-800 group-hover:text-[var(--astar-red)] transition-colors">{item.name}</span>
-              <ChevronRight size={18} className="text-gray-300 group-hover:text-[var(--astar-red)] transition-colors" />
             </Link>
           ))}
 
-          <hr className="my-2 border-gray-100" />
 
-          <div className="flex flex-col gap-4 mt-2 px-2 pb-4">
-            <Link href="/tutorials" className="flex items-center justify-center w-full py-3.5 rounded-full btn-primary font-bold text-sm shadow-lg shadow-red-500/20">
-              Book Now
-            </Link>
-          </div>
         </div>
       </div>
     </nav>

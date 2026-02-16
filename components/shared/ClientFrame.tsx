@@ -10,7 +10,7 @@ export default function ClientFrame({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const hideChrome = pathname?.startsWith("/tutorials/payment");
+  const hideChrome = pathname?.startsWith("/tutorials/payment") || pathname?.startsWith("/admin") || pathname?.startsWith("/group-tutorials");
 
   return (
     <>

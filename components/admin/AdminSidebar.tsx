@@ -6,7 +6,8 @@ import {
   LayoutDashboard, 
   GraduationCap, 
   PlusCircle, 
-  Users, 
+  MessageSquare,
+  Briefcase,
   CreditCard, 
   Settings, 
   LogOut 
@@ -24,7 +25,8 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Tutorials", href: "/admin/tutorials", icon: GraduationCap },
     { name: "Create Tutorial", href: "/admin/create-tutorial", icon: PlusCircle },
-    { name: "Students", href: "/admin/students", icon: Users },
+    { name: "Feedback", href: "/admin/feedback", icon: MessageSquare },
+    { name: "Careers", href: "/admin/careers", icon: Briefcase },
     { name: "Payments", href: "/admin/payments", icon: CreditCard },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
