@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from "react";
-import { Bell, User, GraduationCap, BellRing, CreditCard, Mail, Settings as SettingsIcon, Save } from "lucide-react";
+import { Bell, User, GraduationCap, BellRing, CreditCard, Mail, Settings as SettingsIcon, Save, Shield, Activity, Key, UserPlus, Lock } from "lucide-react";
 
 export default function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<"profile" | "tutorials" | "notifications" | "payments">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "tutorials" | "notifications" | "payments" | "security">("profile");
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [formData, setFormData] = useState({
     // Profile
     adminName: "Admin User",
@@ -41,7 +43,8 @@ export default function AdminSettingsPage() {
     { id: "profile", name: "Profile", icon: User },
     { id: "tutorials", name: "Tutorials", icon: GraduationCap },
     { id: "notifications", name: "Notifications", icon: BellRing },
-    { id: "payments", name: "Payments", icon: CreditCard }
+    { id: "payments", name: "Payments", icon: CreditCard },
+    { id: "security", name: "Security", icon: Shield }
   ];
 
   return (
@@ -65,7 +68,7 @@ export default function AdminSettingsPage() {
 
       {/* Tabs Navigation */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 p-2">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -351,7 +354,239 @@ export default function AdminSettingsPage() {
             </div>
           </div>
         )}
+
+        {/* Security & Admin Management */}
+        {activeTab === "security" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Security & Admin Management</h2>
+              <p className="text-sm text-gray-500">Manage admin users, passwords, and view activity logs.</p>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={() => setShowPasswordModal(true)}
+                className="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl hover:shadow-md transition-all group"
+              >
+                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                  <Lock size={24} />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-gray-900">Change Password</h3>
+                  <p className="text-sm text-gray-600">Update your admin password</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setShowRegisterModal(true)}
+                className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl hover:shadow-md transition-all group"
+              >
+                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                  <UserPlus size={24} />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-gray-900">Register New Admin</h3>
+                  <p className="text-sm text-gray-600">Add a new admin user</p>
+                </div>
+              </button>
+            </div>
+
+            {/* Activity Logs */}
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Activity className="text-[var(--astar-red)]" size={20} />
+                <h3 className="text-lg font-bold text-gray-900">Recent Activity Logs</h3>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">User</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">IP Address</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Timestamp</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {[
+                        { user: "Admin User", action: "Login", ip: "192.168.1.1", time: "2 hours ago", status: "success" },
+                        { user: "Admin User", action: "Updated Tutorial", ip: "192.168.1.1", time: "3 hours ago", status: "success" },
+                        { user: "Admin User", action: "Created Career Role", ip: "192.168.1.1", time: "5 hours ago", status: "success" },
+                        { user: "Super Admin", action: "Login Attempt", ip: "10.0.0.25", time: "Yesterday", status: "failed" },
+                        { user: "Admin User", action: "Changed Settings", ip: "192.168.1.1", time: "2 days ago", status: "success" },
+                      ].map((log, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold">
+                                {log.user.split(' ').map(n => n[0]).join('')}
+                              </div>
+                              <span className="text-sm font-medium text-gray-900">{log.user}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-700">{log.action}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500 font-mono">{log.ip}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{log.time}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              log.status === 'success' 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-red-100 text-red-700'
+                            }`}>
+                              {log.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Lock className="text-blue-600" size={24} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Change Password</h3>
+                <p className="text-sm text-gray-500">Update your admin password</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Current Password</label>
+                <input
+                  type="password"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                  placeholder="Enter current password"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
+                <input
+                  type="password"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                  placeholder="Enter new password"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm New Password</label>
+                <input
+                  type="password"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                  placeholder="Confirm new password"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                className="flex-1 px-4 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 font-semibold text-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                className="flex-1 px-4 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold text-white transition-colors"
+              >
+                Update Password
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Register Admin Modal */}
+      {showRegisterModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <UserPlus className="text-green-600" size={24} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Register New Admin</h3>
+                <p className="text-sm text-gray-500">Add a new administrator to the system</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                  placeholder="Enter admin name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                <input
+                  type="email"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                  placeholder="Enter email address"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                <input
+                  type="tel"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                  placeholder="+234"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Initial Password</label>
+                <input
+                  type="password"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                  placeholder="Enter temporary password"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Role</label>
+                <select className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all cursor-pointer">
+                  <option>Admin</option>
+                  <option>Super Admin</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowRegisterModal(false)}
+                className="flex-1 px-4 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 font-semibold text-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                className="flex-1 px-4 py-3 rounded-lg bg-green-600 hover:bg-green-700 font-semibold text-white transition-colors"
+              >
+                Register Admin
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Save Button (Sticky Footer) */}
       <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-white border-t border-gray-200 p-4 shadow-lg z-40">
