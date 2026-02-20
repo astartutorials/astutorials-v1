@@ -26,7 +26,7 @@ export default function HeroSection() {
           Contact Us
         </Link>
       </div>
-      <div className="w-full max-w-5xl mx-auto mb-24 md:mb-32">
+      <div className="w-full max-w-5xl mx-auto mb-22 md:mb-32">
         <p className="text-xs md:text-sm text-gray-400 mb-10 font-medium uppercase tracking-wider">Trusted by students globally</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8 items-center justify-center opacity-80">
           {[ { val: '6000+', label: 'Active Students' }, { val: '98%', label: 'Pass Rate' }, { val: '50+', label: 'Expert Tutors' }, { val: '24', label: 'Support' } ].map((stat, i) => (
