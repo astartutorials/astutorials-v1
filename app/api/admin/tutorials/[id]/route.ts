@@ -65,3 +65,38 @@ export async function PUT(
     );
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const supabase = await createSupabaseServerClient();
+    
+    // Auth check
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { error } = await supabase
+      .from('tutorials')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      return NextResponse.json(
+        { error: 'Database Error', message: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ message: 'Tutorial deleted successfully.' });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: 'Internal Server Error', message: error.message },
+      { status: 500 }
+    );
+  }
+}
