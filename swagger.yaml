@@ -1,0 +1,590 @@
+openapi: 3.0.0
+info:
+  title: A-Star Tutorials API
+  description: >
+    Comprehensive API documentation for A-Star Tutorials.
+    This API manages the lifecycle of tutorial sessions, student bookings, job career roles, and student feedback.
+    Designed for the Next.js App Router and Supabase backend.
+  version: 1.0.0
+
+servers:
+  - url: /api
+    description: Production/Development API Base
+
+tags:
+  - name: "1. Admin | Authentication"
+    description: Admin session and identity management
+  - name: "2. Public | Tutorials"
+    description: Public facing tutorial listings
+  - name: "3. Admin | Tutorials"
+    description: Administrative management of tutorial sessions
+  - name: "4. Public | Careers"
+    description: Public job board and role listings
+  - name: "5. Admin | Careers"
+    description: Administrative career management
+  - name: "6. Public | Operations"
+    description: Public actions (Bookings & Feedback)
+  - name: "7. Admin | Management"
+    description: Advanced administrative tasks (Attendance & Logs)
+
+paths:
+  # --- 1. ADMIN | AUTHENTICATION ---
+  /auth/admin/login:
+    post:
+      tags:
+        - "1. Admin | Authentication"
+      summary: Admin Login
+      description: Authenticate an admin and set a secure session cookie via Supabase.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@astartutorials.com
+                password:
+                  type: string
+                  format: password
+                  example: "********"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  admin:
+                    $ref: "#/components/schemas/Admin"
+        "401":
+          description: Invalid credentials
+        "500":
+          description: Server error
+
+  /auth/admin/logout:
+    post:
+      tags:
+        - "1. Admin | Authentication"
+      summary: Admin Logout
+      description: Clear the session cookie and invalidate the user session.
+      responses:
+        "200":
+          description: Successfully logged out
+
+  # --- 2. PUBLIC | TUTORIALS ---
+  /tutorials:
+    get:
+      tags:
+        - "2. Public | Tutorials"
+      summary: List Active Tutorials
+      description: Retrieve all sessions marked as 'active' for the student-facing site.
+      responses:
+        "200":
+          description: A list of active tutorials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tutorials:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Tutorial"
+
+  # --- 3. ADMIN | TUTORIALS ---
+  /admin/tutorials:
+    post:
+      tags:
+        - "3. Admin | Tutorials"
+      summary: Create New Tutorial (Admin)
+      description: >
+        Create a new tutorial session. 
+        Requires Admin authentication.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TutorialCreate"
+      responses:
+        "201":
+          description: Tutorial successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  tutorial:
+                    $ref: "#/components/schemas/Tutorial"
+        "400":
+          description: Missing required fields
+        "401":
+          description: Unauthorized access
+
+  /admin/tutorials/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique UUID of the tutorial
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags:
+        - "3. Admin | Tutorials"
+      summary: Update Tutorial (Admin)
+      description: Partial update of a tutorial session. Use this to change status, capacity, or details.
+      security:
+        - cookieAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TutorialUpdate"
+      responses:
+        "200":
+          description: Tutorial updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  tutorial:
+                    $ref: "#/components/schemas/Tutorial"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Tutorial not found
+
+  # --- 4. PUBLIC | CAREERS ---
+  /careers:
+    get:
+      tags:
+        - "4. Public | Careers"
+      summary: List Job Openings
+      description: Fetch active career opportunities.
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Job"
+
+  # --- 5. ADMIN | CAREERS ---
+  /admin/careers:
+    post:
+      tags:
+        - "5. Admin | Careers"
+      summary: Create Job Role (Admin)
+      description: Add a new career opportunity to the platform.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  job:
+                    $ref: "#/components/schemas/Job"
+
+  /admin/careers/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags:
+        - "5. Admin | Careers"
+      summary: Update job Role (Admin)
+      description: supports partial updates for careers.
+      security:
+        - cookieAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  job:
+                    $ref: "#/components/schemas/Job"
+    delete:
+      tags:
+        - "5. Admin | Careers"
+      summary: Delete Job Role (Admin)
+      description: Permanently remove a job opening.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  # --- 6. PUBLIC | OPERATIONS ---
+  /bookings/group:
+    post:
+      tags:
+        - "6. Public | Operations"
+      summary: Finalize Group Booking
+      description: >
+        Called after successful payment to secure a seat.
+        Increments enrollment and registers the student.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingRequest"
+      responses:
+        "201":
+          description: Enrollment successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  booking:
+                    type: object
+
+  /feedback:
+    post:
+      tags:
+        - "6. Public | Operations"
+      summary: Submit Session Feedback
+      description: Allows students to rate their experience. Flexible anonymity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackRequest"
+      responses:
+        "201":
+          description: Feedback received
+
+  # --- 7. ADMIN | MANAGEMENT ---
+  /admin/tutorials/{id}/students:
+    get:
+      tags:
+        - "7. Admin | Management"
+      summary: Get Enrollment List (Admin)
+      description: View all students who have paid for a specific tutorial.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  students:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Student"
+
+  /admin/activity-logs:
+    get:
+      tags:
+        - "7. Admin | Management"
+      summary: Get Security Logs (Admin)
+      description: View system and security events.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ActivityLog"
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+
+  schemas:
+    Admin:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [admin, super_admin]
+
+    Tutorial:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: "COS 201"
+        title:
+          type: string
+          example: "Data Structures"
+        teacher:
+          type: string
+          example: "John Adeyemi"
+        description:
+          type: string
+        day:
+          type: string
+          example: "Thursdays"
+        time:
+          type: string
+          example: "8:00 PM"
+        seatsTotal:
+          type: integer
+          example: 40
+        seatsRemaining:
+          type: integer
+          example: 12
+        price:
+          type: string
+          example: "1k"
+        colorScheme:
+          type: string
+          example: "blue"
+
+    TutorialCreate:
+      type: object
+      required: [code, title, teacher, capacity, time]
+      properties:
+        code:
+          type: string
+          example: "MATH101"
+        title:
+          type: string
+          example: "Calculus Review"
+        teacher:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date
+          example: "2024-10-15"
+        time:
+          type: string
+          example: "14:00"
+        capacity:
+          type: integer
+          example: 20
+        price:
+          type: integer
+          example: 1000
+        colorScheme:
+          type: string
+          enum:
+            [blue, green, pink, orange, purple, yellow, indigo, teal, red, cyan]
+        status:
+          type: string
+          enum: [active, draft]
+
+    TutorialUpdate:
+      type: object
+      properties:
+        code:
+          type: string
+        title:
+          type: string
+        teacher:
+          type: string
+        capacity:
+          type: integer
+        status:
+          type: string
+
+    BookingRequest:
+      type: object
+      required: [tutorialId, fullName, email, paymentReference]
+      properties:
+        tutorialId:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        course:
+          type: string
+        matricId:
+          type: string
+        paymentReference:
+          type: string
+
+    Student:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        email:
+          type: string
+        paymentStatus:
+          type: string
+        attended:
+          type: boolean
+
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        jobId:
+          type: string
+          example: "#DEV-204"
+        title:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        location:
+          type: string
+        applicationLink:
+          type: string
+
+    JobCreate:
+      type: object
+      required: [title, category, type, applicationLink]
+      properties:
+        title:
+          type: string
+          example: "Senior Product Designer"
+        category:
+          type: string
+        type:
+          type: string
+        location:
+          type: string
+        description:
+          type: string
+        responsibilities:
+          type: string
+        requirements:
+          type: string
+        applicationLink:
+          type: string
+
+    JobUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        status:
+          type: string
+          enum: [active, draft]
+
+    FeedbackRequest:
+      type: object
+      required: [tutorialId, rating, feedback]
+      properties:
+        fullName:
+          type: string
+          description: Optional identifier
+        department:
+          type: string
+        level:
+          type: string
+        tutorialId:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        feedback:
+          type: string
+
+    ActivityLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        adminName:
+          type: string
+        action:
+          type: string
+        timestamp:
+          type: string

@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json({ message: 'Tutorial successfully created', tutorial: data }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json(
       { error: 'Internal Server Error', message: error.message },
