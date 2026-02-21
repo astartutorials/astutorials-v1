@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Plus, Bell, ChevronRight, Calculator, FlaskConical, Gavel, Scale, TrendingUp, Building2 } from "lucide-react";
+import { Search, Plus, Bell, ChevronRight, Calculator, FlaskConical, Gavel, Scale, TrendingUp, Building2, Pencil, Trash2, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const tutorials = [
@@ -116,11 +116,11 @@ export default function AdminTutorialsPage() {
             {/* Table Header */}
             <div className="grid grid-cols-12 gap-4 px-8 py-4 bg-gray-50/50 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">
               <div className="col-span-2">Course Code</div>
-              <div className="col-span-4">Tutorial Title</div>
+              <div className="col-span-3">Tutorial Title</div>
               <div className="col-span-2">Date</div>
-              <div className="col-span-2">Time</div>
-              <div className="col-span-1">Status</div>
-              <div className="col-span-1 text-right">Attendance</div>
+              <div className="col-span-1">Time</div>
+              <div className="col-span-2">Status</div>
+              <div className="col-span-2 text-right px-4">Actions</div>
             </div>
 
             {/* Table Body */}
@@ -144,8 +144,8 @@ export default function AdminTutorialsPage() {
                   </div>
 
                   {/* Title */}
-                  <div className="col-span-4">
-                    <span className="font-semibold text-gray-700 text-sm">{item.title}</span>
+                  <div className="col-span-3">
+                    <span className="font-semibold text-gray-700 text-sm truncate block">{item.title}</span>
                   </div>
 
                   {/* Date */}
@@ -154,20 +154,40 @@ export default function AdminTutorialsPage() {
                   </div>
 
                   {/* Time */}
-                  <div className="col-span-2 text-sm text-gray-600 font-medium">
+                  <div className="col-span-1 text-sm text-gray-600 font-medium tracking-tight">
                     {item.time}
                   </div>
 
                   {/* Status */}
-                  <div className="col-span-1">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${item.statusColor}`}>
+                  <div className="col-span-2">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide whitespace-nowrap ${item.statusColor}`}>
                       {item.status}
                     </span>
                   </div>
 
-                  {/* Attendance arrow */}
-                  <div className="col-span-1 flex justify-end">
-                    <ChevronRight size={18} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
+                  {/* Actions */}
+                  <div className="col-span-2 flex justify-end items-center gap-2 px-2">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); /* View logic */ }}
+                      className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                      title="View Details"
+                    >
+                      <Eye size={18} />
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); /* Edit logic */ }}
+                      className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                      title="Edit Tutorial"
+                    >
+                      <Pencil size={18} />
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); /* Delete logic */ }}
+                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                      title="Delete Tutorial"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
 
                 </div>

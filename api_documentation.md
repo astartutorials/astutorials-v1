@@ -3,7 +3,7 @@
 > **Base URL:** `/api` (Next.js App Router)
 >
 > All requests and responses use `Content-Type: application/json`.
-> Protected admin endpoints require an active session cookie (set via Supabase SSR).
+> Protected admin endpoints require an active session cookie named **`sb-access-token`** (set automatically after login).
 
 ---
 
@@ -88,7 +88,8 @@ Retrieve active tutorials.
 
 ### `POST /admin/tutorials` — `[x] Implemented`
 
-**Used by: Create Tutorial Modal**
+**Used by: Create Tutorial Modal**  
+**Auth**: Requires `sb-access-token` cookie.
 
 **Request Body:**
 
@@ -131,6 +132,29 @@ Retrieve active tutorials.
 ### `PUT /admin/tutorials/:id` — `[x] Implemented`
 
 Update tutorial details.
+
+**Response `200`:**
+
+```json
+{
+  "message": "Tutorial updated successfully",
+  "tutorial": { ... }
+}
+```
+
+---
+
+### `DELETE /admin/tutorials/:id` — `[x] Implemented`
+
+Permanently remove a tutorial session.
+
+**Response `200`:**
+
+```json
+{
+  "message": "Tutorial deleted successfully."
+}
+```
 
 ---
 

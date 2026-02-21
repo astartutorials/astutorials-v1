@@ -167,6 +167,23 @@ paths:
           description: Unauthorized
         "404":
           description: Tutorial not found
+    delete:
+      tags:
+        - "3. Admin | Tutorials"
+      summary: Delete Tutorial (Admin)
+      description: Permanently remove a tutorial session.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Tutorial deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
   # --- 4. PUBLIC | CAREERS ---
   /careers:
