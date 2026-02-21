@@ -39,7 +39,7 @@ Authenticate an admin user and set a session cookie.
 ```json
 {
   "admin": {
-    "id": "string",
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "email": "string",
     "name": "string",
     "role": "admin | super_admin"
@@ -68,7 +68,7 @@ Retrieve active tutorials.
 {
   "tutorials": [
     {
-      "id": "string",
+      "id": "550e8400-e29b-41d4-a716-446655440000",
       "code": "COS 201",
       "title": "Data Structures",
       "teacher": "John Adeyemi",
@@ -147,7 +147,7 @@ Update tutorial details.
 {
   "students": [
     {
-      "id": "string",
+      "id": "550e8400-e29b-41d4-a716-446655440000",
       "fullName": "Sarah Jenkins",
       "email": "sarah@example.com",
       "phone": "08012345678",
@@ -164,7 +164,7 @@ Update tutorial details.
 
 ## 4. Careers
 
-### `GET /careers` — `[ ] Not yet implemented`
+### `GET /careers` — `[x] Implemented`
 
 **Used by: Careers Page**
 
@@ -174,7 +174,7 @@ Update tutorial details.
 {
   "jobs": [
     {
-      "id": "string",
+      "id": "550e8400-e29b-41d4-a716-446655440000",
       "jobId": "#DEV-204",
       "title": "Frontend Developer",
       "category": "Engineering",
@@ -214,9 +214,30 @@ Update tutorial details.
 
 ### `PUT /admin/careers/:id` — `[ ] Not yet implemented`
 
-Update or toggle job visibility.
+Update career role details. Supports partial updates.
+
+**Request Body (Partial):**
+
+```json
+{
+  "title": "Lead Engineer",
+  "status": "active | draft"
+}
+```
 
 ---
+
+### `DELETE /admin/careers/:id` — `[ ] Not yet implemented`
+
+Permanently remove a job role.
+
+**Response `200`:**
+
+```json
+{
+  "message": "Job role deleted successfully."
+}
+```
 
 ## 5. Feedback
 
@@ -250,7 +271,7 @@ Update or toggle job visibility.
 {
   "logs": [
     {
-      "id": "string",
+      "id": "550e8400-e29b-41d4-a716-446655440000",
       "adminName": "System",
       "action": "New Admin Registered",
       "target": "sarah@example.com",
