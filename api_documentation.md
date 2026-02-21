@@ -7,7 +7,7 @@
 
 ---
 
-## 🚀 Core Platform Flow (How it Connects)
+## Core Platform Flow (How it Connects)
 
 The platform is designed as a continuous loop:
 
@@ -212,7 +212,7 @@ Update tutorial details.
 
 ---
 
-### `PUT /admin/careers/:id` — `[ ] Not yet implemented`
+### `PUT /admin/careers/:id` — `[x] Implemented`
 
 Update career role details. Supports partial updates.
 
@@ -227,7 +227,7 @@ Update career role details. Supports partial updates.
 
 ---
 
-### `DELETE /admin/careers/:id` — `[ ] Not yet implemented`
+### `DELETE /admin/careers/:id` — `[x] Implemented`
 
 Permanently remove a job role.
 
