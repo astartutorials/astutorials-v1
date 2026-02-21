@@ -2,72 +2,120 @@
 
 import { Search, Plus, Bell, ChevronRight, Calculator, FlaskConical, Gavel, Scale, TrendingUp, Building2, Pencil, Trash2, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-const tutorials = [
+// const tutorials = [
 
-  {
-    id: 1,
-    code: "CS-101",
-    sub: "Lab A",
-    title: "Introduction to Algorithms",
-    date: "Oct 26, 2023",
-    time: "10:00 AM",
-    status: "Scheduled",
-    statusColor: "bg-green-100 text-green-700",
-    icon: Calculator,
-    iconColor: "bg-blue-100 text-blue-600"
-  },
-  {
-    id: 2,
-    code: "MATH-202",
-    sub: "Hall B",
-    title: "Linear Algebra II",
-    date: "Oct 26, 2023",
-    time: "02:00 PM",
-    status: "Scheduled",
-    statusColor: "bg-green-100 text-green-700",
-    icon: Calculator,
-    iconColor: "bg-purple-100 text-purple-600"
-  },
-  {
-    id: 3,
-    code: "PHY-101",
-    sub: "Lab C",
-    title: "Classical Mechanics",
-    date: "Oct 27, 2023",
-    time: "09:00 AM",
-    status: "Pending",
-    statusColor: "bg-yellow-100 text-yellow-700",
-    icon: FlaskConical,
-    iconColor: "bg-orange-100 text-orange-600"
-  },
-  {
-    id: 4,
-    code: "HIS-200",
-    sub: "Room 304",
-    title: "Modern European History",
-    date: "Oct 25, 2023",
-    time: "11:30 AM",
-    status: "Completed",
-    statusColor: "bg-gray-100 text-gray-700",
-    icon: Scale,
-    iconColor: "bg-teal-100 text-teal-600"
-  },
-  {
-    id: 5,
-    code: "BUS-305",
-    sub: "Hall A",
-    title: "Corporate Finance",
-    date: "Oct 25, 2023",
-    time: "03:00 PM",
-    status: "Completed",
-    statusColor: "bg-gray-100 text-gray-700",
-    icon: Building2,
-    iconColor: "bg-indigo-100 text-indigo-600"
-  }
-];
+//   {
+//     id: 1,
+//     code: "CS-101",
+//     sub: "Lab A",
+//     title: "Introduction to Algorithms",
+//     date: "Oct 26, 2023",
+//     time: "10:00 AM",
+//     status: "Scheduled",
+//     statusColor: "bg-green-100 text-green-700",
+//     icon: Calculator,
+//     iconColor: "bg-blue-100 text-blue-600"
+//   },
+//   {
+//     id: 2,
+//     code: "MATH-202",
+//     sub: "Hall B",
+//     title: "Linear Algebra II",
+//     date: "Oct 26, 2023",
+//     time: "02:00 PM",
+//     status: "Scheduled",
+//     statusColor: "bg-green-100 text-green-700",
+//     icon: Calculator,
+//     iconColor: "bg-purple-100 text-purple-600"
+//   },
+//   {
+//     id: 3,
+//     code: "PHY-101",
+//     sub: "Lab C",
+//     title: "Classical Mechanics",
+//     date: "Oct 27, 2023",
+//     time: "09:00 AM",
+//     status: "Pending",
+//     statusColor: "bg-yellow-100 text-yellow-700",
+//     icon: FlaskConical,
+//     iconColor: "bg-orange-100 text-orange-600"
+//   },
+//   {
+//     id: 4,
+//     code: "HIS-200",
+//     sub: "Room 304",
+//     title: "Modern European History",
+//     date: "Oct 25, 2023",
+//     time: "11:30 AM",
+//     status: "Completed",
+//     statusColor: "bg-gray-100 text-gray-700",
+//     icon: Scale,
+//     iconColor: "bg-teal-100 text-teal-600"
+//   },
+//   {
+//     id: 5,
+//     code: "BUS-305",
+//     sub: "Hall A",
+//     title: "Corporate Finance",
+//     date: "Oct 25, 2023",
+//     time: "03:00 PM",
+//     status: "Completed",
+//     statusColor: "bg-gray-100 text-gray-700",
+//     icon: Building2,
+//     iconColor: "bg-indigo-100 text-indigo-600"
+//   }
+// ];
+
+
+export interface Tutorial {
+  id: string;
+  code: string;
+  title: string;
+  teacher: string;
+  description: string;
+  date: string;
+  time: string;
+  seats_total: number;
+  price: number;
+  color_scheme: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  sub: string
+}
+
+interface TutorialsResponse {
+  tutorials: Tutorial[];
+}
 
 export default function AdminTutorialsPage() {
+  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+   useEffect(() => {
+    async function fetchTutorials() {
+      try {
+        const response = await fetch("/api/tutorials");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch tutorials");
+        }
+
+        const data: TutorialsResponse = await response.json();
+        setTutorials(data.tutorials);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTutorials();
+  }, []);
+
   const router = useRouter();
 
   return (
@@ -134,8 +182,8 @@ export default function AdminTutorialsPage() {
                   
                   {/* Course Code */}
                   <div className="col-span-2 flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${item.iconColor}`}>
-                      <item.icon size={20} />
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-teal-100 text-teal-600`}>
+                      <Building2 size={20} />
                     </div>
                     <div>
                       <h4 className="font-bold text-gray-900 text-sm">{item.code}</h4>
@@ -159,8 +207,8 @@ export default function AdminTutorialsPage() {
                   </div>
 
                   {/* Status */}
-                  <div className="col-span-2">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide whitespace-nowrap ${item.statusColor}`}>
+                  <div className="col-span-1">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide`}>
                       {item.status}
                     </span>
                   </div>
@@ -205,8 +253,6 @@ export default function AdminTutorialsPage() {
            </div>
         </div>
       </div>
-
-
     </div>
   );
 }
