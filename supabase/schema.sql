@@ -39,8 +39,11 @@ CREATE TABLE public.careers (
     title TEXT NOT NULL,
     category TEXT NOT NULL,
     description TEXT,
+    responsibilities TEXT,
+    requirements TEXT,
     type TEXT NOT NULL, -- Full-time, Part-time, etc.
     location TEXT DEFAULT 'Remote',
+    application_link TEXT,
     status TEXT DEFAULT 'active', -- active, draft
     created_at TIMESTAMPTZ DEFAULT now()
 );

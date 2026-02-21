@@ -16,6 +16,8 @@ export default function AddCareerRoleModal({ isOpen, onClose }: AddCareerRoleMod
         jobType: "Full-time",
         location: "",
         description: "",
+        responsibilities: "",
+        requirements: "",
         applicationLink: ""
     });
 
@@ -58,7 +60,7 @@ export default function AddCareerRoleModal({ isOpen, onClose }: AddCareerRoleMod
                                                 <FileText size={20} />
                                             </div>
                                             <div>
-                                                <h2 className="text-2xl font-bold">Add New Career Role</h2>
+                                                <h2 className="text-2xl font-bold">Add New Role</h2>
                                             </div>
                                         </div>
                                         <button
@@ -145,15 +147,48 @@ export default function AddCareerRoleModal({ isOpen, onClose }: AddCareerRoleMod
                                     {/* Description */}
                                     <div className="mt-6">
                                         <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
-                                            Description
+                                           About Role
                                         </label>
                                         <textarea
                                             id="description"
                                             value={formData.description}
                                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                            rows={5}
+                                            rows={4}
+                                            placeholder="Overview of the role and team..."
                                             className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-gray-700 placeholder:text-gray-400 resize-none"
                                         />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                        {/* Key Responsibilities */}
+                                        <div>
+                                            <label htmlFor="responsibilities" className="block text-sm font-semibold text-gray-700 mb-2">
+                                                Key Responsibilities
+                                            </label>
+                                            <textarea
+                                                id="responsibilities"
+                                                value={formData.responsibilities}
+                                                onChange={(e) => setFormData({ ...formData, responsibilities: e.target.value })}
+                                                rows={6}
+                                                placeholder="List the main duties (one per line)..."
+                                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-gray-700 placeholder:text-gray-400 resize-none"
+                                            />
+                                        </div>
+
+                                        {/* Requirements */}
+                                        <div>
+                                            <label htmlFor="requirements" className="block text-sm font-semibold text-gray-700 mb-2">
+                                                Requirements
+                                            </label>
+                                            <textarea
+                                                id="requirements"
+                                                value={formData.requirements}
+                                                onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                                                rows={6}
+                                                placeholder="Skills, experience, qualities..."
+                                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-gray-700 placeholder:text-gray-400 resize-none"
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Application Redirect Link */}

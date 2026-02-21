@@ -130,13 +130,6 @@ export default function JobApplicationModal({ isOpen, onClose, job }: JobApplica
                                             </li>
                                         </ul>
                                     </section>
-
-                                    {/* Info Footer */}
-                                    <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
-                                        <p className="text-xs sm:text-sm text-gray-600">
-                                            Interested in this role? Submit your application via our secure form.
-                                        </p>
-                                    </div>
                                 </div>
 
                                 {/* Footer */}

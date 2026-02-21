@@ -178,13 +178,43 @@ Update tutorial details.
       "jobId": "#DEV-204",
       "title": "Frontend Developer",
       "category": "Engineering",
-      "description": "Build high-quality user experiences...",
+      "description": "About the role overview...",
+      "responsibilities": "List of duties...",
+      "requirements": "Skills and experience...",
       "type": "Full-time",
-      "location": "Remote"
+      "location": "Remote",
+      "applicationLink": "https://forms.gle/..."
     }
   ]
 }
 ```
+
+---
+
+### `POST /admin/careers` — `[ ] Not yet implemented`
+
+**Used by: Add Career Role Modal**
+
+**Request Body:**
+
+```json
+{
+  "title": "Senior Product Designer",
+  "category": "Product & Design",
+  "type": "Full-time",
+  "location": "Remote",
+  "description": "string",
+  "responsibilities": "string",
+  "requirements": "string",
+  "applicationLink": "https://..."
+}
+```
+
+---
+
+### `PUT /admin/careers/:id` — `[ ] Not yet implemented`
+
+Update or toggle job visibility.
 
 ---
 
