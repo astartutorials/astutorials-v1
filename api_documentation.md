@@ -191,7 +191,7 @@ Update tutorial details.
 
 ---
 
-### `POST /admin/careers` — `[ ] Not yet implemented`
+### `POST /admin/careers` — `[x] Implemented`
 
 **Used by: Add Career Role Modal**
 
