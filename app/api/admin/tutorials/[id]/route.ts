@@ -57,7 +57,7 @@ export async function PUT(
       );
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json({ message: 'Tutorial updated successfully', tutorial: data });
   } catch (error: any) {
     return NextResponse.json(
       { error: 'Internal Server Error', message: error.message },

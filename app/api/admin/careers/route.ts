@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       createdAt: data.created_at
     };
 
-    return NextResponse.json(formattedJob, { status: 201 });
+    return NextResponse.json({ message: 'Career role created successfully', job: formattedJob }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json(
       { error: 'Internal Server Error', message: error.message },

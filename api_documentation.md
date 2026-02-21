@@ -92,7 +92,7 @@ Retrieve active tutorials.
 
 **Request Body:**
 
-```json
+````json
 {
   "code": "MATH101",
   "title": "Calculus Review",
@@ -105,7 +105,26 @@ Retrieve active tutorials.
   "colorScheme": "blue | green | pink | orange | purple | yellow | indigo | teal | red | cyan",
   "status": "active | draft"
 }
-```
+**Response `201`:**
+
+```json
+{
+  "message": "Tutorial successfully created",
+  "tutorial": {
+    "id": "uuid",
+    "code": "MATH101",
+    "title": "Calculus Review",
+    "teacher": "John Adeyemi",
+    "description": "...",
+    "date": "2024-10-15",
+    "time": "14:00",
+    "seatsTotal": 20,
+    "price": 1000,
+    "colorScheme": "blue",
+    "status": "active"
+  }
+}
+````
 
 ---
 
@@ -117,7 +136,7 @@ Update tutorial details.
 
 ## 3. Bookings & Payments
 
-### `POST /bookings/group` — `[ ] Not yet implemented`
+### `POST /bookings/group` — `[x] Implemented`
 
 **Used by: Personal Info Form (POST-PAYMENT)**
 

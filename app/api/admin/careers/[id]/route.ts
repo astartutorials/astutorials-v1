@@ -43,8 +43,6 @@ export async function PUT(
       return NextResponse.json({ message: 'No valid fields provided for update.' }, { status: 400 });
     }
 
-   
-
     const { data, error } = await supabase
       .from('careers')
       .update(updateData)
@@ -59,7 +57,6 @@ export async function PUT(
       );
     }
 
-    // Map back to camelCase for response
     const formattedJob = {
       id: data.id,
       jobId: data.job_id,
@@ -75,7 +72,7 @@ export async function PUT(
       createdAt: data.created_at
     };
 
-    return NextResponse.json(formattedJob);
+    return NextResponse.json({ message: 'Career role updated successfully', job: formattedJob });
   } catch (error: any) {
     return NextResponse.json(
       { error: 'Internal Server Error', message: error.message },
