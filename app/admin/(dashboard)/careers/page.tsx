@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from "react";
-import { Search, Plus, Bell, Code, Palette, Megaphone, Headphones, BarChart3, MoreVertical } from "lucide-react";
-import AddCareerRoleModal from "@/components/admin/AddCareerRoleModal";
+import { Search, Plus, Bell, Code, Palette, Megaphone, Headphones, BarChart3, MoreVertical, Edit, Trash2 } from "lucide-react";
+import AddCareerRoleModal from "@/components/careers/admin/AddCareerRoleModal";
+import { motion, AnimatePresence } from "framer-motion";
 
 const jobRoles = [
   {
@@ -67,11 +68,82 @@ const jobRoles = [
   }
 ];
 
+function JobRow({ job }: { job: any }) {
+  const [showMenu, setShowMenu] = useState(false);
+
+  return (
+    <div className="grid grid-cols-12 gap-4 px-8 py-5 items-center hover:bg-gray-50/50 transition-colors group relative">
+      <div className="col-span-3 flex items-center gap-3">
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${job.iconColor} flex-shrink-0`}>
+          <job.icon size={20} />
+        </div>
+        <div>
+          <h4 className="font-bold text-gray-900 text-sm">{job.title}</h4>
+          <p className="text-xs text-gray-500">ID: {job.jobId}</p>
+        </div>
+      </div>
+      <div className="col-span-2 text-sm text-gray-700 font-medium">{job.department}</div>
+      <div className="col-span-2 text-sm text-gray-600">{job.location}</div>
+      <div className="col-span-2 text-sm text-gray-600">{job.postedDate}</div>
+      <div className="col-span-2">
+        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${job.statusColor}`}>
+          {job.status}
+        </span>
+      </div>
+      <div className="col-span-1 flex justify-end relative">
+        <button 
+          onClick={() => setShowMenu(!showMenu)}
+          className={`p-2 rounded-full transition-colors ${showMenu ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+        >
+          <MoreVertical size={18} />
+        </button>
+
+        <AnimatePresence>
+          {showMenu && (
+            <>
+              <div 
+                className="fixed inset-0 z-10" 
+                onClick={() => setShowMenu(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-20 overflow-hidden"
+              >
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    console.log("Edit job:", job.id);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                >
+                  <Edit size={16} className="text-blue-600" />
+                  Edit Role
+                </button>
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    console.log("Delete job:", job.id);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm font-semibold text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                >
+                  <Trash2 size={16} />
+                  Delete Role
+                </button>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminCareersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Filter jobs based on search
   const filteredJobs = jobRoles.filter(job =>
     job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     job.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,7 +152,7 @@ export default function AdminCareersPage() {
 
   return (
     <div>
-      {/* Header */}
+      {/* ... previous content until divide-y ... */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Career Management</h1>
@@ -97,7 +169,6 @@ export default function AdminCareersPage() {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 mb-8">
         <div className="relative w-full md:max-w-md">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -119,11 +190,9 @@ export default function AdminCareersPage() {
         </button>
       </div>
 
-      {/* Table Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <div className="min-w-[900px]">
-            {/* Table Header */}
             <div className="grid grid-cols-12 gap-4 px-8 py-4 bg-gray-50/50 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">
               <div className="col-span-3">Role Title</div>
               <div className="col-span-2">Department</div>
@@ -133,50 +202,9 @@ export default function AdminCareersPage() {
               <div className="col-span-1 text-right">Actions</div>
             </div>
 
-            {/* Table Body */}
             <div className="divide-y divide-gray-50">
               {filteredJobs.map((job) => (
-                <div key={job.id} className="grid grid-cols-12 gap-4 px-8 py-5 items-center hover:bg-gray-50/50 transition-colors group">
-                  {/* Role Title */}
-                  <div className="col-span-3 flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${job.iconColor} flex-shrink-0`}>
-                      <job.icon size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 text-sm">{job.title}</h4>
-                      <p className="text-xs text-gray-500">ID: {job.jobId}</p>
-                    </div>
-                  </div>
-
-                  {/* Department */}
-                  <div className="col-span-2 text-sm text-gray-700 font-medium">
-                    {job.department}
-                  </div>
-
-                  {/* Location */}
-                  <div className="col-span-2 text-sm text-gray-600">
-                    {job.location}
-                  </div>
-
-                  {/* Posted Date */}
-                  <div className="col-span-2 text-sm text-gray-600">
-                    {job.postedDate}
-                  </div>
-
-                  {/* Status */}
-                  <div className="col-span-2">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${job.statusColor}`}>
-                      {job.status}
-                    </span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="col-span-1 flex justify-end">
-                    <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                      <MoreVertical size={18} />
-                    </button>
-                  </div>
-                </div>
+                <JobRow key={job.id} job={job} />
               ))}
             </div>
           </div>
