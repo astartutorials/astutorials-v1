@@ -1,14 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 
-/**
- * POST /api/auth/admin/logout
- *
- * Signs the current admin out of Supabase and clears the session cookie.
- *
- * Response 200: { message: "Logged out successfully" }
- * Response 500: { error: "Failed to log out" }
- */
+
 export async function POST() {
   try {
     const supabase = await createSupabaseServerClient();
