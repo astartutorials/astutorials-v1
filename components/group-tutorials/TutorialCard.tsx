@@ -50,6 +50,10 @@ const TutorialCard = ({
         purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-600' },
         pink: { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-600' },
         yellow: { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-600' },
+        indigo: { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-600' },
+        teal: { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-600' },
+        red: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-600' },
+        cyan: { bg: 'bg-cyan-50', border: 'border-cyan-200', text: 'text-cyan-600' },
     };
 
     const colors = colorMap[colorScheme] || colorMap.blue;
