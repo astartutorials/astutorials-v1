@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   GraduationCap, 
@@ -20,6 +21,30 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter()
+  
+  async function handleLogout(): Promise<void> {
+  try {
+    const response = await fetch("/api/auth/admin/logout", {
+      method: "POST",
+      credentials: "include", // important if using httpOnly cookies
+    });
+
+    if (!response.ok) {
+      throw new Error("Logout failed");
+    }
+
+    // Redirect to admin login page
+    router.push("/admin/login");
+
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Logout error:", error.message);
+    } else {
+      console.error("Unknown logout error");
+    }
+  }
+}
 
   const navItems = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -76,7 +101,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
         {/* Logout */}
         <div className="p-4 border-t border-gray-700/50">
-          <button className="flex items-center gap-3 px-4 py-3 w-full text-left text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+          <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 w-full text-left text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
             <LogOut size={20} />
             <span className="text-sm">Logout</span>
           </button>
