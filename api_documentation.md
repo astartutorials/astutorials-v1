@@ -109,7 +109,7 @@ Retrieve active tutorials.
 
 ---
 
-### `PUT /admin/tutorials/:id` — `[ ] Not yet implemented`
+### `PUT /admin/tutorials/:id` — `[x] Implemented`
 
 Update tutorial details.
 
