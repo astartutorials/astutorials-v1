@@ -10,8 +10,56 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 export const metadata: Metadata = {
-  title: "A-Star | Unlock Your Academic Brilliance",
-  description: "Personalized tutoring designed specifically for Babcock University curriculums.",
+  metadataBase: new URL('https://astartutorials.com'),
+  title: {
+    default: "A-Star Tutorials | Unlock Your Academic Brilliance",
+    template: "%s | A-Star Tutorials"
+  },
+  description: "Premium personalized tutoring for Babcock University students. Excel in your academics with structured guidance and community support.",
+  keywords: ["Babcock University", "Tutoring", "Academic Excellence", "A-Star Tutorials", "Nigeria Education", "Student Support"],
+  authors: [{ name: "A-Star Tutorials" }],
+  creator: "A-Star Tutorials",
+  publisher: "A-Star Tutorials",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: "A-Star Tutorials | Unlock Your Academic Brilliance",
+    description: "Premium personalized tutoring for Babcock University students.",
+    url: 'https://astartutorials.com',
+    siteName: 'A-Star Tutorials',
+    images: [
+      {
+        url: '/logo.png',
+        width: 800,
+        height: 600,
+      },
+    ],
+    locale: 'en_NG',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "A-Star Tutorials | Unlock Your Academic Brilliance",
+    description: "Premium personalized tutoring for Babcock University students.",
+    images: ['/logo.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
