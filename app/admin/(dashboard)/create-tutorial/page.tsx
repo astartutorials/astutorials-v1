@@ -58,16 +58,6 @@ export default function CreateTutorialPage() {
               </div>
             </div>
 
-            {/* Upload Materials */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-700">Upload Materials (Optional)</label>
-              <div className="border border-dashed border-gray-300 rounded-xl h-32 flex flex-col items-center justify-center text-center hover:border-[var(--astar-red)] hover:bg-red-50/10 transition-colors cursor-pointer group bg-gray-50/30">
-                <div className="w-10 h-10 bg-gray-400 text-white rounded-full flex items-center justify-center mb-2 group-hover:bg-[var(--astar-red)] transition-colors">
-                  <Upload size={18} />
-                </div>
-                <p className="text-xs text-gray-500 font-medium">Drag & drop files or <span className="text-[var(--astar-red)]">browse</span></p>
-              </div>
-            </div>
           </div>
 
           {/* Right Column: Schedule & Capacity */}

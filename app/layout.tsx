@@ -11,7 +11,7 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: "A-Star | Unlock Your Academic Brilliance",
-  description: "Personalized tutoring designed specifically for Babcock University curriculums.",
+  description: "Personalized tutoring designed specifically for Tertiary Institutions.",
 };
 
 export default function RootLayout({

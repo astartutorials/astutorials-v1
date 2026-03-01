@@ -28,7 +28,7 @@ export default function RequestDetailsForm() {
             </label>
             <input
               type="email"
-              placeholder="you@babcock.edu.ng"
+              placeholder="you@student.edu.ng"
               className="mt-2 w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-[var(--astar-red)]"
             />
           </div>

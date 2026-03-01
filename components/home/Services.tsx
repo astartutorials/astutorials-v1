@@ -21,46 +21,23 @@ export default function Services() {
       highlight: false,
       href: "/tutorials"
     },
-    {
-      title: "Exam Preparation",
-      desc: "Intensive revision crash courses designed to maximize retention and exam performance in minimum time.",
-      icon: BookOpen,
-      action: "Start Prep",
-      highlight: true,
-      href: "#"
-    },
-    {
-      title: "Private 1-on-1",
+        {
+      title: "Private tutorials",
       desc: "Personalized attention focused entirely on your specific weaknesses and learning pace.",
       icon: User,
       action: "Find a Tutor",
-      highlight: false,
+      highlight: true,
       href: "/tutorials"
     },
     {
-      title: "Science Labs",
-      desc: "Practical guidance for laboratory reports and experimental procedures to boost your practical grades.",
-      icon: FlaskConical,
-      action: "Lab Support",
+      title: "Mock Exams Sessions",
+      desc: "Intensive revision crash courses designed to maximize retention and exam performance in minimum time.",
+      icon: BookOpen,
+      action: "Start Prep",
       highlight: false,
       href: "#"
     },
-    {
-      title: "Assignment Help",
-      desc: "Guidance on structuring essays, research papers, and assignments to meet academic standards.",
-      icon: FileText,
-      action: "Get Help",
-      highlight: false,
-      href: "#"
-    },
-    {
-      title: "Language Club",
-      desc: "Enhance your communication skills in French and other languages with conversational practice.",
-      icon: Globe,
-      action: "Join Club",
-      highlight: false,
-      href: "#"
-    },
+
   ];
 
   return (

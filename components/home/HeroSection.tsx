@@ -16,7 +16,7 @@ export default function HeroSection() {
         </span>
       </h1>
       <p className="max-w-xl md:max-w-2xl mx-auto text-lg md:text-xl text-gray-500 font-light mb-10 leading-relaxed px-4">
-        Personalized tutoring designed specifically for Babcock University curriculums. Master complex topics today.
+        Personalized tutoring designed specifically for Tertiary Institutions.. Master complex topics today.
       </p>
       <div className="flex flex-row items-center justify-center gap-3 w-full max-w-md mx-auto mb-20 md:mb-32">
         <Link href="/tutorials" className="btn-primary flex-1 px-4 py-3.5 rounded-full text-sm md:text-base font-medium text-center shadow-xl shadow-red-500/10 whitespace-nowrap">
