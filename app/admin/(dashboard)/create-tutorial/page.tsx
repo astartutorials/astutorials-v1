@@ -83,18 +83,38 @@ export default function CreateTutorialPage() {
               <div className="grid grid-cols-2 gap-6 mb-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-700">Date</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                    <input type="text" placeholder="mm/dd/yyyy" className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-gray-800 text-sm" />
-                    <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-800" size={16} />
+                  <div className="relative group">
+                    <Calendar 
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[var(--astar-red)] transition-colors cursor-pointer" 
+                      size={16} 
+                      onClick={(e) => {
+                        const input = e.currentTarget.parentElement?.querySelector('input');
+                        if (input) input.showPicker();
+                      }}
+                    />
+                    <input 
+                      type="date" 
+                      className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-gray-800 text-sm [appearance:none] [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer" 
+                      onClick={(e) => e.currentTarget.showPicker()}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-700">Time</label>
-                   <div className="relative">
-                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                    <input type="text" placeholder="--:-- --" className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-gray-800 text-sm" />
-                     <Clock className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-800" size={16} />
+                   <div className="relative group">
+                    <Clock 
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[var(--astar-red)] transition-colors cursor-pointer" 
+                      size={16} 
+                      onClick={(e) => {
+                        const input = e.currentTarget.parentElement?.querySelector('input');
+                        if (input) input.showPicker();
+                      }}
+                    />
+                    <input 
+                      type="time" 
+                      className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-gray-800 text-sm [appearance:none] [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer" 
+                      onClick={(e) => e.currentTarget.showPicker()}
+                    />
                   </div>
                 </div>
               </div>
@@ -110,7 +130,7 @@ export default function CreateTutorialPage() {
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-700">Price per Student</label>
                    <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm font-medium">$</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm font-medium">₦</span>
                     <input type="number" placeholder="1000" className="w-full pl-8 pr-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-gray-800 text-sm" />
                   </div>
                 </div>
@@ -119,12 +139,11 @@ export default function CreateTutorialPage() {
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-700">Tutor Assignment</label>
                 <div className="relative">
-                   <select className="w-full px-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-gray-800 bg-white appearance-none text-sm">
-                      <option value="">Select a tutor...</option>
-                      <option value="john">John Adeyemi</option>
-                      <option value="sarah">Sarah Smith</option>
-                   </select>
-                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▼</div>
+                   <input 
+                     type="text" 
+                     placeholder="Enter tutor name..." 
+                     className="w-full px-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-400 text-gray-800 text-sm" 
+                   />
                 </div>
               </div>
             </div>
@@ -151,10 +170,10 @@ export default function CreateTutorialPage() {
         {/* Footer Actions */}
         <div className="flex justify-end gap-3 mt-12 pt-6 border-t border-gray-50">
           <button className="px-8 py-3.5 rounded-xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50 transition-colors">
-            Save Draft
+           Draft
           </button>
           <button className="px-8 py-3.5 rounded-xl bg-[#C1121F] text-white font-bold text-sm shadow-xl shadow-red-500/10 hover:shadow-red-500/20 transition-all">
-            Publish Tutorial
+            Publish 
           </button>
         </div>
       </div>
