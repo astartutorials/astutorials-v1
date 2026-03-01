@@ -19,7 +19,7 @@ export default function Footer() {
             />
           </Link>
           <p className="text-gray-400 leading-relaxed max-w-sm">
-            Empowering Babcock University students to achieve academic excellence through structured guidance and community support.
+            Empowering tertiary institution students to achieve academic excellence through structured guidance and community support.
           </p>
         </div>
 

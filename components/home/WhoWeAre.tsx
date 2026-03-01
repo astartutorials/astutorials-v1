@@ -9,7 +9,7 @@ export default function WhoWeAre() {
         <div className="max-w-xl">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">Who We Are</h2>
           <p className="text-gray-600 text-lg leading-relaxed mb-6">
-            A-Star Tutorials is a student-driven academic support system built to help Babcock University students excel. We provide structured tutorials, easy-to-understand guidance, and a supportive learning community.
+            A-Star Tutorials is a student-driven academic support system built to help tertiary institution students excel. We provide structured tutorials, easy-to-understand guidance, and a supportive learning community.
           </p>
           <Link href="#" className="btn-primary inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-base font-medium shadow-lg shadow-red-500/20 group">
             Learn More <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -33,7 +33,7 @@ export default function WhoWeAre() {
           </div>
           <div className="group p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300 cursor-default">
             <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-6"><Target className="w-6 h-6 text-[var(--astar-red)]" /></div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">Student-First</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Student-First Approach</h3>
             <p className="text-gray-500 text-sm leading-relaxed mb-8">Tailored approaches for individual success.</p>
             <div className="flex items-center text-[var(--astar-red)] text-xs font-bold tracking-widest uppercase">Learn More <ArrowRight className="w-3 h-3 ml-2 transition-transform duration-300 group-hover:translate-x-1" /></div>
           </div>

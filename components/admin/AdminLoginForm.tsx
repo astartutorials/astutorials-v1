@@ -68,7 +68,7 @@ export default function AdminLoginForm() {
         </form>
 
         <div className="absolute bottom-6 left-0 right-0 text-center">
-             <p className="text-[10px] text-gray-300">© 2024 A-Star Tutorials. All rights reserved.</p>
+             <p className="text-[10px] text-gray-300">© {new Date().getFullYear()} A-Star Tutorials. All rights reserved.</p>
         </div>
       </div>
     </div>
