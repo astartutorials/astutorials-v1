@@ -7,41 +7,41 @@ import { motion, AnimatePresence } from "framer-motion";
 
 // Mock Data matching the design
 const JOBS: JobPosition[] = [
-    {
-        id: "1",
-        title: "Math Tutor (High School Level)",
-        category: "Tutoring",
-        description: "We're seeking an experienced Math Tutor to help high school students master Algebra, Calculus, and Geometry concepts.",
-        type: "Part-time",
-        location: "100% Remote",
-    },
-    {
-        id: "2",
-        title: "Graphic Designer",
-        category: "Marketing",
-        description: "Join our creative team to design educational materials, social media assets, and marketing collateral that inspires learning.",
-        type: "Full-time",
-        location: "Hybrid",
-    },
-    {
-        id: "3",
-        title: "Academic Coordinator",
-        category: "Operations",
-        description: "We need an organized individual to manage tutor schedules, coordinate with parents, and ensure smooth operational flow.",
-        type: "Full-time",
-        location: "On-site",
-    },
-    {
-        id: "4",
-        title: "Physics Tutor",
-        category: "Tutoring",
-        description: "Passionate about Physics? Join us to teach mechanics, thermodynamics, and electromagnetism to eager learners.",
-        type: "Contract",
-        location: "100% Remote",
-    },
+    // {
+    //     id: "1",
+    //     title: "Math Tutor (High School Level)",
+    //     category: "Tutoring",
+    //     description: "We're seeking an experienced Math Tutor to help high school students master Algebra, Calculus, and Geometry concepts.",
+    //     type: "Part-time",
+    //     location: "100% Remote",
+    // },
+    // {
+    //     id: "2",
+    //     title: "Graphic Designer",
+    //     category: "Marketing",
+    //     description: "Join our creative team to design educational materials, social media assets, and marketing collateral that inspires learning.",
+    //     type: "Full-time",
+    //     location: "Hybrid",
+    // },
+    // {
+    //     id: "3",
+    //     title: "Academic Coordinator",
+    //     category: "Operations",
+    //     description: "We need an organized individual to manage tutor schedules, coordinate with parents, and ensure smooth operational flow.",
+    //     type: "Full-time",
+    //     location: "On-site",
+    // },
+    // {
+    //     id: "4",
+    //     title: "Physics Tutor",
+    //     category: "Tutoring",
+    //     description: "Passionate about Physics? Join us to teach mechanics, thermodynamics, and electromagnetism to eager learners.",
+    //     type: "Contract",
+    //     location: "100% Remote",
+    // },
 ];
 
-const CATEGORIES = ["View all", "Tutoring", "Content Creation", "Admin", "Marketing", "Operations"];
+const CATEGORIES = ["View all"]; // Removing other categories since there are no jobs
 
 export default function CareersPage() {
     const [activeCategory, setActiveCategory] = useState("View all");

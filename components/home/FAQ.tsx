@@ -13,11 +13,11 @@ export default function FAQ() {
   const faqs = [
     {
       question: "How do I register for a tutorial?",
-      answer: "Registration is simple. Click on the 'Start Learning' button at the top of the page, select your department and course code, and choose a tutor that fits your schedule."
+      answer: "Registration is simple. Click on the 'Start Learning' button at the top of the page, select your course code, and choose a tutor that fits your schedule."
     },
     {
       question: "Are the tutors qualified?",
-      answer: "Yes, absolutely. All our tutors are high-performing senior students who have achieved an 'A' grade in the specific courses they teach and have passed our vetting process."
+      answer: "Yes, absolutely. All our tutors are high-performing students who have achieved an 'A' grade in the specific courses they teach and have passed our thorough vetting process."
     },
     {
       question: "Can I get a refund if I'm not satisfied?",
@@ -25,7 +25,7 @@ export default function FAQ() {
     },
     {
       question: "Do you offer online tutorials?",
-      answer: "Yes, we offer hybrid learning options. You can choose between physical meetups on campus or virtual sessions via Zoom/Google Meet depending on your preference."
+      answer: "Yes, we offer flexible learning options. You can choose between physical meetups or virtual sessions via Zoom/Google Meet depending on your preference."
     }
   ];
 
