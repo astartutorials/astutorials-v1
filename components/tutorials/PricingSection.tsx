@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import EmailModal from "@/components/tutorials/EmailModal";
 
 export default function PricingSection() {
+    const [modalOpen, setModalOpen] = useState(false);
+
     return (
         <section className="text-center max-w-3xl mx-auto mb-20 px-4">
             <motion.div
@@ -27,13 +30,15 @@ export default function PricingSection() {
                     <span className="text-gray-500 text-lg">/ session</span>
                 </div>
 
-                <Link
-                    href="/tutorials/payment"
+                <button
+                    onClick={() => setModalOpen(true)}
                     className="bg-[var(--astar-red)] text-white px-8 py-4 rounded-full font-bold text-lg inline-flex items-center gap-2 hover:bg-red-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
                     Request Private Tutorial <ArrowRight size={20} />
-                </Link>
+                </button>
             </motion.div>
+
+            {modalOpen && <EmailModal onClose={() => setModalOpen(false)} />}
         </section>
     );
 }
