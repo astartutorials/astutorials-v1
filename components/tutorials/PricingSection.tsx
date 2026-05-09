@@ -28,9 +28,7 @@ export default function PricingSection() {
                 </div>
 
                 <Link
-                    href="https://wa.me/2349160465678?text=Hello,%20I%20am%20interested%20in%20requesting%20a%20private%20tutorial."
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="/tutorials/payment"
                     className="bg-[var(--astar-red)] text-white px-8 py-4 rounded-full font-bold text-lg inline-flex items-center gap-2 hover:bg-red-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
                     Request Private Tutorial <ArrowRight size={20} />
