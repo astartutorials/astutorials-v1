@@ -1,14 +1,10 @@
-
 import Link from "next/link";
 import {
   GraduationCap,
   BookOpen,
   User,
-  FlaskConical,
-  FileText,
-  Globe,
   ArrowRight
-} from "lucide-react"; 
+} from "lucide-react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 
 export default function Services() {
@@ -21,8 +17,8 @@ export default function Services() {
       highlight: false,
       href: "/tutorials"
     },
-        {
-      title: "Private tutorials",
+    {
+      title: "Private 1-on-1 Tutorials",
       desc: "Personalized attention focused entirely on your specific weaknesses and learning pace.",
       icon: User,
       action: "Find a Tutor",
@@ -30,14 +26,13 @@ export default function Services() {
       href: "/tutorials"
     },
     {
-      title: "Mock Exams Sessions",
-      desc: "Intensive revision crash courses designed to maximize retention and exam performance in minimum time.",
+      title: "Exam Mock Sessions",
+      desc: "Intensive revision sessions designed to maximize retention and exam performance in minimum time.",
       icon: BookOpen,
       action: "Start Prep",
       highlight: false,
       href: "#"
     },
-
   ];
 
   return (
@@ -46,18 +41,25 @@ export default function Services() {
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">Our Academic Services</h2>
         <p className="text-gray-500 text-lg font-light">Comprehensive tutorial programs designed to fit your learning style and schedule.</p>
       </div>
+
+      <h3 className="text-sm font-bold tracking-widest text-gray-400 uppercase text-center mb-8">Our Pillars</h3>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {services.map((service, index) => (
-          <Link 
-            key={index} 
+          <Link
+            key={index}
             href={service.href}
             className={`group relative p-8 rounded-3xl transition-all duration-300 hover:-translate-y-2 cursor-pointer ${service.highlight ? 'bg-[#355EA9] text-white shadow-xl shadow-blue-900/20' : 'bg-white border border-gray-100 text-gray-900 shadow-sm hover:shadow-xl hover:shadow-gray-200/40'}`}
           >
             {service.highlight && <service.icon className="absolute top-8 right-8 w-32 h-32 text-white/5 -rotate-12 pointer-events-none transition-transform duration-500 group-hover:scale-110" />}
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-xl transition-colors duration-300 ${service.highlight ? 'bg-white/10 text-white' : 'bg-red-50 text-[var(--astar-red)]'}`}><service.icon size={28} /></div>
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-xl transition-colors duration-300 ${service.highlight ? 'bg-white/10 text-white' : 'bg-red-50 text-[var(--astar-red)]'}`}>
+              <service.icon size={28} />
+            </div>
             <h3 className="text-xl font-bold mb-4">{service.title}</h3>
             <p className={`text-sm leading-relaxed mb-8 ${service.highlight ? 'text-white/80' : 'text-gray-500'}`}>{service.desc}</p>
-            <div className={`flex items-center text-xs font-bold tracking-widest uppercase transition-all duration-300 ${service.highlight ? 'text-white' : 'text-[var(--astar-red)]'}`}>{service.action} <ArrowRight className="w-3 h-3 ml-2 transition-transform duration-300 group-hover:translate-x-1" /></div>
+            <div className={`flex items-center text-xs font-bold tracking-widest uppercase transition-all duration-300 ${service.highlight ? 'text-white' : 'text-[var(--astar-red)]'}`}>
+              {service.action} <ArrowRight className="w-3 h-3 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+            </div>
           </Link>
         ))}
       </div>
