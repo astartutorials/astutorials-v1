@@ -9,7 +9,7 @@ export default function BecomeTutor() {
         <div>
           <span className="text-sm font-bold tracking-widest text-blue-200 uppercase mb-4 block">Careers</span>
           <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">
-            Become a Tutor at <br /> A-Star Tutorials
+            Become a <span className="underline underline-offset-4 decoration-blue-300">Tutor</span> at <br /> A-Star Tutorials
           </h2>
           <p className="text-blue-100 text-lg mb-8 leading-relaxed max-w-lg">
             Are you a high-performing student with a passion for teaching? Join our team of expert tutors and make a difference while earning.

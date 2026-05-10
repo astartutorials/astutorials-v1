@@ -1,5 +1,4 @@
 import HeroSection from "@/components/home/HeroSection";
-import DashboardPreview from "@/components/home/DashboardPreview";
 import WhoWeAre from "@/components/home/WhoWeAre";
 import Services from "@/components/home/Services";
 import Testimonials from "@/components/home/Testimonials";
@@ -13,8 +12,6 @@ export default function Home() {
       <section className="flex-grow flex flex-col items-center pt-32 md:pt-52 overflow-hidden">
 
         <HeroSection />
-
-        <DashboardPreview />
 
         <WhoWeAre />
 
