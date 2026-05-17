@@ -31,7 +31,7 @@ export default function BecomeTutor() {
           </ul>
 
           <Link 
-            href="#"
+            href="/apply"
             className="bg-white text-blue-900 px-8 py-3.5 rounded-full font-bold shadow-lg shadow-blue-900/50 hover:bg-blue-50 hover:-translate-y-1 transition-all duration-300 inline-block"
           >
             Apply Now
