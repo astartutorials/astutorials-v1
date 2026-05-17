@@ -30,7 +30,16 @@ export default function FAQ() {
   ];
 
   return (
-    <ScrollReveal id="faq" className="w-full max-w-3xl mx-auto px-6 py-12 mb-8">
+    <ScrollReveal id="faq" className="w-full max-w-3xl mx-auto px-6 py-12 mb-8 relative">
+      <div
+        className="absolute inset-0 rounded-3xl pointer-events-none"
+        style={{
+          backgroundImage: "url('/doodle-bg.jpg')",
+          backgroundSize: "600px",
+          backgroundRepeat: "repeat",
+          opacity: 0.06,
+        }}
+      />
       <div className="text-center mb-10">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 mb-4">
           Frequently Asked Questions
