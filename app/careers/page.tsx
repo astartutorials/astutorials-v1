@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import CareersHero from "@/components/careers/CareersHero";
 import JobCard, { JobPosition } from "@/components/careers/JobCard";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 // Mock Data matching the design
 const JOBS: JobPosition[] = [
@@ -63,13 +65,22 @@ export default function CareersPage() {
                                 <JobCard key={job.id} job={job} />
                             ))
                         ) : (
-                            <motion.p
+                            <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="text-center text-gray-500 py-12"
+                                className="text-center py-16 px-4"
                             >
-                                No open positions in this category at the moment.
-                            </motion.p>
+                                <p className="text-gray-500 mb-6">No open positions at the moment.</p>
+                                <p className="text-gray-700 font-semibold mb-4">
+                                    Interested in joining as a tutor?
+                                </p>
+                                <Link
+                                    href="/apply"
+                                    className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--astar-red)] text-white font-semibold rounded-full shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 hover:-translate-y-0.5 transition-all"
+                                >
+                                    Apply Now <ArrowRight size={16} />
+                                </Link>
+                            </motion.div>
                         )}
                     </AnimatePresence>
                 </motion.div>

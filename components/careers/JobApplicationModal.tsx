@@ -1,7 +1,8 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MapPin, Clock, FileText, CheckCircle, AlertCircle, ExternalLink } from "lucide-react";
+import { X, MapPin, Clock, FileText, CheckCircle, AlertCircle, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { JobPosition } from "./JobCard";
 
 interface JobApplicationModalProps {
@@ -134,16 +135,13 @@ export default function JobApplicationModal({ isOpen, onClose, job }: JobApplica
 
                                 {/* Footer */}
                                 <div className="border-t border-gray-200 px-6 sm:px-8 py-4 sm:py-6 bg-gray-50 flex flex-col sm:flex-row items-center justify-end gap-3">
-                                    <button
-                                        onClick={() => {
-                                            // Replace with your actual Google Form URL
-                                            window.open("https://forms.gle.com/your-form-url", "_blank");
-                                        }}
-                                        className="w-full sm:w-auto px-6 py-2.5 bg-[var(--astar-red)] text-white font-semibold hover:bg-[#c8102e] rounded-lg transition-colors flex items-center justify-center gap-2"
+                                    <Link
+                                        href="/apply"
+                                        className="w-full sm:w-auto px-6 py-2.5 bg-[var(--astar-red)] text-white font-semibold hover:bg-red-700 rounded-lg transition-colors flex items-center justify-center gap-2"
                                     >
-                                        Apply
-                                        <ExternalLink size={16} />
-                                    </button>
+                                        Apply Now
+                                        <ArrowRight size={16} />
+                                    </Link>
                                 </div>
                             </motion.div>
                         </div>
