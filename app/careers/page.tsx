@@ -53,7 +53,7 @@ export default function CareersPage() {
         : JOBS.filter(job => job.category === activeCategory);
 
     return (
-        <div className="min-h-screen flex flex-col bg-gray-50/50 font-sans pt-32 md:pt-40 pb-20 px-4 md:px-8">
+        <div className="min-h-screen flex flex-col bg-gray-50/50 font-sans pt-24 md:pt-32 pb-14 px-4 md:px-8">
             <div className="max-w-5xl mx-auto">
                 <CareersHero />
 

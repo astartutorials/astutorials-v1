@@ -4,8 +4,8 @@ import { MapPin, Phone, Mail, MessageCircle, Camera, Music } from "lucide-react"
 
 export default function Footer() {
   return (
-    <footer className="bg-[#020617] text-white pt-20 pb-8 border-t border-white/5">
-      <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
+    <footer className="bg-[#020617] text-white pt-14 pb-6 border-t border-white/5">
+      <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-10 mb-10">
         
         {/* Brand Column (Span 5) */}
         <div className="md:col-span-5 space-y-6">
@@ -25,7 +25,7 @@ export default function Footer() {
 
         {/* Quick Links (Span 3) */}
         <div className="md:col-span-3">
-          <h4 className="text-lg font-bold mb-8">Quick Links</h4>
+          <h4 className="text-lg font-bold mb-5">Quick Links</h4>
           <ul className="space-y-4 text-gray-400">
             {['Home', 'About', 'Services', 'Book a Tutorial', 'Contact'].map((link) => (
               <li key={link}>
@@ -39,9 +39,9 @@ export default function Footer() {
 
         {/* Contact & Social (Span 4) */}
         <div className="md:col-span-4">
-          <h4 className="text-lg font-bold mb-8">Connect With Us</h4>
-          
-          <ul className="space-y-6 mb-10">
+          <h4 className="text-lg font-bold mb-5">Connect With Us</h4>
+
+          <ul className="space-y-4 mb-7">
             <li className="flex items-start gap-4 text-gray-400">
               <MapPin className="w-5 h-5 text-[var(--astar-red)] shrink-0 mt-1" />
               <span>Babcock University<br />Ilishan-Remo, Ogun State</span>

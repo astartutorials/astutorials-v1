@@ -30,8 +30,8 @@ export default function FAQ() {
   ];
 
   return (
-    <ScrollReveal id="faq" className="w-full max-w-3xl mx-auto px-6 py-24 mb-20">
-      <div className="text-center mb-16">
+    <ScrollReveal id="faq" className="w-full max-w-3xl mx-auto px-6 py-12 mb-8">
+      <div className="text-center mb-10">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 mb-4">
           Frequently Asked Questions
         </h2>

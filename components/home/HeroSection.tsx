@@ -7,7 +7,7 @@ export default function HeroSection() {
   return (
     <ScrollReveal id="home" className="w-full max-w-7xl mx-auto px-4 md:px-6">
       {/* Hero grid: text left, image right */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-20 md:mb-32">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center mb-12 md:mb-16">
         {/* Left: text */}
         <div className="text-center lg:text-left">
           <div className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-[#23457A] text-[10px] md:text-xs font-bold tracking-wide uppercase shadow-sm">
@@ -51,7 +51,7 @@ export default function HeroSection() {
       </div>
 
       {/* Stats */}
-      <div className="w-full max-w-5xl mx-auto mb-22 md:mb-32">
+      <div className="w-full max-w-5xl mx-auto mb-10 md:mb-14">
         <p className="text-xs md:text-sm text-gray-400 mb-10 font-medium uppercase tracking-wider text-center">
           Trusted by students globally
         </p>

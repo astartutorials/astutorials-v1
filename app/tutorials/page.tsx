@@ -126,18 +126,18 @@ export default function TutorialsPage() {
     return (
         <div className="min-h-screen flex flex-col bg-[var(--astar-bg)] font-sans selection:bg-[var(--astar-red)] selection:text-white">
 
-            <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 pt-32 md:pt-40 pb-12 md:pb-20 w-full">
+            <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 pt-24 md:pt-32 pb-10 md:pb-16 w-full">
                 {/* Header */}
                 <motion.div 
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-12 md:mb-16"
+                    className="text-center mb-8 md:mb-10"
                 >
                     <h1 className="text-4xl md:text-6xl font-bold text-[var(--astar-blue)] mb-6 md:mb-8 font-space tracking-tight">Tutorials</h1>
 
                     {/* Toggle */}
-                    <div className="mb-8 md:mb-10">
+                    <div className="mb-6">
                         <TutorialToggle activeType={activeType} onTypeChange={setActiveType} />
                     </div>
 
@@ -203,7 +203,7 @@ export default function TutorialsPage() {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.98 }}
                             transition={{ duration: 0.4 }}
-                            className="space-y-16 md:space-y-24"
+                            className="space-y-10 md:space-y-14"
                         >
                             <PricingSection />
                             <FeaturesGrid />

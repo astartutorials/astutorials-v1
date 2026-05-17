@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-[var(--astar-bg)] font-sans selection:bg-[var(--astar-red)] selection:text-white">
 
-      <section className="flex-grow flex flex-col items-center pt-32 md:pt-52 overflow-hidden">
+      <section className="flex-grow flex flex-col items-center pt-24 md:pt-32 overflow-hidden">
 
         <HeroSection />
 

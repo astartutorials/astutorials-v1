@@ -202,7 +202,7 @@ export default function TutorApplicationForm() {
 
   return (
     <div className="w-full max-w-2xl mx-auto py-8 px-4">
-      <div className="mb-10">
+      <div className="mb-8">
         <span className="text-xs font-bold tracking-widest text-[var(--astar-red)] uppercase mb-3 block">
           Join our team
         </span>

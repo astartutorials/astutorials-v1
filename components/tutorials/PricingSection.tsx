@@ -9,7 +9,7 @@ export default function PricingSection() {
     const [modalOpen, setModalOpen] = useState(false);
 
     return (
-        <section className="text-center max-w-3xl mx-auto mb-20 px-4">
+        <section className="text-center max-w-3xl mx-auto px-4">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
