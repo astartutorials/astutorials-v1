@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import CountUp from "@/components/shared/CountUp";
 
@@ -36,15 +35,16 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Right: hero image */}
+        {/* Right: hero video */}
         <div className="relative flex justify-center lg:justify-end">
-          <div className="relative w-full max-w-lg aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl shadow-gray-200/60 border border-gray-100">
-            <Image
-              src="/tutor-hero.png"
-              alt="A-Star Tutorials"
-              fill
-              className="object-cover"
-              priority
+          <div className="relative w-full max-w-lg aspect-square rounded-3xl overflow-hidden shadow-2xl shadow-gray-200/60 border border-gray-100">
+            <video
+              src="/hero.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
