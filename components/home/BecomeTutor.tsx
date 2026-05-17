@@ -41,12 +41,10 @@ export default function BecomeTutor() {
         {/* Right Image */}
         <div className="relative">
           <div className="aspect-square bg-teal-600/20 rounded-[2rem] overflow-hidden backdrop-blur-sm border border-white/10 relative">
-            {/* Decorative Elements */}
-            <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-[#4ade80]/20 to-transparent pointer-events-none" />
-            <img 
-              src="https://img.freepik.com/free-vector/teacher-standing-near-blackboard-holding-stick-isolated-flat-vector-illustration-cartoon-woman-character-near-chalkboard-school-learning-concept_74855-13272.jpg" 
-              alt="Tutor Teaching" 
-              className="w-full h-full object-cover mix-blend-overlay opacity-80"
+            <img
+              src="/become-tutor.jpg"
+              alt="A-Star Tutor Teaching"
+              className="w-full h-full object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-blue-900/90 to-transparent">
               <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 inline-flex items-center gap-3">

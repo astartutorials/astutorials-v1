@@ -18,6 +18,7 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
+    { name: 'Home', href: '/' },
     { name: 'Tutorials', href: '/tutorials' },
     { name: 'About', href: '/#about' },
     { name: 'Careers', href: '/careers' },
@@ -54,12 +55,12 @@ export default function Navbar() {
             }
           }}
         >
-          <Image 
-            src="/logo.png" 
-            alt="A-Star Logo" 
-            width={48} 
-            height={48} 
-            className="w-14 h-14 md:w-16 md:h-16 object-contain"
+          <Image
+            src="/logo.png"
+            alt="A-Star Logo"
+            width={120}
+            height={132}
+            className="h-14 md:h-16 w-auto object-contain"
             priority
           />
         </Link>
