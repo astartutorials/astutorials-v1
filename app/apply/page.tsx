@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function ApplyPage() {
   return (
-    <div className="min-h-screen bg-gray-50/50 pt-32 md:pt-40 pb-20 px-4 md:px-8">
+    <div className="min-h-screen bg-gray-50/50 pt-24 md:pt-32 pb-14 px-4 md:px-8">
       <div className="max-w-2xl mx-auto">
         <TutorApplicationForm />
       </div>

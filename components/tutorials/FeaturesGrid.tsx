@@ -32,7 +32,7 @@ const features = [
 
 export default function FeaturesGrid() {
     return (
-        <section className="max-w-6xl mx-auto px-4 mb-20">
+        <section className="max-w-6xl mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {features.map((feature, index) => (
                     <motion.div

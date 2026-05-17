@@ -48,8 +48,8 @@ export default function Testimonials() {
   ];
 
   return (
-    <ScrollReveal id="stories" className="w-full px-6 py-12 md:py-24 max-w-[1440px] mx-auto">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+    <ScrollReveal id="stories" className="w-full px-6 py-10 md:py-16 max-w-[1440px] mx-auto">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div className="max-w-2xl">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">Student Success Stories</h2>
           <p className="text-gray-500 text-lg font-light">Don't just take our word for it. Hear from students who transformed their grades.</p>

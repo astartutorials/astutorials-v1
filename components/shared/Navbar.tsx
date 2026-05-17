@@ -17,12 +17,11 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Menu items list for cleaner mapping
   const navItems = [
-    { name: 'Home', href: '/#home' },
+    { name: 'Tutorials', href: '/tutorials' },
     { name: 'About', href: '/#about' },
-    { name: 'Services', href: '/#services' },
     { name: 'Careers', href: '/careers' },
+    { name: 'Become a Tutor', href: '/apply' },
   ];
 
   const scrollToSection = (e: React.MouseEvent, id: string) => {
@@ -87,7 +86,7 @@ export default function Navbar() {
         {/* --- ACTIONS & MOBILE TOGGLE --- */}
         <div className="flex items-center gap-4">
           <Link href="/tutorials" className="hidden md:block btn-primary px-6 py-2.5 rounded-full text-sm font-medium hover:shadow-lg hover:shadow-red-500/20 transform hover:-translate-y-0.5 transition-all">
-            Get Started
+            Book a Tutorial
           </Link>
 
           {/* Mobile "Join" (Visible only when menu is closed) */}
@@ -118,22 +117,31 @@ export default function Navbar() {
       >
         <div className="p-6 flex flex-col gap-2">
           {navItems.map((item, idx) => (
-            <Link 
-              key={item.name} 
-              href={item.href} 
+            <Link
+              key={item.name}
+              href={item.href}
               className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors group"
               onClick={(e) => {
                 if (window.location.pathname === '/' && item.href.startsWith('/#')) {
                   scrollToSection(e, item.href.substring(2));
                 }
+                setIsMobileMenuOpen(false);
               }}
-              style={{ transitionDelay: `${idx * 50}ms` }} // Stagger animation effect
+              style={{ transitionDelay: `${idx * 50}ms` }}
             >
               <span className="text-lg font-semibold text-gray-800 group-hover:text-[var(--astar-red)] transition-colors">{item.name}</span>
             </Link>
           ))}
 
-
+          <div className="pt-2 pb-2">
+            <Link
+              href="/tutorials"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block w-full btn-primary text-center px-6 py-3.5 rounded-full text-base font-semibold hover:shadow-lg hover:shadow-red-500/20 transition-all"
+            >
+              Book a Tutorial
+            </Link>
+          </div>
         </div>
       </div>
     </nav>

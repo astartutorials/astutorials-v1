@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export default function CareersHero() {
     return (
-        <section className="text-center max-w-2xl mx-auto mb-12">
+        <section className="text-center max-w-2xl mx-auto mb-8">
             <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
