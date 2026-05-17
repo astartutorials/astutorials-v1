@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A-Star Tutorials — Student Success Stories</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background: #f8f9fb;
+      color: #0b1120;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .section {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 72px 24px 80px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 52px;
+    }
+    .header-label {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #d93025;
+      margin-bottom: 14px;
+    }
+    .header-title {
+      font-size: clamp(26px, 5vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      color: #0b1120;
+    }
+    .header-sub {
+      margin-top: 10px;
+      font-size: 15px;
+      color: #6b7280;
+    }
+
+    /* Carousel */
+    .carousel-wrapper {
+      position: relative;
+    }
+    .carousel-viewport {
+      overflow: hidden;
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    /* Card */
+    .card {
+      flex: 0 0 100%;
+      background: #ffffff;
+      padding: 52px 56px 44px;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-top {
+      flex: 1;
+    }
+    .quote-mark {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 96px;
+      line-height: 0.75;
+      color: #d93025;
+      opacity: 0.12;
+      user-select: none;
+      margin-bottom: 4px;
+    }
+    .quote-text {
+      font-size: clamp(15px, 2.2vw, 18px);
+      font-style: italic;
+      color: #374151;
+      line-height: 1.8;
+      margin-top: 8px;
+    }
+    .divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 32px 0 28px;
+    }
+
+    /* Card footer */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .author {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      letter-spacing: 0.03em;
+    }
+    .avatar-cn { background: #d1fae5; color: #065f46; }
+    .avatar-va { background: #dbeafe; color: #1e40af; }
+    .avatar-kn { background: #fce7f3; color: #9d174d; }
+    .avatar-do { background: #ede9fe; color: #5b21b6; }
+    .avatar-fm { background: #fef3c7; color: #92400e; }
+    .avatar-ae { background: #d1fae5; color: #065f46; }
+
+    .author-info {}
+    .author-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .author-detail {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 100px;
+      background: #fef2f2;
+      color: #d93025;
+      border: 1px solid #fecaca;
+      white-space: nowrap;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 24px;
+      padding: 0 2px;
+    }
+    .counter {
+      font-size: 12px;
+      font-weight: 600;
+      color: #9ca3af;
+      min-width: 40px;
+    }
+    .dots {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #d1d5db;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    .dot.active {
+      background: #d93025;
+      width: 22px;
+      border-radius: 4px;
+    }
+    .dot:hover:not(.active) {
+      background: #9ca3af;
+    }
+    .arrows {
+      display: flex;
+      gap: 8px;
+    }
+    .arrow {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid #e5e7eb;
+      background: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      transition: all 0.2s ease;
+    }
+    .arrow:hover {
+      border-color: #d93025;
+      color: #d93025;
+      background: #fef2f2;
+    }
+    .arrow:active {
+      transform: scale(0.95);
+    }
+    .arrow svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      .card {
+        padding: 36px 28px 32px;
+        min-height: unset;
+      }
+      .quote-mark {
+        font-size: 72px;
+      }
+      .card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .badge {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="section">
+
+    <div class="header">
+      <span class="header-label">Student Success Stories</span>
+      <h2 class="header-title">Real students. Real results.</h2>
+      <p class="header-sub">Babcock University students who stopped panicking and started passing.</p>
+    </div>
+
+    <div class="carousel-wrapper" id="carousel">
+
+      <div class="carousel-viewport">
+        <div class="carousel-track" id="track">
+
+          <div class="card">
+            <div class="card-top">
+              <div class="quote-mark">&ldquo;</div>
+              <p class="quote-text">GEDS 126 sounds easy until you're staring at a test you haven't prepared for. I booked one session, my tutor went through the likely areas, and I stopped panicking. Scored 88/100.</p>
+            </div>
+            <div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="author">
+                  <div class="avatar avatar-cn">CN</div>
+                  <div class="author-info">
+                    <div class="author-name">Cynthia Ngwu</div>
+                    <div class="author-detail">100L Accounting · Babcock University</div>
+                  </div>
+                </div>
+                <span class="badge">88/100 in GEDS 126</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-top">
+              <div class="quote-mark">&ldquo;</div>
+              <p class="quote-text">IFT 212 with Dr Eweoya was where I almost lost my GPA. My tutor had done the course and knew the exact topics he tests. We drilled those for two sessions and I passed. Simple.</p>
+            </div>
+            <div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="author">
+                  <div class="avatar avatar-va">VA</div>
+                  <div class="author-info">
+                    <div class="author-name">Victor Adeyemi</div>
+                    <div class="author-detail">200L Software Engineering · Babcock University</div>
+                  </div>
+                </div>
+                <span class="badge">Passed IFT 212</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-top">
+              <div class="quote-mark">&ldquo;</div>
+              <p class="quote-text">I was running BIO 108 and CHM 108 at the same time. Both had practicals in the same week. I did one session per course and walked into both labs knowing what I was doing.</p>
+            </div>
+            <div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="author">
+                  <div class="avatar avatar-kn">KN</div>
+                  <div class="author-info">
+                    <div class="author-name">Kosi Njoku</div>
+                    <div class="author-detail">100L Biochemistry · Babcock University</div>
+                  </div>
+                </div>
+                <span class="badge">Passed both practicals same week</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-top">
+              <div class="quote-mark">&ldquo;</div>
+              <p class="quote-text">PHY 102 pulled my CGPA down in 100L. I retook it with a tutor from week one. Not week twelve. Finished with an A.</p>
+            </div>
+            <div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="author">
+                  <div class="avatar avatar-do">DO</div>
+                  <div class="author-info">
+                    <div class="author-name">Dubem Okonkwo</div>
+                    <div class="author-detail">300L Computer Science · Babcock University</div>
+                  </div>
+                </div>
+                <span class="badge">PHY 102 — from F to A</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-top">
+              <div class="quote-mark">&ldquo;</div>
+              <p class="quote-text">ELCT 401 with Prof Omotosho broke me in 400L. Signal processing just wasn't clicking from the lectures alone. My tutor sat with me and rebuilt my understanding from scratch. Passed with an A.</p>
+            </div>
+            <div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="author">
+                  <div class="avatar avatar-fm">FM</div>
+                  <div class="author-info">
+                    <div class="author-name">Femi Makinde</div>
+                    <div class="author-detail">400L Computer Technology · Babcock University</div>
+                  </div>
+                </div>
+                <span class="badge">Passed ELCT 401</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-top">
+              <div class="quote-mark">&ldquo;</div>
+              <p class="quote-text">I missed three weeks of CSC 301 due to health issues. By the time I was back, the class had moved on. Four sessions with my A-Star tutor and I learnt Data Structures and Algorithms on time with an A.</p>
+            </div>
+            <div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="author">
+                  <div class="avatar avatar-ae">AE</div>
+                  <div class="author-info">
+                    <div class="author-name">Amaka Eze</div>
+                    <div class="author-detail">300L Computer Science · Babcock University</div>
+                  </div>
+                </div>
+                <span class="badge">Caught up, A in DSA</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="controls">
+        <span class="counter" id="counter">1 of 6</span>
+        <div class="dots" id="dots">
+          <button class="dot active" data-index="0" aria-label="Slide 1"></button>
+          <button class="dot" data-index="1" aria-label="Slide 2"></button>
+          <button class="dot" data-index="2" aria-label="Slide 3"></button>
+          <button class="dot" data-index="3" aria-label="Slide 4"></button>
+          <button class="dot" data-index="4" aria-label="Slide 5"></button>
+          <button class="dot" data-index="5" aria-label="Slide 6"></button>
+        </div>
+        <div class="arrows">
+          <button class="arrow" id="prev" aria-label="Previous slide">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button class="arrow" id="next" aria-label="Next slide">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+    const track    = document.getElementById('track');
+    const counter  = document.getElementById('counter');
+    const dotBtns  = document.querySelectorAll('.dot');
+    const carousel = document.getElementById('carousel');
+    const TOTAL    = 6;
+    let current    = 0;
+    let timer      = null;
+
+    function goTo(index) {
+      current = ((index % TOTAL) + TOTAL) % TOTAL;
+      track.style.transform = `translateX(-${current * 100}%)`;
+      dotBtns.forEach((d, i) => d.classList.toggle('active', i === current));
+      counter.textContent = `${current + 1} of ${TOTAL}`;
+    }
+
+    function startTimer() {
+      stopTimer();
+      timer = setInterval(() => goTo(current + 1), 5000);
+    }
+
+    function stopTimer() {
+      if (timer) { clearInterval(timer); timer = null; }
+    }
+
+    document.getElementById('prev').addEventListener('click', () => { goTo(current - 1); startTimer(); });
+    document.getElementById('next').addEventListener('click', () => { goTo(current + 1); startTimer(); });
+
+    dotBtns.forEach(dot => {
+      dot.addEventListener('click', () => { goTo(+dot.dataset.index); startTimer(); });
+    });
+
+    carousel.addEventListener('mouseenter', stopTimer);
+    carousel.addEventListener('mouseleave', startTimer);
+
+    // Touch swipe support
+    let touchStartX = 0;
+    carousel.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
+    carousel.addEventListener('touchend', e => {
+      const delta = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(delta) > 40) { goTo(delta < 0 ? current + 1 : current - 1); startTimer(); }
+    }, { passive: true });
+
+    startTimer();
+  </script>
+
+</body>
+</html>
