@@ -39,8 +39,8 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${scrolled || isMobileMenuOpen
-        ? 'bg-white/95 backdrop-blur-md border-b border-gray-100/50 shadow-sm'
-        : 'bg-white/80 backdrop-blur-sm border-transparent'
+        ? 'bg-[#FDFAF6]/95 backdrop-blur-md border-b border-amber-100/60 shadow-sm'
+        : 'bg-[#FDFAF6]/70 backdrop-blur-sm border-transparent'
         }`}
     >
       <div className="max-w-[1440px] mx-auto px-6 py-4 flex items-center justify-between relative">
@@ -112,7 +112,7 @@ export default function Navbar() {
       {/* --- MOBILE DROPDOWN MENU (Slide-Down) --- */}
       <div
         className={`
-          md:hidden absolute top-[100%] left-0 w-full bg-white/95 backdrop-blur-xl  shadow-xl overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.33,1,0.68,1)]
+          md:hidden absolute top-[100%] left-0 w-full bg-[#FDFAF6]/95 backdrop-blur-xl shadow-xl overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.33,1,0.68,1)]
           ${isMobileMenuOpen ? 'max-h-[600px] opacity-100 visible' : 'max-h-0 opacity-0 invisible'}
         `}
       >

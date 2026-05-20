@@ -1,186 +1,204 @@
 'use client';
 
-import { useState } from "react";
-import { Search, Bell, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Star, MessageCircle, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
-const feedbackData = [
-  {
-    id: 1,
-    studentName: "Sarah Jenkins",
-    studentInitials: "SJ",
-    initialsColor: "bg-blue-100 text-blue-600",
-    tutorialName: "Advanced Calculus Review",
-    sessionType: "Group",
-    rating: 5.0,
-    feedback: "The session was incredibly helpful. The breakdown of complex limit problems really clicked for me this time. I wish we had spent a bit more time on integration techniques, but overall excellent value.",
-    timestamp: "2 hours ago",
-    replied: false
-  },
-  {
-    id: 2,
-    studentName: "Michael Ross",
-    studentInitials: "MR",
-    initialsColor: "bg-green-100 text-green-600",
-    tutorialName: "Legal Studies 101: Contracts",
-    sessionType: "Group",
-    rating: 4.0,
-    feedback: "Great content and the tutor clearly knows their stuff. However, the pacing was a bit fast for a group of 20 people. Some questions were skipped over to save time.",
-    timestamp: "Yesterday",
-    replied: false
-  },
-  {
-    id: 3,
-    studentName: "Jessica Pearson",
-    studentInitials: "JP",
-    initialsColor: "bg-yellow-100 text-yellow-600",
-    tutorialName: "Corporate Strategy",
-    sessionType: "Group",
-    rating: 5.0,
-    feedback: "Impeccable delivery. The case studies selected were highly relevant. No complaints.",
-    timestamp: "2 days ago",
-    replied: false
-  }
+type Feedback = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  tutorials: { title: string } | null;
+};
+
+function renderStars(rating: number) {
+  return Array.from({ length: 5 }).map((_, i) => (
+    <Star
+      key={i}
+      size={14}
+      className={i < rating ? "fill-amber-400 text-amber-400" : "text-gray-200"}
+    />
+  ));
+}
+
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return "Yesterday";
+  return `${days} days ago`;
+}
+
+function initials(name: string | null) {
+  if (!name) return "?";
+  return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+}
+
+const COLORS = [
+  "bg-blue-100 text-blue-600",
+  "bg-green-100 text-green-600",
+  "bg-amber-100 text-amber-600",
+  "bg-purple-100 text-purple-600",
+  "bg-pink-100 text-pink-600",
 ];
 
 export default function AdminFeedbackPage() {
+  const [feedback, setFeedback] = useState<Feedback[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"group" | "private">("group");
+  const [minRating, setMinRating] = useState<number>(0);
 
-  // Filter feedback based on search
-  const filteredFeedback = feedbackData.filter(item =>
-    item.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.tutorialName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Render star rating
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={`full-${i}`} size={16} className="fill-red-500 text-red-500" />);
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase
+        .from("feedback")
+        .select("id, full_name, email, rating, comment, created_at, tutorials(title)")
+        .order("created_at", { ascending: false });
+      setFeedback((data as Feedback[]) ?? []);
+      setLoading(false);
     }
+    load();
+  }, []);
 
-    if (hasHalfStar) {
-      stars.push(<Star key="half" size={16} className="fill-red-500 text-red-500 opacity-50" />);
-    }
+  const avgRating =
+    feedback.length
+      ? feedback.reduce((s, f) => s + f.rating, 0) / feedback.length
+      : 0;
 
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<Star key={`empty-${i}`} size={16} className="text-gray-300" />);
-    }
-
-    return stars;
-  };
+  const filtered = feedback.filter((f) => {
+    const q = searchQuery.toLowerCase();
+    const matchSearch =
+      (f.full_name ?? "").toLowerCase().includes(q) ||
+      (f.tutorials?.title ?? "").toLowerCase().includes(q) ||
+      (f.comment ?? "").toLowerCase().includes(q);
+    const matchRating = f.rating >= minRating;
+    return matchSearch && matchRating;
+  });
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Session Feedback</h1>
-          <p className="text-gray-500 text-sm md:text-base">Manage and view student reviews for tutorials.</p>
-        </div>
-        <div className="flex items-center gap-4 self-end md:self-auto">
-          <button className="p-2 text-gray-400 hover:text-gray-600 relative">
-            <Bell size={24} />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
-          <div className="w-10 h-10 rounded-full bg-[#1E293B] text-white flex items-center justify-center font-bold text-sm">
-            AD
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-[#0B1120]">Feedback</h1>
+        <p className="text-sm text-gray-500 mt-0.5">Student reviews for tutorials.</p>
+      </div>
+
+      {/* Stats */}
+      <div className="flex flex-wrap gap-4 mb-6">
+        <div className="bg-white rounded-xl border border-gray-100 px-5 py-4 flex items-center gap-4">
+          <div className="flex gap-0.5">{renderStars(Math.round(avgRating))}</div>
+          <div>
+            <p className="text-xl font-bold text-[#0B1120]">
+              {avgRating ? avgRating.toFixed(1) : "—"}
+            </p>
+            <p className="text-xs text-gray-500">Avg Rating</p>
           </div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 px-5 py-4">
+          <p className="text-xl font-bold text-[#0B1120]">{feedback.length}</p>
+          <p className="text-xs text-gray-500">Total Reviews</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 px-5 py-4">
+          <p className="text-xl font-bold text-[#0B1120]">
+            {feedback.filter((f) => f.rating >= 4).length}
+          </p>
+          <p className="text-xs text-gray-500">4★ or above</p>
         </div>
       </div>
 
-      {/* Search and Tabs */}
-      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 mb-6">
-        <div className="relative w-full md:max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-5">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input
             type="text"
-            placeholder="Search by student or tutorial..."
+            placeholder="Search by student, tutorial, or comment..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white border border-gray-200 focus:border-blue-500 outline-none transition-all placeholder:text-gray-400 text-gray-700"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm"
           />
         </div>
-
-        {/* Tabs */}
-        <div className="flex bg-white rounded-lg border border-gray-200 p-1">
-          <button
-            onClick={() => setActiveTab("group")}
-            className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
-              activeTab === "group"
-                ? "bg-white text-[var(--astar-red)] shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Group Sessions
-          </button>
-          <button
-            onClick={() => setActiveTab("private")}
-            className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
-              activeTab === "private"
-                ? "bg-white text-[var(--astar-red)] shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Private Sessions
-          </button>
-        </div>
+        <select
+          value={minRating}
+          onChange={(e) => setMinRating(Number(e.target.value))}
+          className="px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm cursor-pointer"
+        >
+          <option value={0}>All Ratings</option>
+          <option value={5}>5 Stars</option>
+          <option value={4}>4+ Stars</option>
+          <option value={3}>3+ Stars</option>
+        </select>
       </div>
 
-      {/* Feedback Cards */}
-      <div className="space-y-4">
-        {filteredFeedback.map((item) => (
-          <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-            {/* Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${item.initialsColor}`}>
-                  {item.studentInitials}
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900">{item.studentName}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-sm text-gray-600">{item.tutorialName}</p>
-                    <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
-                      {item.sessionType}
-                    </span>
+      {/* Cards */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20 gap-2 text-gray-400">
+          <Loader2 size={18} className="animate-spin" />
+          <span className="text-sm">Loading feedback...</span>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+          <p className="text-gray-400 text-sm">
+            {feedback.length === 0
+              ? "No feedback submitted yet."
+              : "No feedback matches your filters."}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filtered.map((item, i) => (
+            <div
+              key={item.id}
+              className="bg-white p-5 rounded-2xl border border-gray-100"
+            >
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${COLORS[i % COLORS.length]}`}>
+                    {initials(item.full_name)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#0B1120] text-sm">
+                      {item.full_name || "Anonymous"}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {item.tutorials?.title ?? "General Feedback"}
+                    </p>
                   </div>
                 </div>
+                <span className="text-[11px] text-gray-400 flex-shrink-0">
+                  {timeAgo(item.created_at)}
+                </span>
               </div>
-              <span className="text-xs text-gray-400">{item.timestamp}</span>
-            </div>
 
-            {/* Rating */}
-            <div className="flex items-center gap-2 mb-3">
-              <div className="flex gap-0.5">
-                {renderStars(item.rating)}
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex gap-0.5">{renderStars(item.rating)}</div>
+                <span className="text-sm font-bold text-[#0B1120]">{item.rating}.0</span>
               </div>
-              <span className="text-sm font-bold text-gray-900">{item.rating.toFixed(1)}</span>
+
+              {item.comment && (
+                <p className="text-gray-600 text-sm leading-relaxed italic mb-4">
+                  "{item.comment}"
+                </p>
+              )}
+
+              {item.email && (
+                <div className="flex justify-end">
+                  <a
+                    href={`mailto:${item.email}?subject=Re: Your feedback on ${item.tutorials?.title ?? "A-Star Tutorials"}`}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0B1120] hover:text-[#D93025] transition-colors"
+                  >
+                    <MessageCircle size={13} />
+                    Reply to {item.full_name?.split(" ")[0] ?? "Student"}
+                  </a>
+                </div>
+              )}
             </div>
-
-            {/* Feedback Text */}
-            <p className="text-gray-700 leading-relaxed mb-4">
-              "{item.feedback}"
-            </p>
-
-            {/* Reply Button */}
-            <div className="flex justify-end">
-              <button className="text-sm font-semibold text-[var(--astar-navy)] hover:text-[var(--astar-red)] transition-colors flex items-center gap-1">
-                Reply to {item.studentName.split(' ')[0]} →
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Empty State (when no results) */}
-      {filteredFeedback.length === 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-          <p className="text-gray-500">No feedback found matching your search.</p>
+          ))}
         </div>
       )}
     </div>

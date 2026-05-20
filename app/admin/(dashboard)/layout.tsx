@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import Image from "next/image";
 import { Menu } from "lucide-react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 
@@ -12,22 +13,36 @@ export default function AdminDashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      
-      {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 w-full bg-white z-40 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-gray-600">
-            <Menu size={24} />
-          </button>
-          <span className="font-bold text-gray-900">A-Star Admin</span>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[var(--astar-bg)] flex">
+      <AdminSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
 
-      {/* Main Content Area - Shifted right by sidebar width on desktop */}
-      <div className="flex-1 w-full lg:ml-64 min-h-screen p-4 pt-20 lg:p-8 lg:pt-8 transition-all">
-        {children}
+      {/* Main content — shifted right on desktop */}
+      <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
+        {/* Mobile top bar */}
+        <header className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 -ml-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <Menu size={22} />
+          </button>
+
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <div className="w-8 h-8 relative">
+              <Image src="/logo.png" alt="A-Star" fill className="object-contain" />
+            </div>
+          </div>
+
+          <div className="w-8 h-8 rounded-full bg-[#D93025]/15 text-[#D93025] flex items-center justify-center font-bold text-xs">
+            AD
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="flex-1 p-5 md:p-8">{children}</main>
       </div>
     </div>
   );

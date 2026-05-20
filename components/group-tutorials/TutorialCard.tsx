@@ -1,8 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { Calendar, Clock } from 'lucide-react';
 
 interface TutorialCardProps {
+    id: string;
     code: string;
     title: string;
     teacher: string;
@@ -16,6 +18,7 @@ interface TutorialCardProps {
 }
 
 const TutorialCard = ({
+    id,
     code,
     title,
     teacher,
@@ -25,7 +28,7 @@ const TutorialCard = ({
     seatsTaken,
     seatsTotal,
     price,
-    colorScheme = 'blue', // Default color
+    colorScheme = 'blue',
 }: TutorialCardProps) => {
     const seatsLeft = seatsTotal - seatsTaken;
     const percentageTaken = (seatsTaken / seatsTotal) * 100;
@@ -112,10 +115,13 @@ const TutorialCard = ({
                 </div>
             </div>
 
-            {/* CTA Button with Glow Effect */}
-            <button className="w-full py-2.5 md:py-3 rounded-xl border-2 border-slate-100 text-slate-700 text-sm md:text-base font-bold hover:border-slate-300 hover:text-slate-900 hover:shadow-lg transition-all duration-1000 hover:scale-105 active:scale-100">
+            {/* CTA */}
+            <Link
+                href={`/group-tutorials/confirm-booking?id=${id}`}
+                className="block w-full py-2.5 md:py-3 rounded-xl border-2 border-slate-100 text-slate-700 text-sm md:text-base font-bold text-center hover:border-slate-300 hover:text-slate-900 hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-100"
+            >
                 Reserve Spot
-            </button>
+            </Link>
         </div>
     );
 };

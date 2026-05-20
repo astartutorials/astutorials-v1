@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export default function BookingNavbar() {
   return (
-    <nav className="w-full bg-white border-b border-gray-100 py-4 px-6 md:px-10 flex items-center justify-between sticky top-0 z-50">
+    <nav className="w-full bg-[#FDFAF6]/95 backdrop-blur-md border-b border-amber-100/60 py-4 px-6 md:px-10 flex items-center justify-between sticky top-0 z-50">
       <Link href="/" className="flex items-center gap-2">
         <Image 
           src="/logo.png" 

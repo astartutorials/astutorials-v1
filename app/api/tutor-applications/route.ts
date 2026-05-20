@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 const NOTION_DATABASE_ID = "fc8883564840431fa1ed4158744542dd";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 function richText(content: string) {
   return [{ text: { content } }];
@@ -60,7 +66,7 @@ export async function POST(req: NextRequest) {
     "Difficult Concept Explanation": { rich_text: richText(String(difficultConceptExplanation ?? "")) },
     "Days Available": { multi_select: multiSelect(Array.isArray(daysAvailable) ? daysAvailable : []) },
     "Time of Day": { multi_select: multiSelect(Array.isArray(timeOfDay) ? timeOfDay : []) },
-    "CV Link": { url: String(cvLink ?? "") },
+    "CV Link": { url: cvLink ? String(cvLink) : null },
     "Application Status": { select: { name: "New" } },
   };
 
@@ -94,6 +100,30 @@ export async function POST(req: NextRequest) {
       { status: 502 }
     );
   }
+
+  // Mirror to Supabase
+  const { error: sbError } = await supabase.from("tutor_applications").insert({
+    full_name: String(fullName ?? ""),
+    email: String(email ?? ""),
+    phone: phone ? String(phone) : null,
+    education_level: educationLevel ? String(educationLevel) : null,
+    institution: institution ? String(institution) : null,
+    field_of_study: fieldOfStudy ? String(fieldOfStudy) : null,
+    subjects_can_teach: subjectsCanTeach ? String(subjectsCanTeach) : null,
+    levels_can_teach: Array.isArray(levelsCanTeach) ? levelsCanTeach.join(", ") : null,
+    years_of_experience: yearsOfExperience ? String(yearsOfExperience) : null,
+    teaching_mode: teachingMode ? String(teachingMode) : null,
+    has_tutored_before: hasTutoredBefore ? String(hasTutoredBefore) : null,
+    previous_tutoring_description: previousTutoringDescription ? String(previousTutoringDescription) : null,
+    why_astar: whyAstar ? String(whyAstar) : null,
+    difficult_concept_explanation: difficultConceptExplanation ? String(difficultConceptExplanation) : null,
+    days_available: Array.isArray(daysAvailable) ? daysAvailable.join(", ") : null,
+    time_of_day: Array.isArray(timeOfDay) ? timeOfDay.join(", ") : null,
+    cv_link: cvLink ? String(cvLink) : null,
+    linkedin_portfolio: linkedinPortfolio ? String(linkedinPortfolio) : null,
+    status: "new",
+  });
+  if (sbError) console.error("[tutor-applications] Supabase insert error:", sbError);
 
   return NextResponse.json({ success: true }, { status: 201 });
 }

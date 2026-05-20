@@ -1,200 +1,306 @@
-'use client';
-
-import { Bell, TrendingUp, Users, GraduationCap, DollarSign, Star, Calendar, MessageSquare, Briefcase } from "lucide-react";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import Link from "next/link";
+import {
+  DollarSign,
+  Users,
+  GraduationCap,
+  Star,
+  Calendar,
+  MessageSquare,
+  Briefcase,
+  Settings,
+} from "lucide-react";
 
-export default function AdminDashboardPage() {
-  // Mock data - replace with actual API calls
-  const stats = {
-    totalRevenue: 450000,
-    revenueGrowth: 12.5,
-    totalStudents: 156,
-    studentGrowth: 8.2,
-    activeTutorials: 24,
-    upcomingTutorials: 8,
-    avgRating: 4.8,
-    pendingPayments: 3
-  };
+function fmt(n: number) {
+  return `₦${n.toLocaleString()}`;
+}
 
-  const upcomingTutorials = [
-    { id: 1, code: "CALC-101", title: "Advanced Calculus", date: "Oct 25", time: "2:00 PM", students: 28 },
-    { id: 2, code: "LAW-202", title: "Legal Studies 101", date: "Oct 25", time: "4:30 PM", students: 15 },
-    { id: 3, code: "BUS-303", title: "Corporate Strategy", date: "Oct 26", time: "10:00 AM", students: 22 },
-  ];
+function initials(name: string) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
 
-  const recentFeedback = [
-    { student: "Sarah Jenkins", tutorial: "Advanced Calculus", rating: 5, time: "2 hours ago" },
-    { student: "Michael Ross", tutorial: "Legal Studies", rating: 4, time: "Yesterday" },
-    { student: "Jessica Pearson", tutorial: "Corporate Strategy", rating: 5, time: "2 days ago" },
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+export default async function AdminDashboardPage() {
+  const supabase = await createSupabaseServerClient();
+
+  const [
+    { data: paidBookings },
+    { data: allBookings },
+    { count: activeTutorials },
+    { data: feedbackRows },
+    { data: upcoming },
+    { data: recentFeedback },
+  ] = await Promise.all([
+    supabase
+      .from("bookings")
+      .select("tutorials(price)")
+      .eq("payment_status", "paid"),
+    supabase.from("bookings").select("email"),
+    supabase
+      .from("tutorials")
+      .select("*", { count: "exact", head: true })
+      .neq("status", "draft"),
+    supabase.from("feedback").select("rating"),
+    supabase
+      .from("tutorials")
+      .select("id, code, title, date, time")
+      .gte("date", new Date().toISOString().split("T")[0])
+      .neq("status", "draft")
+      .order("date", { ascending: true })
+      .limit(4),
+    supabase
+      .from("feedback")
+      .select("full_name, rating, created_at, tutorials(title)")
+      .order("created_at", { ascending: false })
+      .limit(4),
+  ]);
+
+  const revenue =
+    (paidBookings as any[])?.reduce(
+      (sum, b) => sum + (b.tutorials?.price || 0),
+      0
+    ) ?? 0;
+  const uniqueStudents = new Set((allBookings ?? []).map((b) => b.email)).size;
+  const avgRating =
+    feedbackRows?.length
+      ? feedbackRows.reduce((s, f) => s + f.rating, 0) / feedbackRows.length
+      : null;
+
+  const stats = [
+    {
+      label: "Total Revenue",
+      value: fmt(revenue),
+      icon: DollarSign,
+      bg: "bg-red-50",
+      color: "text-[#D93025]",
+    },
+    {
+      label: "Students Served",
+      value: String(uniqueStudents),
+      icon: Users,
+      bg: "bg-blue-50",
+      color: "text-blue-600",
+    },
+    {
+      label: "Active Tutorials",
+      value: String(activeTutorials ?? 0),
+      icon: GraduationCap,
+      bg: "bg-red-50",
+      color: "text-[#D93025]",
+    },
+    {
+      label: "Avg Rating",
+      value: avgRating ? avgRating.toFixed(1) : "—",
+      icon: Star,
+      bg: "bg-amber-50",
+      color: "text-amber-500",
+    },
   ];
 
   const quickActions = [
-    { name: "Create Tutorial", href: "/admin/create-tutorial", icon: GraduationCap, color: "bg-blue-100 text-blue-600" },
-    { name: "Add Career Role", href: "/admin/careers", icon: Briefcase, color: "bg-purple-100 text-purple-600" },
-    { name: "View Payments", href: "/admin/payments", icon: DollarSign, color: "bg-green-100 text-green-600" },
-    { name: "Manage Settings", href: "/admin/settings", icon: Bell, color: "bg-orange-100 text-orange-600" },
+    {
+      name: "Schedule Tutorial",
+      href: "/admin/create-tutorial",
+      icon: GraduationCap,
+      bg: "bg-red-50",
+      color: "text-[#D93025]",
+    },
+    {
+      name: "Add Career Role",
+      href: "/admin/careers",
+      icon: Briefcase,
+      bg: "bg-blue-50",
+      color: "text-blue-600",
+    },
+    {
+      name: "View Payments",
+      href: "/admin/payments",
+      icon: DollarSign,
+      bg: "bg-emerald-50",
+      color: "text-emerald-600",
+    },
+    {
+      name: "Settings",
+      href: "/admin/settings",
+      icon: Settings,
+      bg: "bg-gray-100",
+      color: "text-gray-500",
+    },
   ];
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Dashboard</h1>
-          <p className="text-gray-500 text-sm md:text-base">Welcome back! Here's what's happening today.</p>
-        </div>
-        <div className="flex items-center gap-4 self-end md:self-auto">
-          <button className="p-2 text-gray-400 hover:text-gray-600 relative">
-            <Bell size={24} />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
-          <div className="w-10 h-10 rounded-full bg-[#1E293B] text-white flex items-center justify-center font-bold text-sm">
-            AD
-          </div>
-        </div>
+      <div className="mb-7">
+        <h1 className="text-2xl font-bold text-[#0B1120]">Dashboard</h1>
+        <p className="text-sm text-gray-500 mt-0.5">
+          Here's what's happening with A-Star Tutorials.
+        </p>
       </div>
 
-      {/* Key Statistics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {/* Total Revenue */}
-        <div className="bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8c] rounded-2xl shadow-lg p-6 text-white">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <DollarSign size={24} />
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {stats.map((s) => (
+          <div
+            key={s.label}
+            className="bg-white rounded-2xl border border-gray-100 p-5"
+          >
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${s.bg}`}
+            >
+              <s.icon size={20} className={s.color} />
             </div>
-            <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded-full">+{stats.revenueGrowth}%</span>
+            <p className="text-2xl font-bold text-[#0B1120]">{s.value}</p>
+            <p className="text-xs text-gray-500 mt-1">{s.label}</p>
           </div>
-          <h3 className="text-3xl font-bold mb-1">₦{stats.totalRevenue.toLocaleString()}</h3>
-          <p className="text-white/80 text-sm">Total Revenue</p>
-        </div>
+        ))}
+      </div>
 
-        {/* Total Students */}
-        <div className="bg-gradient-to-br from-[#475569] to-[#64748b] rounded-2xl shadow-lg p-6 text-white">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <Users size={24} />
+      {/* Quick actions */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {quickActions.map((a) => (
+          <Link
+            key={a.name}
+            href={a.href}
+            className="bg-white p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all group"
+          >
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center ${a.bg} ${a.color} mb-3 group-hover:scale-110 transition-transform`}
+            >
+              <a.icon size={20} />
             </div>
-            <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded-full">+{stats.studentGrowth}%</span>
+            <p className="font-bold text-[#0B1120] text-sm">{a.name}</p>
+          </Link>
+        ))}
+      </div>
+
+      {/* Lower panels */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Upcoming sessions */}
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 className="text-base font-bold text-[#0B1120] flex items-center gap-2">
+              <Calendar size={17} className="text-[#D93025]" />
+              Upcoming Sessions
+            </h2>
+            <Link
+              href="/admin/tutorials"
+              className="text-xs font-semibold text-[#D93025] hover:underline"
+            >
+              View All →
+            </Link>
           </div>
-          <h3 className="text-3xl font-bold mb-1">{stats.totalStudents}</h3>
-          <p className="text-white/80 text-sm">Total Students</p>
-        </div>
-
-        {/* Active Tutorials */}
-        <div className="bg-gradient-to-br from-[#4f46e5] to-[#6366f1] rounded-2xl shadow-lg p-6 text-white">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <GraduationCap size={24} />
-            </div>
-            <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded-full">{stats.upcomingTutorials} upcoming</span>
-          </div>
-          <h3 className="text-3xl font-bold mb-1">{stats.activeTutorials}</h3>
-          <p className="text-white/80 text-sm">Active Tutorials</p>
-        </div>
-
-        {/* Average Rating */}
-        <div className="bg-gradient-to-br from-[#059669] to-[#10b981] rounded-2xl shadow-lg p-6 text-white">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <Star size={24} />
-            </div>
-            <div className="flex gap-0.5">
-              {[1,2,3,4,5].map(i => (
-                <Star key={i} size={12} className="fill-white" />
+          {upcoming && upcoming.length > 0 ? (
+            <div className="divide-y divide-gray-50">
+              {(upcoming as any[]).map((t) => (
+                <div
+                  key={t.id}
+                  className="px-6 py-4 flex items-center gap-4 hover:bg-gray-50/50 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                    <GraduationCap size={18} className="text-[#D93025]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[#0B1120] text-sm leading-tight">
+                      {t.code}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">{t.title}</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <span className="text-xs font-semibold text-[#D93025] bg-red-50 px-2 py-1 rounded-full">
+                      {new Date(t.date).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </span>
+                    <p className="text-[10px] text-gray-400 mt-1">{t.time}</p>
+                  </div>
+                </div>
               ))}
             </div>
-          </div>
-          <h3 className="text-3xl font-bold mb-1">{stats.avgRating.toFixed(1)}</h3>
-          <p className="text-white/80 text-sm">Average Rating</p>
+          ) : (
+            <div className="px-6 py-10 text-center">
+              <p className="text-sm text-gray-400">No upcoming sessions.</p>
+              <Link
+                href="/admin/create-tutorial"
+                className="text-xs font-semibold text-[#D93025] hover:underline mt-1 inline-block"
+              >
+                Schedule one →
+              </Link>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Quick Actions */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {quickActions.map((action) => (
-            <Link
-              key={action.name}
-              href={action.href}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all group"
-            >
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${action.color} mb-3 group-hover:scale-110 transition-transform`}>
-                <action.icon size={24} />
-              </div>
-              <h3 className="font-semibold text-gray-900 text-sm">{action.name}</h3>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upcoming Tutorials */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Recent feedback */}
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Calendar size={20} className="text-[var(--astar-red)]" />
-              Upcoming Tutorials
-            </h2>
-            <Link href="/admin/tutorials" className="text-sm font-semibold text-[var(--astar-red)] hover:underline">
-              View All →
-            </Link>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {upcomingTutorials.map((tutorial) => (
-              <div key={tutorial.id} className="px-6 py-4 hover:bg-gray-50/50 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-bold text-gray-400">{tutorial.code}</span>
-                      <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                      <span className="text-xs text-gray-500">{tutorial.students} students</span>
-                    </div>
-                    <h3 className="font-bold text-gray-900">{tutorial.title}</h3>
-                  </div>
-                  <span className="text-xs font-semibold text-[var(--astar-red)] bg-red-50 px-2 py-1 rounded-full">
-                    {tutorial.date}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600">{tutorial.time}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Feedback */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <MessageSquare size={20} className="text-[var(--astar-red)]" />
+            <h2 className="text-base font-bold text-[#0B1120] flex items-center gap-2">
+              <MessageSquare size={17} className="text-[#D93025]" />
               Recent Feedback
             </h2>
-            <Link href="/admin/feedback" className="text-sm font-semibold text-[var(--astar-red)] hover:underline">
+            <Link
+              href="/admin/feedback"
+              className="text-xs font-semibold text-[#D93025] hover:underline"
+            >
               View All →
             </Link>
           </div>
-          <div className="divide-y divide-gray-50">
-            {recentFeedback.map((feedback, index) => (
-              <div key={index} className="px-6 py-4 hover:bg-gray-50/50 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="font-bold text-gray-900">{feedback.student}</h3>
-                    <p className="text-sm text-gray-600">{feedback.tutorial}</p>
+          {recentFeedback && recentFeedback.length > 0 ? (
+            <div className="divide-y divide-gray-50">
+              {(recentFeedback as any[]).map((f, i) => (
+                <div
+                  key={i}
+                  className="px-6 py-4 flex items-center gap-4 hover:bg-gray-50/50 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-sm text-gray-600 flex-shrink-0">
+                    {f.full_name ? initials(f.full_name) : "?"}
                   </div>
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        className={i < feedback.rating ? "fill-yellow-500 text-yellow-500" : "text-gray-300"}
-                      />
-                    ))}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[#0B1120] text-sm leading-tight">
+                      {f.full_name || "Anonymous"}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {f.tutorials?.title ?? "—"}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, idx) => (
+                        <Star
+                          key={idx}
+                          size={12}
+                          className={
+                            idx < f.rating
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-gray-200"
+                          }
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[10px] text-gray-400">
+                      {timeAgo(f.created_at)}
+                    </span>
                   </div>
                 </div>
-                <p className="text-xs text-gray-400">{feedback.time}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="px-6 py-10 text-center">
+              <p className="text-sm text-gray-400">No feedback received yet.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
