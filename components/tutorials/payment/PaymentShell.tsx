@@ -11,8 +11,8 @@ export default function PaymentShell({
   summary: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-gray-900">
-      <header className="w-full border-b border-gray-200 bg-white">
+    <div className="min-h-screen bg-[var(--astar-bg)] text-gray-900">
+      <header className="w-full border-b border-amber-100/60 bg-[#FDFAF6]/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-3">
             <Image

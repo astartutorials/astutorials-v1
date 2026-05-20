@@ -1,169 +1,264 @@
 'use client';
 
-import { Calendar, Clock, DollarSign, Upload, Eye, Bell } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Calendar, Clock, Eye, Loader2 } from "lucide-react";
+
+const inputClass =
+  "w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm";
 
 export default function CreateTutorialPage() {
+  const router = useRouter();
+  const [form, setForm] = useState({
+    code: "",
+    title: "",
+    teacher: "",
+    description: "",
+    date: "",
+    time: "",
+    capacity: "",
+    price: "",
+  });
+  const [visible, setVisible] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const set = (key: string, value: string) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
+
+  async function handleSubmit(status: "active" | "draft") {
+    setError("");
+    if (!form.code || !form.title || !form.teacher || !form.capacity) {
+      setError("Course code, title, tutor, and seats are required.");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/admin/tutorials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: form.code,
+          title: form.title,
+          teacher: form.teacher,
+          description: form.description,
+          date: form.date || null,
+          time: form.time,
+          capacity: Number(form.capacity),
+          price: form.price ? Number(form.price) : 0,
+          status,
+        }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        setError(d.message ?? "Failed to create tutorial.");
+        return;
+      }
+      router.push("/admin/tutorials");
+    } catch {
+      setError("An unexpected error occurred.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
-    <div className="max-w-[1400px] mx-auto">
-      {/* Page Header */}
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Create New Tutorial</h1>
-          <p className="text-gray-500">Set up a new group session for students.</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <button className="p-2 text-gray-400 hover:text-gray-600 relative">
-            <Bell size={24} />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
-          <div className="w-10 h-10 rounded-full bg-[#1E293B] text-white flex items-center justify-center font-bold text-sm">
-            AD
-          </div>
-        </div>
+    <div className="max-w-5xl">
+      <div className="mb-7">
+        <h1 className="text-2xl font-bold text-[#0B1120]">Schedule Tutorial</h1>
+        <p className="text-sm text-gray-500 mt-0.5">
+          Set up a new group session for students.
+        </p>
       </div>
 
-      {/* Main Content Card */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
-          
-          {/* Left Column: General Info */}
-          <div className="space-y-8">
-            <div>
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-xs">
-                  i
-                </div>
-                <h3 className="font-bold text-red-600 text-lg">General Info</h3>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-6 mb-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Course Code</label>
-                  <input type="text" placeholder="e.g. MATH101" className="w-full px-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-400 text-gray-800 text-sm" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Tutorial Title</label>
-                  <input type="text" placeholder="e.g. Advanced Calculus Review" className="w-full px-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-400 text-gray-800 text-sm" />
-                </div>
-              </div>
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+          {/* Left — General Info */}
+          <div className="space-y-5">
+            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+              <span className="w-5 h-5 rounded-full bg-[#D93025] text-white text-[10px] font-bold flex items-center justify-center">i</span>
+              <h3 className="font-bold text-[#D93025] text-sm">General Info</h3>
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-700">Topics to be Covered</label>
-                <textarea 
-                  rows={8}
-                  placeholder="List the main topics that will be discussed in this session..."
-                  className="w-full px-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-400 text-gray-800 resize-none text-sm"
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700">Course Code</label>
+                <input
+                  type="text"
+                  placeholder="e.g. MATH101"
+                  value={form.code}
+                  onChange={(e) => set("code", e.target.value)}
+                  className={inputClass}
                 />
-                <div className="text-right text-[10px] text-gray-400 font-medium">0/500 characters</div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700">Tutorial Title</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Advanced Calculus Review"
+                  value={form.title}
+                  onChange={(e) => set("title", e.target.value)}
+                  className={inputClass}
+                />
               </div>
             </div>
 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-700">Topics to be Covered</label>
+              <textarea
+                rows={7}
+                placeholder="List the main topics that will be discussed in this session..."
+                value={form.description}
+                onChange={(e) => set("description", e.target.value)}
+                maxLength={500}
+                className={`${inputClass} resize-none`}
+              />
+              <div className="text-right text-[10px] text-gray-400 font-medium">
+                {form.description.length}/500 characters
+              </div>
+            </div>
           </div>
 
-          {/* Right Column: Schedule & Capacity */}
-          <div className="space-y-8">
-            <div>
-              <div className="flex items-center gap-3 mb-8">
-                 <div className="w-6 h-6 rounded-md flex items-center justify-center text-red-600">
-                  <Calendar size={20} />
-                </div>
-                <h3 className="font-bold text-red-600 text-lg">Schedule & Capacity</h3>
-              </div>
+          {/* Right — Schedule & Capacity */}
+          <div className="space-y-5">
+            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+              <Calendar size={16} className="text-[#D93025]" />
+              <h3 className="font-bold text-[#D93025] text-sm">Schedule & Capacity</h3>
+            </div>
 
-              <div className="grid grid-cols-2 gap-6 mb-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Date</label>
-                  <div className="relative group">
-                    <Calendar 
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[var(--astar-red)] transition-colors cursor-pointer" 
-                      size={16} 
-                      onClick={(e) => {
-                        const input = e.currentTarget.parentElement?.querySelector('input');
-                        if (input) input.showPicker();
-                      }}
-                    />
-                    <input 
-                      type="date" 
-                      className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-gray-800 text-sm [appearance:none] [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer" 
-                      onClick={(e) => e.currentTarget.showPicker()}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Time</label>
-                   <div className="relative group">
-                    <Clock 
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[var(--astar-red)] transition-colors cursor-pointer" 
-                      size={16} 
-                      onClick={(e) => {
-                        const input = e.currentTarget.parentElement?.querySelector('input');
-                        if (input) input.showPicker();
-                      }}
-                    />
-                    <input 
-                      type="time" 
-                      className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-gray-800 text-sm [appearance:none] [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer" 
-                      onClick={(e) => e.currentTarget.showPicker()}
-                    />
-                  </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700">Date</label>
+                <div className="relative group">
+                  <Calendar
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                    size={15}
+                    onClick={(e) => {
+                      const input = e.currentTarget.parentElement?.querySelector("input");
+                      if (input) input.showPicker();
+                    }}
+                  />
+                  <input
+                    type="date"
+                    value={form.date}
+                    onChange={(e) => set("date", e.target.value)}
+                    className={`${inputClass} pl-10 [appearance:none] [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer`}
+                    onClick={(e) => e.currentTarget.showPicker()}
+                  />
                 </div>
               </div>
-
-               <div className="grid grid-cols-2 gap-6 mb-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Available Slots</label>
-                  <div className="relative">
-                    <input type="number" placeholder="20" className="w-full px-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-gray-800 text-sm" />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">students</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-700">Price per Student</label>
-                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm font-medium">₦</span>
-                    <input type="number" placeholder="1000" className="w-full pl-8 pr-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-gray-800 text-sm" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-700">Tutor Assignment</label>
-                <div className="relative">
-                   <input 
-                     type="text" 
-                     placeholder="Enter tutor name..." 
-                     className="w-full px-4 py-3.5 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-400 text-gray-800 text-sm" 
-                   />
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700">Time</label>
+                <div className="relative group">
+                  <Clock
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                    size={15}
+                    onClick={(e) => {
+                      const input = e.currentTarget.parentElement?.querySelector("input");
+                      if (input) input.showPicker();
+                    }}
+                  />
+                  <input
+                    type="time"
+                    value={form.time}
+                    onChange={(e) => set("time", e.target.value)}
+                    className={`${inputClass} pl-10 [appearance:none] [&::-webkit-calendar-picker-indicator]:hidden cursor-pointer`}
+                    onClick={(e) => e.currentTarget.showPicker()}
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Visibility */}
-            <div className="bg-blue-50/50 rounded-xl p-5 flex items-center justify-between border border-blue-100">
-               <div className="flex items-center gap-4">
-                 <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
-                   <Eye size={16} />
-                 </div>
-                 <div>
-                   <h4 className="font-bold text-gray-900 text-sm">Visibility</h4>
-                   <p className="text-[10px] text-gray-500">Tutorial will be visible to all students immediately.</p>
-                 </div>
-               </div>
-               <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out">
-                  <input type="checkbox" id="toggle" className="peer absolute opacity-0 w-0 h-0" defaultChecked />
-                  <label htmlFor="toggle" className="block w-12 h-7 bg-[#1E293B] rounded-full cursor-pointer transition-colors relative before:content-[''] before:absolute before:top-1 before:left-1 before:w-5 before:h-5 before:bg-white before:rounded-full before:transition-transform peer-checked:before:translate-x-5 shadow-inner"></label>
-               </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700">Available Slots</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    placeholder="30"
+                    value={form.capacity}
+                    onChange={(e) => set("capacity", e.target.value)}
+                    className={inputClass}
+                    min={1}
+                  />
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-medium">
+                    students
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700">Price per Student</label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-600 text-sm font-semibold">₦</span>
+                  <input
+                    type="number"
+                    placeholder="1000"
+                    value={form.price}
+                    onChange={(e) => set("price", e.target.value)}
+                    className={`${inputClass} pl-7`}
+                    min={0}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-700">Tutor Name</label>
+              <input
+                type="text"
+                placeholder="Enter tutor name..."
+                value={form.teacher}
+                onChange={(e) => set("teacher", e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            {/* Visibility toggle */}
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                  <Eye size={15} />
+                </div>
+                <div>
+                  <p className="font-bold text-[#0B1120] text-sm">Visible to students</p>
+                  <p className="text-[10px] text-gray-500">
+                    Tutorial will appear on the booking page immediately.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setVisible(!visible)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${visible ? "bg-[#0B1120]" : "bg-gray-300"}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${visible ? "translate-x-6" : "translate-x-1"}`} />
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="flex justify-end gap-3 mt-12 pt-6 border-t border-gray-50">
-          <button className="px-8 py-3.5 rounded-xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50 transition-colors">
-           Draft
+        {error && (
+          <p className="mt-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
+        )}
+
+        <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={() => handleSubmit("draft")}
+            disabled={isSubmitting}
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 bg-white text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all text-sm disabled:opacity-60"
+          >
+            {isSubmitting ? <Loader2 size={15} className="animate-spin" /> : null}
+            Save as Draft
           </button>
-          <button className="px-8 py-3.5 rounded-xl bg-[#C1121F] text-white font-bold text-sm shadow-xl shadow-red-500/10 hover:shadow-red-500/20 transition-all">
-            Publish 
+          <button
+            type="button"
+            onClick={() => handleSubmit("active")}
+            disabled={isSubmitting}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D93025] text-white font-semibold rounded-xl shadow-sm hover:bg-red-700 transition-all text-sm disabled:opacity-60"
+          >
+            {isSubmitting ? <Loader2 size={15} className="animate-spin" /> : null}
+            Publish Tutorial
           </button>
         </div>
       </div>

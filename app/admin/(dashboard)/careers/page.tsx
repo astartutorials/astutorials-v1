@@ -1,134 +1,98 @@
 'use client';
 
-import { useState } from "react";
-import { Search, Plus, Bell, Code, Palette, Megaphone, Headphones, BarChart3, MoreVertical, Edit, Trash2 } from "lucide-react";
-import AddCareerRoleModal from "@/components/careers/admin/AddCareerRoleModal";
+import { useState, useEffect } from "react";
+import { Search, Plus, MoreVertical, Edit, Trash2, Loader2, Briefcase } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabase";
+import AddCareerRoleModal from "@/components/careers/admin/AddCareerRoleModal";
 
-const jobRoles = [
-  {
-    id: 1,
-    title: "Senior Frontend Developer",
-    jobId: "#DEV-204",
-    department: "Engineering",
-    location: "Remote (US)",
-    postedDate: "Oct 24, 2023",
-    status: "Active",
-    statusColor: "bg-green-100 text-green-700",
-    icon: Code,
-    iconColor: "bg-blue-100 text-blue-600"
-  },
-  {
-    id: 2,
-    title: "Product Designer",
-    jobId: "#DES-101",
-    department: "Product",
-    location: "New York, NY",
-    postedDate: "Oct 22, 2023",
-    status: "Active",
-    statusColor: "bg-green-100 text-green-700",
-    icon: Palette,
-    iconColor: "bg-purple-100 text-purple-600"
-  },
-  {
-    id: 3,
-    title: "Marketing Intern",
-    jobId: "#MKT-003",
-    department: "Marketing",
-    location: "London, UK",
-    postedDate: "-",
-    status: "Draft",
-    statusColor: "bg-gray-100 text-gray-700",
-    icon: Megaphone,
-    iconColor: "bg-orange-100 text-orange-600"
-  },
-  {
-    id: 4,
-    title: "Customer Success Manager",
-    jobId: "#CS-301",
-    department: "Customer Support",
-    location: "Remote (EU)",
-    postedDate: "Oct 15, 2023",
-    status: "Active",
-    statusColor: "bg-green-100 text-green-700",
-    icon: Headphones,
-    iconColor: "bg-teal-100 text-teal-600"
-  },
-  {
-    id: 5,
-    title: "Data Scientist",
-    jobId: "#DS-552",
-    department: "Analytics",
-    location: "San Francisco, CA",
-    postedDate: "Oct 10, 2023",
-    status: "Active",
-    statusColor: "bg-green-100 text-green-700",
-    icon: BarChart3,
-    iconColor: "bg-indigo-100 text-indigo-600"
-  }
-];
+type Career = {
+  id: string;
+  job_id: string | null;
+  title: string;
+  category: string;
+  type: string;
+  location: string;
+  status: string;
+  created_at: string;
+};
 
-function JobRow({ job }: { job: any }) {
+function statusPill(status: string) {
+  if (status === "active") return "bg-emerald-50 text-emerald-700";
+  if (status === "draft") return "bg-amber-50 text-amber-700";
+  return "bg-gray-100 text-gray-500";
+}
+
+function formatDate(d: string) {
+  return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function JobRow({
+  job,
+  onDelete,
+}: {
+  job: Career;
+  onDelete: (id: string) => void;
+}) {
   const [showMenu, setShowMenu] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    setShowMenu(false);
+    if (!confirm("Delete this role? This cannot be undone.")) return;
+    setDeleting(true);
+    await fetch(`/api/admin/careers/${job.id}`, { method: "DELETE" });
+    onDelete(job.id);
+  }
 
   return (
-    <div className="grid grid-cols-12 gap-4 px-8 py-5 items-center hover:bg-gray-50/50 transition-colors group relative">
-      <div className="col-span-3 flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${job.iconColor} flex-shrink-0`}>
-          <job.icon size={20} />
+    <div className="grid grid-cols-12 gap-3 px-6 py-4 items-center hover:bg-gray-50/60 transition-colors relative">
+      <div className="col-span-4 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+          <Briefcase size={18} className="text-[#D93025]" />
         </div>
-        <div>
-          <h4 className="font-bold text-gray-900 text-sm">{job.title}</h4>
-          <p className="text-xs text-gray-500">ID: {job.jobId}</p>
+        <div className="min-w-0">
+          <p className="font-bold text-[#0B1120] text-sm truncate">{job.title}</p>
+          <p className="text-xs text-gray-400">{job.job_id ?? "—"}</p>
         </div>
       </div>
-      <div className="col-span-2 text-sm text-gray-700 font-medium">{job.department}</div>
+
+      <div className="col-span-2 text-sm text-gray-700 font-medium">{job.category}</div>
       <div className="col-span-2 text-sm text-gray-600">{job.location}</div>
-      <div className="col-span-2 text-sm text-gray-600">{job.postedDate}</div>
-      <div className="col-span-2">
-        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${job.statusColor}`}>
+      <div className="col-span-1 text-xs text-gray-500">{job.type}</div>
+      <div className="col-span-1 text-xs text-gray-400">{formatDate(job.created_at)}</div>
+
+      <div className="col-span-1">
+        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusPill(job.status)}`}>
           {job.status}
         </span>
       </div>
+
       <div className="col-span-1 flex justify-end relative">
-        <button 
+        <button
           onClick={() => setShowMenu(!showMenu)}
-          className={`p-2 rounded-full transition-colors ${showMenu ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+          disabled={deleting}
+          className={`p-2 rounded-full transition-colors ${showMenu ? "bg-gray-100 text-[#0B1120]" : "text-gray-400 hover:text-gray-600"}`}
         >
-          <MoreVertical size={18} />
+          {deleting ? <Loader2 size={16} className="animate-spin" /> : <MoreVertical size={16} />}
         </button>
 
         <AnimatePresence>
           {showMenu && (
             <>
-              <div 
-                className="fixed inset-0 z-10" 
-                onClick={() => setShowMenu(false)}
-              />
+              <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                initial={{ opacity: 0, scale: 0.95, y: -8 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-20 overflow-hidden"
+                exit={{ opacity: 0, scale: 0.95, y: -8 }}
+                transition={{ duration: 0.12 }}
+                className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20 overflow-hidden"
               >
                 <button
-                  onClick={() => {
-                    setShowMenu(false);
-                    console.log("Edit job:", job.id);
-                  }}
-                  className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                >
-                  <Edit size={16} className="text-blue-600" />
-                  Edit Role
-                </button>
-                <button
-                  onClick={() => {
-                    setShowMenu(false);
-                    console.log("Delete job:", job.id);
-                  }}
+                  onClick={handleDelete}
                   className="w-full px-4 py-2.5 text-left text-sm font-semibold text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={15} />
                   Delete Role
                 </button>
               </motion.div>
@@ -141,87 +105,115 @@ function JobRow({ job }: { job: any }) {
 }
 
 export default function AdminCareersPage() {
+  const [careers, setCareers] = useState<Career[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const filteredJobs = jobRoles.filter(job =>
-    job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.jobId.toLowerCase().includes(searchQuery.toLowerCase())
+  useEffect(() => {
+    fetchCareers();
+  }, []);
+
+  async function fetchCareers() {
+    setLoading(true);
+    const { data } = await supabase
+      .from("careers")
+      .select("id, job_id, title, category, type, location, status, created_at")
+      .order("created_at", { ascending: false });
+    setCareers((data as Career[]) ?? []);
+    setLoading(false);
+  }
+
+  function handleDelete(id: string) {
+    setCareers((prev) => prev.filter((c) => c.id !== id));
+  }
+
+  function handleCreated() {
+    setIsModalOpen(false);
+    fetchCareers();
+  }
+
+  const filtered = careers.filter(
+    (c) =>
+      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.job_id ?? "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div>
-      {/* ... previous content until divide-y ... */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-8">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Career Management</h1>
-          <p className="text-gray-500 text-sm md:text-base">Manage job openings, review applications, and update listings.</p>
+          <h1 className="text-2xl font-bold text-[#0B1120]">Career Management</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Manage job openings and listings.
+          </p>
         </div>
-        <div className="flex items-center gap-4 self-end md:self-auto">
-          <button className="p-2 text-gray-400 hover:text-gray-600 relative">
-            <Bell size={24} />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
-          <div className="w-10 h-10 rounded-full bg-[#1E293B] text-white flex items-center justify-center font-bold text-sm">
-            AD
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 mb-8">
-        <div className="relative w-full md:max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-          <input
-            type="text"
-            placeholder="Search roles, departments..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white border border-gray-200 focus:border-blue-500 outline-none transition-all placeholder:text-gray-400 text-gray-700"
-          />
-        </div>
-
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[var(--astar-red)] text-white font-bold shadow-lg shadow-red-500/20 hover:shadow-red-500/30 transition-all w-full md:w-auto"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D93025] text-white font-semibold rounded-xl shadow-sm hover:bg-red-700 transition-all text-sm self-start"
         >
-          <Plus size={20} />
-          Add New Role
+          <Plus size={16} />
+          Add Role
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search roles, departments..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm"
+            />
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
-          <div className="min-w-[900px]">
-            <div className="grid grid-cols-12 gap-4 px-8 py-4 bg-gray-50/50 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">
-              <div className="col-span-3">Role Title</div>
+          <div className="min-w-[760px]">
+            <div className="grid grid-cols-12 gap-3 px-6 py-3 bg-gray-50 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              <div className="col-span-4">Role</div>
               <div className="col-span-2">Department</div>
               <div className="col-span-2">Location</div>
-              <div className="col-span-2">Posted Date</div>
-              <div className="col-span-2">Status</div>
+              <div className="col-span-1">Type</div>
+              <div className="col-span-1">Posted</div>
+              <div className="col-span-1">Status</div>
               <div className="col-span-1 text-right">Actions</div>
             </div>
 
-            <div className="divide-y divide-gray-50">
-              {filteredJobs.map((job) => (
-                <JobRow key={job.id} job={job} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-16 gap-2 text-gray-400">
+                <Loader2 size={18} className="animate-spin" />
+                <span className="text-sm">Loading careers...</span>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="py-16 text-center text-sm text-gray-400">
+                {careers.length === 0 ? "No career roles added yet." : "No roles match your search."}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {filtered.map((job) => (
+                  <JobRow key={job.id} job={job} onDelete={handleDelete} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Pagination Footer */}
-        <div className="px-8 py-4 bg-gray-50/50 border-t border-gray-100 flex justify-between items-center text-sm text-gray-500">
-          <span>Showing <span className="font-bold text-gray-900">1</span> to <span className="font-bold text-gray-900">5</span> of <span className="font-bold text-gray-900">12</span> results</span>
-          <div className="flex gap-2">
-            <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-xs font-bold text-gray-600 disabled:opacity-50 transition-colors">Previous</button>
-            <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-xs font-bold text-gray-600 transition-colors">Next</button>
-          </div>
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 text-sm text-gray-500">
+          Showing <span className="font-bold text-[#0B1120]">{filtered.length}</span> of{" "}
+          <span className="font-bold text-[#0B1120]">{careers.length}</span> roles
         </div>
       </div>
 
-      {/* Modal */}
-      <AddCareerRoleModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <AddCareerRoleModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreated={handleCreated}
+      />
     </div>
   );
 }

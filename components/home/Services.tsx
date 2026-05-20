@@ -36,7 +36,7 @@ export default function Services() {
   ];
 
   return (
-    <ScrollReveal id="services" className="w-full px-6 py-10 md:py-16 max-w-[1440px] mx-auto bg-gray-50/50 rounded-[3rem] my-8">
+    <ScrollReveal id="services" className="w-full px-6 py-10 md:py-16 max-w-[1440px] mx-auto bg-white/55 rounded-[3rem] my-8">
       <div className="text-center max-w-3xl mx-auto mb-10">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">Our Academic Services</h2>
         <p className="text-gray-500 text-lg font-light">Comprehensive tutorial programs designed to fit your learning style and schedule.</p>
