@@ -20,7 +20,7 @@ interface GroupBookingModalProps {
 }
 
 const inputClass =
-  "w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-300 text-gray-800 text-sm";
+  "w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-300 text-gray-800 text-base";
 
 export default function GroupBookingModal({ tutorial, onClose }: GroupBookingModalProps) {
   const [form, setForm] = useState({
