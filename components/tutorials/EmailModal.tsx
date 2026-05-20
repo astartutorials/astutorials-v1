@@ -46,7 +46,7 @@ export default function EmailModal({ onClose }: EmailModalProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: form.email,
-          amount: 100,
+          amount: 5075,
           metadata: {
             type: "private",
             full_name: form.fullName,
@@ -90,7 +90,7 @@ export default function EmailModal({ onClose }: EmailModalProps) {
           </button>
           <h2 className="text-2xl font-bold text-[var(--astar-navy)]">Request Private Tutorial</h2>
           <p className="text-gray-500 text-sm mt-1">
-            Fill in your details and pay ₦100 to secure your session. We'll reach out on WhatsApp to discuss your schedule.
+            Fill in your details and pay ₦5,075 to secure your session. We'll reach out on WhatsApp to discuss your schedule.
           </p>
         </div>
 
@@ -155,7 +155,7 @@ export default function EmailModal({ onClose }: EmailModalProps) {
             {loading ? (
               <><Loader2 size={18} className="animate-spin" /> Redirecting to payment…</>
             ) : (
-              <>Pay ₦100 &amp; Submit Request <ArrowRight size={18} /></>
+              <>Pay ₦5,075 &amp; Submit Request <ArrowRight size={18} /></>
             )}
           </button>
 

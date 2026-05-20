@@ -46,7 +46,7 @@ export default async function AdminDashboardPage() {
   ] = await Promise.all([
     supabase
       .from("bookings")
-      .select("tutorials(price)")
+      .select("amount_paid, tutorials(price)")
       .eq("payment_status", "paid"),
     supabase.from("bookings").select("email"),
     supabase
@@ -70,7 +70,7 @@ export default async function AdminDashboardPage() {
 
   const revenue =
     (paidBookings as any[])?.reduce(
-      (sum, b) => sum + (b.tutorials?.price || 0),
+      (sum, b) => sum + (b.amount_paid ?? b.tutorials?.price ?? 0),
       0
     ) ?? 0;
   const uniqueStudents = new Set((allBookings ?? []).map((b) => b.email)).size;
