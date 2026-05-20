@@ -45,11 +45,14 @@ export async function sendGroupBookingConfirmation(opts: {
       </table>
 
       <p style="font-size:13px;color:#666;line-height:1.6">
-        Keep your reference number as proof of payment. If you have any questions,
-        reply to this email or reach us on WhatsApp.
+        Keep your reference number as proof of payment.
       </p>
 
-      <p style="font-size:12px;color:#aaa;margin-top:32px">A-Star Tutorials · astartutorials.com</p>
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        Please do not reply to this email.<br/>
+        For help, WhatsApp us on <strong>0916 046 5678</strong> or email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
     </div>
   `;
 
@@ -79,11 +82,14 @@ export async function sendPrivateBookingReceipt(opts: {
       </table>
 
       <p style="font-size:13px;color:#666;line-height:1.6">
-        A tutor will reach out to you on WhatsApp shortly to confirm your course,
-        preferred schedule, and session details.
+        A tutor will reach out to you on WhatsApp shortly to confirm your schedule and session details.
       </p>
 
-      <p style="font-size:12px;color:#aaa;margin-top:32px">A-Star Tutorials · astartutorials.com</p>
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        Please do not reply to this email.<br/>
+        For help, WhatsApp us on <strong>0916 046 5678</strong> or email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
     </div>
   `;
 
