@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, PlusCircle, Eye, Trash2, GraduationCap, Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { Search, PlusCircle, Eye, Pencil, Trash2, GraduationCap, Loader2 } from "lucide-react";
 
 type Tutorial = {
   id: string;
@@ -55,11 +54,9 @@ export default function AdminTutorialsPage() {
 
   async function fetchTutorials() {
     setLoading(true);
-    const { data } = await supabase
-      .from("tutorials")
-      .select("id, code, title, teacher, date, time, seats_total, status, bookings(id)")
-      .order("created_at", { ascending: false });
-    setTutorials((data as Tutorial[]) ?? []);
+    const res = await fetch("/api/admin/tutorials");
+    const data = await res.json();
+    setTutorials(Array.isArray(data) ? data : []);
     setLoading(false);
   }
 
@@ -83,6 +80,7 @@ export default function AdminTutorialsPage() {
   });
 
   const scheduled = tutorials.filter((t) => t.status === "active").length;
+  const drafts = tutorials.filter((t) => t.status === "draft").length;
   const completed = tutorials.filter((t) => t.status === "completed").length;
 
   return (
@@ -104,21 +102,28 @@ export default function AdminTutorialsPage() {
       </div>
 
       {/* Stats strip */}
-      <div className="bg-white rounded-xl border border-gray-100 p-3 flex gap-6 mb-5 w-fit">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 font-medium">Total</span>
-          <span className="text-sm font-bold text-[#0B1120]">{tutorials.length}</span>
-        </div>
-        <div className="w-px bg-gray-100" />
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 font-medium">Active</span>
-          <span className="text-sm font-bold text-emerald-600">{scheduled}</span>
-        </div>
-        <div className="w-px bg-gray-100" />
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 font-medium">Completed</span>
-          <span className="text-sm font-bold text-gray-500">{completed}</span>
-        </div>
+      <div className="bg-white rounded-xl border border-gray-100 p-3 flex gap-1 mb-5 w-fit">
+        {[
+          { label: "All", value: tutorials.length, filter: "all", color: "text-[#0B1120]" },
+          { label: "Active", value: scheduled, filter: "active", color: "text-emerald-600" },
+          { label: "Drafts", value: drafts, filter: "draft", color: "text-amber-600" },
+          { label: "Completed", value: completed, filter: "completed", color: "text-gray-500" },
+        ].map((stat, i, arr) => (
+          <div key={stat.filter} className="flex items-center">
+            <button
+              onClick={() => setStatusFilter(stat.filter)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all ${
+                statusFilter === stat.filter
+                  ? "bg-gray-100"
+                  : "hover:bg-gray-50"
+              }`}
+            >
+              <span className="text-xs text-gray-500 font-medium">{stat.label}</span>
+              <span className={`text-sm font-bold ${stat.color}`}>{stat.value}</span>
+            </button>
+            {i < arr.length - 1 && <div className="w-px h-4 bg-gray-100 mx-1" />}
+          </div>
+        ))}
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
@@ -139,9 +144,9 @@ export default function AdminTutorialsPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm cursor-pointer"
           >
-            <option value="all">All Status</option>
+            <option value="all">All Tutorials</option>
             <option value="active">Active</option>
-            <option value="draft">Draft</option>
+            <option value="draft">Drafts</option>
             <option value="completed">Completed</option>
           </select>
         </div>
@@ -219,6 +224,13 @@ export default function AdminTutorialsPage() {
                           title="View Attendance"
                         >
                           <Eye size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); router.push(`/admin/tutorials/${item.id}/edit`); }}
+                          className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                          title="Edit"
+                        >
+                          <Pencil size={16} />
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); deleteTutorial(item.id); }}

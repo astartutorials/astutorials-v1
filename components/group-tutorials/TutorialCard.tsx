@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, MapPin } from 'lucide-react';
 
 interface TutorialCardProps {
     id: string;
@@ -11,10 +10,12 @@ interface TutorialCardProps {
     description: string;
     day: string;
     time: string;
+    location?: string | null;
     seatsTaken: number;
     seatsTotal: number;
     price: string;
     colorScheme?: string;
+    onBook: () => void;
 }
 
 const TutorialCard = ({
@@ -25,10 +26,12 @@ const TutorialCard = ({
     description,
     day,
     time,
+    location,
     seatsTaken,
     seatsTotal,
     price,
     colorScheme = 'blue',
+    onBook,
 }: TutorialCardProps) => {
     const seatsLeft = seatsTotal - seatsTaken;
     const percentageTaken = (seatsTaken / seatsTotal) * 100;
@@ -62,18 +65,16 @@ const TutorialCard = ({
     const colors = colorMap[colorScheme] || colorMap.blue;
 
     return (
-        <div className="relative bg-white rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col h-full">
-            {/* Price Badge */}
-            <div className="absolute -top-2 -right-2 md:-top-3 md:-right-3 z-10 w-11 h-11 md:w-12 md:h-12 bg-red-600 rounded-full flex flex-col items-center justify-center text-white text-[10px] md:text-xs font-bold shadow-md transform rotate-12">
-                <span>Starts</span>
-                <span>{price}</span>
-            </div>
-
-            {/* Course Code */}
-            <div className="mb-2">
+        <div
+            onClick={onBook}
+            className="relative bg-white rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer"
+        >
+            {/* Course Code + Price */}
+            <div className="flex items-center justify-between mb-2">
                 <span className={`${colors.text} font-bold ${colors.bg} border ${colors.border} px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg text-xs md:text-sm`}>
                     {code}
                 </span>
+                <span className="text-sm md:text-base font-extrabold text-[var(--astar-red)]">{price}</span>
             </div>
 
             {/* Title & Teacher */}
@@ -95,6 +96,12 @@ const TutorialCard = ({
                     <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-900" />
                     <span>{time}</span>
                 </div>
+                {location && (
+                    <div className="flex items-center gap-2 md:gap-3 text-gray-600 text-xs md:text-sm">
+                        <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-900 flex-shrink-0" />
+                        <span className="truncate">{location}</span>
+                    </div>
+                )}
             </div>
 
             {/* Seats */}
@@ -116,12 +123,9 @@ const TutorialCard = ({
             </div>
 
             {/* CTA */}
-            <Link
-                href={`/group-tutorials/confirm-booking?id=${id}`}
-                className="block w-full py-2.5 md:py-3 rounded-xl border-2 border-slate-100 text-slate-700 text-sm md:text-base font-bold text-center hover:border-slate-300 hover:text-slate-900 hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-100"
-            >
+            <div className="block w-full py-2.5 md:py-3 rounded-xl border-2 border-slate-100 text-slate-700 text-sm md:text-base font-bold text-center hover:border-slate-300 hover:text-slate-900 hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-100">
                 Reserve Spot
-            </Link>
+            </div>
         </div>
     );
 };

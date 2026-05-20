@@ -14,10 +14,15 @@ export default function BookingNavbar() {
           height={40} 
           className="w-8 h-8 md:w-10 md:h-10 object-contain"
         />
-        <span className="text-lg md:text-xl font-bold text-[#0B1120]">Astar Tutorials</span>
+        <span className="text-lg md:text-xl font-bold text-[#0B1120]">A-Star Tutorials</span>
       </Link>
-      
-      <Link href="#" className="hidden md:block text-sm font-medium text-gray-500 hover:text-[var(--astar-red)] transition-colors">
+
+      <Link
+        href="https://api.whatsapp.com/send/?phone=2349160465678&text=Hi%20Support%2C%20I%20have%20an%20issue%3A%20&type=phone_number&app_absent=0"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hidden md:block text-sm font-medium text-gray-500 hover:text-[var(--astar-red)] transition-colors"
+      >
         Need help? <span className="text-[var(--astar-red)]">Contact Support</span>
       </Link>
     </nav>

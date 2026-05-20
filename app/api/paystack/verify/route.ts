@@ -34,11 +34,16 @@ export async function GET(req: NextRequest) {
   const tx = data.data;
   const meta = tx.metadata ?? {};
 
-  // Private tutorial payment → redirect to WhatsApp
+  // Private tutorial payment → redirect to WhatsApp with pre-filled details
   if (meta.type === "private") {
-    return NextResponse.redirect(
-      "https://api.whatsapp.com/send/?phone=2349160465678&text=Hello%2C+I+am+interested+in+requesting+a+private+tutorial.&type=phone_number&app_absent=0"
-    );
+    const name = meta.full_name ?? tx.customer?.first_name ?? "Student";
+    const phone = meta.phone ?? "";
+    const notes = meta.notes ? `\nNotes: ${meta.notes}` : "";
+
+    const message = `Hello! I just paid for a private tutorial session.\n\nName: ${name}\nPhone: ${phone}${notes}`;
+
+    const whatsappUrl = `https://api.whatsapp.com/send/?phone=2349160465678&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
+    return NextResponse.redirect(whatsappUrl);
   }
 
   // Group tutorial booking → create DB record and redirect to success page
@@ -47,8 +52,7 @@ export async function GET(req: NextRequest) {
     full_name: meta.full_name ?? tx.customer?.first_name ?? "Student",
     email: tx.customer?.email ?? "",
     phone: meta.phone ?? null,
-    course: meta.course ?? null,
-    matric_id: meta.matric_id ?? null,
+    notes: meta.notes ?? null,
     payment_status: "paid",
     payment_reference: reference,
   });

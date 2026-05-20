@@ -1,14 +1,17 @@
 'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Calendar, Clock, Eye, Loader2, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { Calendar, Clock, MapPin, ChevronLeft, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 const inputClass =
   "w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm";
 
-export default function CreateTutorialPage() {
+export default function EditTutorialPage() {
   const router = useRouter();
+  const { id } = useParams<{ id: string }>();
+
   const [form, setForm] = useState({
     code: "",
     title: "",
@@ -19,13 +22,39 @@ export default function CreateTutorialPage() {
     location: "",
     capacity: "",
     price: "",
+    status: "active",
   });
-  const [visible, setVisible] = useState(true);
+  const [loadingData, setLoadingData] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const set = (key: string, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  useEffect(() => {
+    supabase
+      .from("tutorials")
+      .select("code, title, teacher, description, date, time, location, seats_total, price, status")
+      .eq("id", id)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setForm({
+            code: data.code ?? "",
+            title: data.title ?? "",
+            teacher: data.teacher ?? "",
+            description: data.description ?? "",
+            date: data.date ?? "",
+            time: data.time ?? "",
+            location: data.location ?? "",
+            capacity: String(data.seats_total ?? ""),
+            price: String(data.price ?? ""),
+            status: data.status ?? "active",
+          });
+        }
+        setLoadingData(false);
+      });
+  }, [id]);
 
   async function handleSubmit(status: "active" | "draft") {
     setError("");
@@ -39,8 +68,8 @@ export default function CreateTutorialPage() {
     }
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/admin/tutorials", {
-        method: "POST",
+      const res = await fetch(`/api/admin/tutorials/${id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: form.code,
@@ -57,7 +86,7 @@ export default function CreateTutorialPage() {
       });
       if (!res.ok) {
         const d = await res.json();
-        setError(d.message ?? "Failed to create tutorial.");
+        setError(d.message ?? "Failed to update tutorial.");
         return;
       }
       router.push("/admin/tutorials");
@@ -68,13 +97,32 @@ export default function CreateTutorialPage() {
     }
   }
 
+  if (loadingData) {
+    return (
+      <div className="flex items-center justify-center py-24 gap-2 text-gray-400">
+        <Loader2 size={20} className="animate-spin" />
+        <span className="text-sm">Loading tutorial...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl">
+      <div className="flex items-center gap-1.5 text-sm text-gray-500 mb-6">
+        <button
+          onClick={() => router.push("/admin/tutorials")}
+          className="inline-flex items-center gap-1 hover:text-[#0B1120] transition-colors font-medium"
+        >
+          <ChevronLeft size={15} />
+          Tutorials
+        </button>
+        <span className="text-gray-300">/</span>
+        <span className="text-[#0B1120] font-medium">Edit</span>
+      </div>
+
       <div className="mb-7">
-        <h1 className="text-2xl font-bold text-[#0B1120]">Schedule Tutorial</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          Set up a new group session for students.
-        </p>
+        <h1 className="text-2xl font-bold text-[#0B1120]">Edit Tutorial</h1>
+        <p className="text-sm text-gray-500 mt-0.5">Update the details for this session.</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
@@ -135,14 +183,9 @@ export default function CreateTutorialPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-700">Date</label>
-                <div className="relative group">
-                  <Calendar
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
-                    size={15}
-                    onClick={(e) => {
-                      const input = e.currentTarget.parentElement?.querySelector("input");
-                      if (input) input.showPicker();
-                    }}
+                <div className="relative">
+                  <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" size={15}
+                    onClick={(e) => { const input = e.currentTarget.parentElement?.querySelector("input"); if (input) input.showPicker(); }}
                   />
                   <input
                     type="date"
@@ -155,14 +198,9 @@ export default function CreateTutorialPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-700">Time</label>
-                <div className="relative group">
-                  <Clock
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
-                    size={15}
-                    onClick={(e) => {
-                      const input = e.currentTarget.parentElement?.querySelector("input");
-                      if (input) input.showPicker();
-                    }}
+                <div className="relative">
+                  <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" size={15}
+                    onClick={(e) => { const input = e.currentTarget.parentElement?.querySelector("input"); if (input) input.showPicker(); }}
                   />
                   <input
                     type="time"
@@ -187,9 +225,7 @@ export default function CreateTutorialPage() {
                     className={inputClass}
                     min={1}
                   />
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-medium">
-                    students
-                  </span>
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] font-medium">students</span>
                 </div>
               </div>
               <div className="space-y-1.5">
@@ -232,28 +268,6 @@ export default function CreateTutorialPage() {
                 />
               </div>
             </div>
-
-            {/* Visibility toggle */}
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
-                  <Eye size={15} />
-                </div>
-                <div>
-                  <p className="font-bold text-[#0B1120] text-sm">Visible to students</p>
-                  <p className="text-[10px] text-gray-500">
-                    Tutorial will appear on the booking page immediately.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setVisible(!visible)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${visible ? "bg-[#0B1120]" : "bg-gray-300"}`}
-              >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${visible ? "translate-x-6" : "translate-x-1"}`} />
-              </button>
-            </div>
           </div>
         </div>
 
@@ -262,6 +276,13 @@ export default function CreateTutorialPage() {
         )}
 
         <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={() => router.push("/admin/tutorials")}
+            className="px-5 py-2.5 border border-gray-200 bg-white text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all text-sm"
+          >
+            Cancel
+          </button>
           <button
             type="button"
             onClick={() => handleSubmit("draft")}
@@ -278,7 +299,7 @@ export default function CreateTutorialPage() {
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D93025] text-white font-semibold rounded-xl shadow-sm hover:bg-red-700 transition-all text-sm disabled:opacity-60"
           >
             {isSubmitting ? <Loader2 size={15} className="animate-spin" /> : null}
-            Publish Tutorial
+            Save Changes
           </button>
         </div>
       </div>
