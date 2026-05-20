@@ -49,7 +49,16 @@ function makeParams(id: string) {
 }
 
 describe('GET /api/admin/tutorials', () => {
+  beforeEach(() => mockServerClient.mockReset());
+
+  it('returns 401 when not authenticated', async () => {
+    mockAuthClient(null);
+    const res = await GET();
+    expect(res.status).toBe(401);
+  });
+
   it('returns all tutorials including drafts', async () => {
+    mockAuthClient(ADMIN_USER);
     const tutorialData = [
       { id: '1', code: 'MTH201', title: 'Calculus', status: 'active', bookings: [] },
       { id: '2', code: 'PHY101', title: 'Physics', status: 'draft', bookings: [] },
@@ -68,6 +77,7 @@ describe('GET /api/admin/tutorials', () => {
   });
 
   it('returns 500 when Supabase errors', async () => {
+    mockAuthClient(ADMIN_USER);
     getServiceFrom().mockReturnValue({
       select: jest.fn().mockReturnValue({
         order: jest.fn().mockResolvedValue({ data: null, error: { message: 'DB failure' } }),
