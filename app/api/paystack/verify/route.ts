@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
       full_name: fullName,
       email,
       phone: meta.phone ?? null,
+      course: meta.course ?? null,
       notes: meta.notes ?? null,
       amount_paid: amountPaid,
       payment_status: "paid",
@@ -65,8 +66,9 @@ export async function GET(req: NextRequest) {
   // Private tutorial → connect student with tutor via WhatsApp, send email receipt
   if (meta.type === "private") {
     const phone = meta.phone ?? "";
+    const course = meta.course ? `\nCourse: ${meta.course}` : "";
     const notes = meta.notes ? `\nNotes: ${meta.notes}` : "";
-    const message = `Hello! I just paid for a private tutorial session.\n\nName: ${fullName}\nPhone: ${phone}${notes}`;
+    const message = `Hello! I just paid for a private tutorial session.\n\nName: ${fullName}\nPhone: ${phone}${course}${notes}`;
     const whatsappUrl = `https://api.whatsapp.com/send/?phone=2349160465678&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
 
     sendPrivateBookingReceipt({ to: email, fullName, amountPaid, reference });
