@@ -42,6 +42,11 @@ describe('POST /api/feedback', () => {
     expect(res.status).toBe(400);
   });
 
+  it('returns 400 when rating is a non-numeric string', async () => {
+    const res = await POST(makeRequest({ rating: 'abc' }));
+    expect(res.status).toBe(400);
+  });
+
   it('saves feedback and returns 201 with just a rating', async () => {
     mockInsert({ error: null });
     const res = await POST(makeRequest({ rating: 4 }));
