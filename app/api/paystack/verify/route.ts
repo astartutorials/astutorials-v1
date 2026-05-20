@@ -61,6 +61,11 @@ export async function GET(req: NextRequest) {
     if (insertError) {
       return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-failed`);
     }
+
+    // Increment seat counter for group bookings
+    if (meta.type !== "private" && meta.tutorial_id) {
+      await supabase.rpc("increment_seats_booked", { tid: meta.tutorial_id });
+    }
   }
 
   // Private tutorial → connect student with tutor via WhatsApp, send email receipt

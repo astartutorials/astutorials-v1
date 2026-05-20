@@ -22,9 +22,9 @@ type Tutorial = {
     time: string;
     location: string | null;
     seats_total: number;
+    seats_booked: number;
     price: number;
     color_scheme: string;
-    bookings: { id: string }[];
 };
 
 const containerVariants = {
@@ -47,7 +47,7 @@ export default function TutorialsPage() {
         async function load() {
             const { data } = await supabase
                 .from('tutorials')
-                .select('id, code, title, teacher, description, date, time, location, seats_total, price, color_scheme, bookings(id)')
+                .select('id, code, title, teacher, description, date, time, location, seats_total, seats_booked, price, color_scheme')
                 .eq('status', 'active')
                 .order('date', { ascending: true });
             setTutorials((data as Tutorial[]) ?? []);
@@ -69,7 +69,7 @@ export default function TutorialsPage() {
                         time: selectedTutorial.time,
                         location: selectedTutorial.location,
                         price: selectedTutorial.price,
-                        seatsLeft: selectedTutorial.seats_total - (selectedTutorial.bookings?.length ?? 0),
+                        seatsLeft: selectedTutorial.seats_total - selectedTutorial.seats_booked,
                     }}
                     onClose={() => setSelectedTutorial(null)}
                 />
@@ -118,7 +118,7 @@ export default function TutorialsPage() {
                                                 time={t.time}
                                                 location={t.location}
                                                 seatsTotal={t.seats_total}
-                                                seatsTaken={t.bookings?.length ?? 0}
+                                                seatsTaken={t.seats_booked}
                                                 price={formatPrice(t.price)}
                                                 colorScheme={t.color_scheme}
                                                 onBook={() => setSelectedTutorial(t)}

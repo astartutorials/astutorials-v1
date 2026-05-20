@@ -7,7 +7,12 @@ const supabase = createClient(
 );
 
 export async function POST(req: NextRequest) {
-  const { rating, comment } = await req.json();
+  let rating: unknown, comment: unknown;
+  try {
+    ({ rating, comment } = await req.json());
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 
   if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {
     return NextResponse.json({ error: "A rating between 1 and 5 is required" }, { status: 400 });
@@ -15,7 +20,7 @@ export async function POST(req: NextRequest) {
 
   const { error } = await supabase.from("feedback").insert({
     rating,
-    comment: comment?.trim() || null,
+    comment: typeof comment === 'string' ? comment.trim() || null : null,
   });
 
   if (error) {

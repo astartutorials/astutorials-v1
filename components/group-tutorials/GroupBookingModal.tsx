@@ -177,7 +177,7 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || tutorial.seatsLeft <= 0}
               className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-red-700 transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (

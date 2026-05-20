@@ -1,8 +1,18 @@
 import { NextRequest } from 'next/server';
-import { POST } from '@/app/api/paystack/initialize/route';
 
+const mockSingle = jest.fn().mockResolvedValue({ data: { seats_total: 30, seats_booked: 0 } });
+const mockEq = jest.fn(() => ({ single: mockSingle }));
+const mockSelect = jest.fn(() => ({ eq: mockEq }));
+jest.mock('@supabase/supabase-js', () => ({
+  createClient: jest.fn(() => ({ from: jest.fn(() => ({ select: mockSelect })) })),
+}));
+
+process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 process.env.PAYSTACK_SECRET_KEY = 'sk_test_dummy';
 process.env.NEXT_PUBLIC_BASE_URL = 'http://localhost:3000';
+
+import { POST } from '@/app/api/paystack/initialize/route';
 
 function makeRequest(body: object) {
   return new NextRequest('http://localhost:3000/api/paystack/initialize', {
@@ -15,6 +25,7 @@ function makeRequest(body: object) {
 describe('POST /api/paystack/initialize', () => {
   beforeEach(() => {
     (global.fetch as jest.Mock).mockReset();
+    mockSingle.mockReset().mockResolvedValue({ data: { seats_total: 30, seats_booked: 0 } });
   });
 
   it('returns 400 when email is missing', async () => {
@@ -56,6 +67,19 @@ describe('POST /api/paystack/initialize', () => {
     expect(body.amount).toBe(507500);
   });
 
+  it('returns 409 when the tutorial is fully booked', async () => {
+    mockSingle.mockResolvedValueOnce({ data: { seats_total: 30, seats_booked: 30 } });
+
+    const res = await POST(makeRequest({
+      email: 'test@example.com',
+      amount: 5000,
+      metadata: { tutorial_id: 'tut-1' },
+    }));
+    expect(res.status).toBe(409);
+    const data = await res.json();
+    expect(data.error).toContain('fully booked');
+  });
+
   it('returns 502 when Paystack returns an error', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: false,
@@ -64,5 +88,31 @@ describe('POST /api/paystack/initialize', () => {
 
     const res = await POST(makeRequest({ email: 'test@example.com', amount: 5000 }));
     expect(res.status).toBe(502);
+  });
+
+  it('returns 500 when PAYSTACK_SECRET_KEY is not set', async () => {
+    const saved = process.env.PAYSTACK_SECRET_KEY;
+    delete process.env.PAYSTACK_SECRET_KEY;
+
+    const res = await POST(makeRequest({ email: 'test@example.com', amount: 5000 }));
+    expect(res.status).toBe(500);
+
+    process.env.PAYSTACK_SECRET_KEY = saved;
+  });
+
+  it('allows a private booking through even when the tutorial is fully booked', async () => {
+    mockSingle.mockResolvedValueOnce({ data: { seats_total: 30, seats_booked: 30 } });
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ status: true, data: { authorization_url: 'https://paystack.com/pay/x' } }),
+    });
+
+    const res = await POST(makeRequest({
+      email: 'test@example.com',
+      amount: 5000,
+      metadata: { tutorial_id: 'tut-1', type: 'private' },
+    }));
+    expect(res.status).toBe(200);
   });
 });
