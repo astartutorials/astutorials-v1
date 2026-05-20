@@ -28,7 +28,12 @@ export default function PaymentShell({
           </Link>
           <div className="text-sm text-gray-500">
             Need help?{" "}
-            <Link href="#" className="text-[var(--astar-red)] hover:underline">
+            <Link
+              href="https://api.whatsapp.com/send/?phone=2349160465678&text=Hi%20Support%2C%20I%20have%20an%20issue%3A%20&type=phone_number&app_absent=0"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--astar-red)] hover:underline"
+            >
               Contact Support
             </Link>
           </div>

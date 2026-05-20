@@ -21,7 +21,7 @@ export default function Navbar() {
     { name: 'Home', href: '/' },
     { name: 'Tutorials', href: '/tutorials' },
     { name: 'About', href: '/#about' },
-    { name: 'Careers', href: '/careers' },
+    { name: 'Join the Team', href: '/careers' },
     { name: 'Become a Tutor', href: '/apply' },
   ];
 

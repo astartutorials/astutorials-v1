@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Search, Download, TrendingUp, Clock, XCircle, CheckCircle, Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { Search, Download, TrendingUp, Clock, XCircle, CheckCircle, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 
 type Booking = {
   id: string;
   full_name: string;
   email: string;
+  phone: string | null;
+  notes: string | null;
   payment_status: string;
   payment_reference: string | null;
   created_at: string;
@@ -51,17 +52,15 @@ export default function AdminPaymentsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "pending" | "failed">("all");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetch() {
-      const { data } = await supabase
-        .from("bookings")
-        .select("id, full_name, email, payment_status, payment_reference, created_at, tutorials(title, price)")
-        .order("created_at", { ascending: false });
-      setBookings((data as unknown as Booking[]) ?? []);
-      setLoading(false);
-    }
-    fetch();
+    fetch("/api/admin/bookings")
+      .then((r) => r.json())
+      .then((data) => {
+        setBookings(Array.isArray(data) ? data : []);
+        setLoading(false);
+      });
   }, []);
 
   const totalRevenue = bookings
@@ -76,6 +75,7 @@ export default function AdminPaymentsPage() {
     const matchSearch =
       b.full_name.toLowerCase().includes(q) ||
       b.email.toLowerCase().includes(q) ||
+      (b.phone ?? "").toLowerCase().includes(q) ||
       (b.tutorials?.title ?? "").toLowerCase().includes(q);
     const matchStatus = statusFilter === "all" || b.payment_status === statusFilter;
     return matchSearch && matchStatus;
@@ -83,13 +83,15 @@ export default function AdminPaymentsPage() {
 
   function exportCSV() {
     const csv = [
-      ["Name", "Email", "Tutorial", "Amount", "Status", "Reference", "Date"].join(","),
+      ["Name", "Email", "Phone", "Tutorial", "Amount", "Notes", "Status", "Reference", "Date"].join(","),
       ...filtered.map((b) =>
         [
-          b.full_name,
+          `"${b.full_name}"`,
           b.email,
-          b.tutorials?.title ?? "",
+          b.phone ?? "",
+          `"${b.tutorials?.title ?? ""}"`,
           b.tutorials?.price ?? 0,
+          `"${b.notes ?? ""}"`,
           b.payment_status,
           b.payment_reference ?? "",
           formatDate(b.created_at),
@@ -135,7 +137,7 @@ export default function AdminPaymentsPage() {
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input
             type="text"
-            placeholder="Search name, email, tutorial..."
+            placeholder="Search name, email, phone, tutorial..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm"
@@ -168,7 +170,8 @@ export default function AdminPaymentsPage() {
               <div className="col-span-3">Tutorial</div>
               <div className="col-span-2">Amount</div>
               <div className="col-span-2">Date</div>
-              <div className="col-span-2">Status</div>
+              <div className="col-span-1">Status</div>
+              <div className="col-span-1"></div>
             </div>
 
             {loading ? (
@@ -183,35 +186,62 @@ export default function AdminPaymentsPage() {
             ) : (
               <div className="divide-y divide-gray-50">
                 {filtered.map((b, i) => (
-                  <div key={b.id} className="grid grid-cols-12 gap-3 px-6 py-4 items-center hover:bg-gray-50/60 transition-colors">
-                    <div className="col-span-3 flex items-center gap-2.5">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${COLORS[i % COLORS.length]}`}>
-                        {initials(b.full_name)}
+                  <div key={b.id}>
+                    <div
+                      className="grid grid-cols-12 gap-3 px-6 py-4 items-center hover:bg-gray-50/60 transition-colors cursor-pointer"
+                      onClick={() => setExpandedId(expandedId === b.id ? null : b.id)}
+                    >
+                      <div className="col-span-3 flex items-center gap-2.5">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${COLORS[i % COLORS.length]}`}>
+                          {initials(b.full_name)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-[#0B1120] text-sm truncate">{b.full_name}</p>
+                          <p className="text-[10px] text-gray-400 truncate">{b.email}</p>
+                          {b.phone && <p className="text-[10px] text-gray-400 truncate">{b.phone}</p>}
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-[#0B1120] text-sm truncate">{b.full_name}</p>
-                        <p className="text-[10px] text-gray-400 truncate">{b.email}</p>
+
+                      <div className="col-span-3 text-sm text-gray-600 truncate">
+                        {b.tutorials?.title ?? "—"}
+                      </div>
+
+                      <div className="col-span-2 font-bold text-[#0B1120] text-sm">
+                        {b.tutorials?.price ? fmt(b.tutorials.price) : "—"}
+                      </div>
+
+                      <div className="col-span-2">
+                        <p className="text-sm text-gray-700">{formatDate(b.created_at)}</p>
+                        <p className="text-xs text-gray-400">{formatTime(b.created_at)}</p>
+                      </div>
+
+                      <div className="col-span-1">
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusPill(b.payment_status)}`}>
+                          {b.payment_status}
+                        </span>
+                      </div>
+
+                      <div className="col-span-1 flex justify-end text-gray-400">
+                        {expandedId === b.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </div>
                     </div>
 
-                    <div className="col-span-3 text-sm text-gray-600 truncate">
-                      {b.tutorials?.title ?? "—"}
-                    </div>
-
-                    <div className="col-span-2 font-bold text-[#0B1120] text-sm">
-                      {b.tutorials?.price ? fmt(b.tutorials.price) : "—"}
-                    </div>
-
-                    <div className="col-span-2">
-                      <p className="text-sm text-gray-700">{formatDate(b.created_at)}</p>
-                      <p className="text-xs text-gray-400">{formatTime(b.created_at)}</p>
-                    </div>
-
-                    <div className="col-span-2">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${statusPill(b.payment_status)}`}>
-                        {b.payment_status}
-                      </span>
-                    </div>
+                    {expandedId === b.id && (
+                      <div className="px-6 pb-4 bg-gray-50/50 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Phone</p>
+                          <p className="text-gray-700">{b.phone ?? "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Payment Reference</p>
+                          <p className="text-gray-700 font-mono text-xs break-all">{b.payment_reference ?? "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Notes</p>
+                          <p className="text-gray-700">{b.notes ?? "—"}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

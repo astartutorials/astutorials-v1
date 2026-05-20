@@ -16,27 +16,29 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { 
-      code, 
-      title, 
-      teacher, 
-      description, 
-      date, 
-      time, 
-      capacity, 
-      price, 
+    const {
+      code,
+      title,
+      teacher,
+      description,
+      date,
+      time,
+      location,
+      capacity,
+      price,
       colorScheme,
       status
     } = body;
 
     // Prepare update object with only provided fields
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (code !== undefined) updateData.code = code;
     if (title !== undefined) updateData.title = title;
     if (teacher !== undefined) updateData.teacher = teacher;
     if (description !== undefined) updateData.description = description;
     if (date !== undefined) updateData.date = date;
     if (time !== undefined) updateData.time = time;
+    if (location !== undefined) updateData.location = location;
     if (capacity !== undefined) updateData.seats_total = capacity;
     if (price !== undefined) updateData.price = price;
     if (colorScheme !== undefined) updateData.color_scheme = colorScheme;

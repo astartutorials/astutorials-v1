@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import TutorialCard from '@/components/group-tutorials/TutorialCard';
+import GroupBookingModal from '@/components/group-tutorials/GroupBookingModal';
 import TutorialToggle from '@/components/tutorials/TutorialToggle';
 import PricingSection from '@/components/tutorials/PricingSection';
 import FeaturesGrid from '@/components/tutorials/FeaturesGrid';
@@ -9,6 +10,7 @@ import HowItWorks from '@/components/tutorials/HowItWorks';
 import { Info, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
+import { formatDay, formatPrice } from '@/lib/format';
 
 type Tutorial = {
     id: string;
@@ -18,28 +20,12 @@ type Tutorial = {
     description: string;
     date: string | null;
     time: string;
+    location: string | null;
     seats_total: number;
     price: number;
     color_scheme: string;
     bookings: { id: string }[];
 };
-
-function formatDay(date: string | null): string {
-    if (!date) return 'Date TBD';
-    return new Date(date).toLocaleDateString('en-GB', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'short',
-    });
-}
-
-function formatPrice(price: number): string {
-    if (price >= 1000) {
-        const k = price / 1000;
-        return `₦${k % 1 === 0 ? k : k.toFixed(1)}k`;
-    }
-    return `₦${price}`;
-}
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -55,12 +41,13 @@ export default function TutorialsPage() {
     const [activeType, setActiveType] = useState<'group' | 'private'>('group');
     const [tutorials, setTutorials] = useState<Tutorial[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedTutorial, setSelectedTutorial] = useState<Tutorial | null>(null);
 
     useEffect(() => {
         async function load() {
             const { data } = await supabase
                 .from('tutorials')
-                .select('id, code, title, teacher, description, date, time, seats_total, price, color_scheme, bookings(id)')
+                .select('id, code, title, teacher, description, date, time, location, seats_total, price, color_scheme, bookings(id)')
                 .eq('status', 'active')
                 .order('date', { ascending: true });
             setTutorials((data as Tutorial[]) ?? []);
@@ -71,6 +58,22 @@ export default function TutorialsPage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-[var(--astar-bg)] font-sans selection:bg-[var(--astar-red)] selection:text-white">
+            {selectedTutorial && (
+                <GroupBookingModal
+                    tutorial={{
+                        id: selectedTutorial.id,
+                        code: selectedTutorial.code,
+                        title: selectedTutorial.title,
+                        teacher: selectedTutorial.teacher,
+                        day: formatDay(selectedTutorial.date),
+                        time: selectedTutorial.time,
+                        location: selectedTutorial.location,
+                        price: selectedTutorial.price,
+                        seatsLeft: selectedTutorial.seats_total - (selectedTutorial.bookings?.length ?? 0),
+                    }}
+                    onClose={() => setSelectedTutorial(null)}
+                />
+            )}
             <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 pt-24 md:pt-32 pb-10 md:pb-16 w-full">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -113,10 +116,12 @@ export default function TutorialsPage() {
                                                 description={t.description ?? ''}
                                                 day={formatDay(t.date)}
                                                 time={t.time}
+                                                location={t.location}
                                                 seatsTotal={t.seats_total}
                                                 seatsTaken={t.bookings?.length ?? 0}
                                                 price={formatPrice(t.price)}
                                                 colorScheme={t.color_scheme}
+                                                onBook={() => setSelectedTutorial(t)}
                                             />
                                         </motion.div>
                                     ))}
