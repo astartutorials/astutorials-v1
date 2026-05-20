@@ -34,7 +34,14 @@ export async function GET(req: NextRequest) {
   const tx = data.data;
   const meta = tx.metadata ?? {};
 
-  // Create the booking in the database
+  // Private tutorial payment → redirect to WhatsApp
+  if (meta.type === "private") {
+    return NextResponse.redirect(
+      "https://api.whatsapp.com/send/?phone=2349160465678&text=Hello%2C+I+am+interested+in+requesting+a+private+tutorial.&type=phone_number&app_absent=0"
+    );
+  }
+
+  // Group tutorial booking → create DB record and redirect to success page
   await supabase.from("bookings").insert({
     tutorial_id: meta.tutorial_id ?? null,
     full_name: meta.full_name ?? tx.customer?.first_name ?? "Student",
