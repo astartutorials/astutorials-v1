@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from "react";
-import { Star, Send, ThumbsUp } from "lucide-react";
+import { Star, Send, ThumbsUp, Loader2 } from "lucide-react";
 
 export default function FeedbackForm() {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [comment, setComment] = useState("");
 
   if (submitted) {
     return (
@@ -26,7 +29,29 @@ export default function FeedbackForm() {
         <h1 className="text-2xl font-bold text-gray-900 mb-2">How was your session?</h1>
       </div>
 
-      <form className="flex flex-col gap-8" onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}>
+      <form className="flex flex-col gap-8" onSubmit={async (e) => {
+        e.preventDefault();
+        if (!rating) { setError("Please select a rating before submitting."); return; }
+        setError(null);
+        setLoading(true);
+        try {
+          const res = await fetch("/api/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rating, comment }),
+          });
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            setError(data.error ?? "Something went wrong. Please try again.");
+          } else {
+            setSubmitted(true);
+          }
+        } catch {
+          setError("Something went wrong. Please try again.");
+        } finally {
+          setLoading(false);
+        }
+      }}>
         
         {/* Rating Section */}
         <div className="flex flex-col items-center gap-3">
@@ -60,19 +85,29 @@ export default function FeedbackForm() {
 
         {/* Comment Section */}
         <div className="space-y-3">
-          <textarea 
+          <textarea
             rows={4}
             placeholder="Share your thoughts on the session..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
             className="w-full p-4 bg-gray-50 rounded-xl focus:ring-0 focus:outline-none text-lg placeholder:text-gray-400 text-gray-800 resize-none transition-colors"
           />
         </div>
 
-        <button 
-          type="submit" 
-          className="w-full btn-primary bg-[var(--astar-red)] text-white font-bold text-lg py-4 rounded-full shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-4"
+        {error && (
+          <p className="text-sm text-red-500 text-center -mt-4">{error}</p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full btn-primary bg-[var(--astar-red)] text-white font-bold text-lg py-4 rounded-full shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0"
         >
-          Submit Feedback
-          <Send size={18} />
+          {loading ? (
+            <><Loader2 size={18} className="animate-spin" /> Submitting…</>
+          ) : (
+            <>Submit Feedback <Send size={18} /></>
+          )}
         </button>
       </form>
     </div>
