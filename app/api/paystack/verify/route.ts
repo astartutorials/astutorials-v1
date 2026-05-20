@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
     const message = `Hello! I just paid for a private tutorial session.\n\nName: ${fullName}\nPhone: ${phone}${course}${notes}`;
     const whatsappUrl = `https://api.whatsapp.com/send/?phone=2349160465678&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
 
-    sendPrivateBookingReceipt({ to: email, fullName, amountPaid, reference });
+    await sendPrivateBookingReceipt({ to: email, fullName, amountPaid, reference });
     return NextResponse.redirect(whatsappUrl);
   }
 
@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (tutorial) {
-      sendGroupBookingConfirmation({
+      await sendGroupBookingConfirmation({
         to: email,
         fullName,
         tutorialTitle: tutorial.title,
