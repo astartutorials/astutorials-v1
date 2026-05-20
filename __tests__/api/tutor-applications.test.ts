@@ -55,6 +55,23 @@ describe('POST /api/tutor-applications', () => {
     process.env.NOTION_CONNECTION_KEY = saved;
   });
 
+  it('returns 400 when fullName is missing', async () => {
+    const { fullName, ...bodyWithoutName } = validBody;
+    const res = await POST(makeRequest(bodyWithoutName));
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when email is missing', async () => {
+    const { email, ...bodyWithoutEmail } = validBody;
+    const res = await POST(makeRequest(bodyWithoutEmail));
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when email has no @ sign', async () => {
+    const res = await POST(makeRequest({ ...validBody, email: 'notanemail' }));
+    expect(res.status).toBe(400);
+  });
+
   it('returns 400 on invalid JSON body', async () => {
     const req = new NextRequest('http://localhost:3000/api/tutor-applications', {
       method: 'POST',
@@ -126,6 +143,17 @@ describe('POST /api/tutor-applications', () => {
     const res = await POST(makeRequest(validBody));
     expect(res.status).toBe(502);
     expect(mockSbInsert).not.toHaveBeenCalled();
+  });
+
+  it('returns 201 even when the Supabase mirror fails', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 'notion-page-id' }),
+    });
+    mockSbInsert.mockResolvedValue({ error: { message: 'DB unavailable' } });
+
+    const res = await POST(makeRequest(validBody));
+    expect(res.status).toBe(201);
   });
 
   it('stores null for optional cv_link when not provided', async () => {

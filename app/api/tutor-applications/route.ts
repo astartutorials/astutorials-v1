@@ -50,6 +50,13 @@ export async function POST(req: NextRequest) {
     linkedinPortfolio,
   } = body as Record<string, unknown>;
 
+  if (!fullName || !String(fullName).trim()) {
+    return NextResponse.json({ error: "Full name is required" }, { status: 400 });
+  }
+  if (!email || !String(email).includes("@")) {
+    return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
+  }
+
   const properties: Record<string, unknown> = {
     "Full Name": { title: richText(String(fullName ?? "")) },
     "Email": { email: String(email ?? "") },

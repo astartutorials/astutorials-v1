@@ -9,7 +9,7 @@ const supabase = createClient(
 export async function POST(req: NextRequest) {
   const { rating, comment } = await req.json();
 
-  if (!rating || rating < 1 || rating > 5) {
+  if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {
     return NextResponse.json({ error: "A rating between 1 and 5 is required" }, { status: 400 });
   }
 

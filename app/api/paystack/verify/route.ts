@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Group tutorial booking → create DB record and redirect to success page
-  await supabase.from("bookings").insert({
+  const { error: insertError } = await supabase.from("bookings").insert({
     tutorial_id: meta.tutorial_id ?? null,
     full_name: meta.full_name ?? tx.customer?.first_name ?? "Student",
     email: tx.customer?.email ?? "",
@@ -56,6 +56,10 @@ export async function GET(req: NextRequest) {
     payment_status: "paid",
     payment_reference: reference,
   });
+
+  if (insertError) {
+    return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-failed`);
+  }
 
   return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-success?ref=${reference}`);
 }

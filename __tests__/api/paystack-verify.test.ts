@@ -148,5 +148,14 @@ describe('GET /api/paystack/verify', () => {
       const location = res.headers.get('location')!;
       expect(location).toContain('ref=ref_abc123');
     });
+
+    it('redirects to booking-failed when DB insert fails', async () => {
+      mockPaystackSuccess({ tutorial_id: 'tut-1', full_name: 'Ada', phone: '080' });
+      mockInsert.mockResolvedValueOnce({ error: { message: 'DB write error' } });
+
+      const res = await GET(makeRequest('ref_db_fail'));
+      expect(res.status).toBe(307);
+      expect(res.headers.get('location')).toContain('booking-failed');
+    });
   });
 });
