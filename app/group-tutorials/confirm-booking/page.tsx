@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
@@ -21,7 +21,7 @@ export type Tutorial = {
   price: number;
 };
 
-export default function ConfirmBookingPage() {
+function ConfirmBookingContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = searchParams.get("id");
@@ -97,5 +97,18 @@ export default function ConfirmBookingPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function ConfirmBookingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[var(--astar-bg)] flex items-center justify-center gap-2 text-gray-400">
+        <Loader2 className="animate-spin" size={20} />
+        <span className="text-sm">Loading tutorial details...</span>
+      </div>
+    }>
+      <ConfirmBookingContent />
+    </Suspense>
   );
 }
