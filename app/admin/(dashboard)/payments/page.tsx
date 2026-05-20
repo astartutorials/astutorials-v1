@@ -9,6 +9,7 @@ type Booking = {
   email: string;
   phone: string | null;
   notes: string | null;
+  amount_paid: number | null;
   payment_status: string;
   payment_reference: string | null;
   created_at: string;
@@ -65,7 +66,7 @@ export default function AdminPaymentsPage() {
 
   const totalRevenue = bookings
     .filter((b) => b.payment_status === "paid")
-    .reduce((s, b) => s + (b.tutorials?.price ?? 0), 0);
+    .reduce((s, b) => s + (b.amount_paid ?? b.tutorials?.price ?? 0), 0);
   const pending = bookings.filter((b) => b.payment_status === "pending").length;
   const completed = bookings.filter((b) => b.payment_status === "paid").length;
   const failed = bookings.filter((b) => b.payment_status === "failed").length;
@@ -203,11 +204,11 @@ export default function AdminPaymentsPage() {
                       </div>
 
                       <div className="col-span-3 text-sm text-gray-600 truncate">
-                        {b.tutorials?.title ?? "—"}
+                        {b.tutorials?.title ?? <span className="italic text-gray-400">Private Session</span>}
                       </div>
 
                       <div className="col-span-2 font-bold text-[#0B1120] text-sm">
-                        {b.tutorials?.price ? fmt(b.tutorials.price) : "—"}
+                        {b.amount_paid != null ? fmt(b.amount_paid) : b.tutorials?.price ? fmt(b.tutorials.price) : "—"}
                       </div>
 
                       <div className="col-span-2">

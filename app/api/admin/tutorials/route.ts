@@ -8,6 +8,12 @@ const serviceSupabase = createClient(
 );
 
 export async function GET() {
+  const authClient = await createSupabaseServerClient();
+  const { data: { user }, error: authError } = await authClient.auth.getUser();
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { data, error } = await serviceSupabase
     .from('tutorials')
     .select('id, code, title, teacher, date, time, seats_total, status, location, bookings(id)')

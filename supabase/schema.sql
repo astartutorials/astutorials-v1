@@ -24,10 +24,10 @@ CREATE TABLE public.bookings (
     full_name TEXT NOT NULL,
     email TEXT NOT NULL,
     phone TEXT,
-    course TEXT,
-    matric_id TEXT,
+    notes TEXT,
+    amount_paid INTEGER,
     payment_status TEXT DEFAULT 'pending', -- pending, paid, failed
-    payment_reference TEXT,
+    payment_reference TEXT UNIQUE,
     attended BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT now()
 );

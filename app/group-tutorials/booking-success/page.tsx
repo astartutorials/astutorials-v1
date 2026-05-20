@@ -12,7 +12,7 @@ export default function BookingSuccessPage() {
         </div>
         <h1 className="text-2xl font-bold text-[#0B1120] mb-3">Booking Confirmed!</h1>
         <p className="text-gray-500 text-sm leading-relaxed mb-8">
-          Your spot has been reserved and payment received. We'll send a confirmation to your email shortly.
+          Your spot has been reserved and payment received. Keep your payment reference as proof of booking.
         </p>
         <Link
           href="/tutorials"
