@@ -60,7 +60,7 @@ export default function AdminFeedbackPage() {
         .from("feedback")
         .select("id, full_name, email, rating, comment, created_at, tutorials(title)")
         .order("created_at", { ascending: false });
-      setFeedback((data as Feedback[]) ?? []);
+      setFeedback((data as unknown as Feedback[]) ?? []);
       setLoading(false);
     }
     load();

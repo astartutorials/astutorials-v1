@@ -58,7 +58,7 @@ export default function AdminPaymentsPage() {
         .from("bookings")
         .select("id, full_name, email, payment_status, payment_reference, created_at, tutorials(title, price)")
         .order("created_at", { ascending: false });
-      setBookings((data as Booking[]) ?? []);
+      setBookings((data as unknown as Booking[]) ?? []);
       setLoading(false);
     }
     fetch();
