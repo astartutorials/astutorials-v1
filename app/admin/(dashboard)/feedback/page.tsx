@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Search, Star, MessageCircle, Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 
 type Feedback = {
   id: string;
@@ -56,11 +55,8 @@ export default function AdminFeedbackPage() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase
-        .from("feedback")
-        .select("id, full_name, email, rating, comment, created_at, tutorials(title)")
-        .order("created_at", { ascending: false });
-      setFeedback((data as unknown as Feedback[]) ?? []);
+      const data = await fetch("/api/admin/feedback").then((r) => r.json());
+      setFeedback(Array.isArray(data) ? data : []);
       setLoading(false);
     }
     load();

@@ -92,7 +92,7 @@ export default function AdminPaymentsPage() {
           b.email,
           b.phone ?? "",
           `"${b.tutorials?.title ?? ""}"`,
-          b.tutorials?.price ?? 0,
+          b.amount_paid ?? b.tutorials?.price ?? 0,
           `"${b.notes ?? ""}"`,
           b.payment_status,
           b.payment_reference ?? "",

@@ -87,5 +87,7 @@ describe('GET /api/admin/bookings', () => {
     const selectArg: string = mockSelect.mock.calls[0][0];
     expect(selectArg).toContain('phone');
     expect(selectArg).toContain('notes');
+    expect(selectArg).toContain('course');
+    expect(selectArg).toContain('amount_paid');
   });
 });

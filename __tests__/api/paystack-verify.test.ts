@@ -6,9 +6,11 @@ const mockMaybeSingle = jest.fn().mockResolvedValue({ data: null }); // no exist
 const mockSingle = jest.fn().mockResolvedValue({ data: null });       // tutorial lookup for email
 const mockEq = jest.fn(() => ({ maybeSingle: mockMaybeSingle, single: mockSingle }));
 const mockSelectChain = jest.fn(() => ({ eq: mockEq }));
+const mockRpc = jest.fn().mockResolvedValue({ error: null });
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     from: jest.fn(() => ({ insert: mockInsert, select: mockSelectChain })),
+    rpc: (...args: any[]) => mockRpc(...args),
   })),
 }));
 
@@ -57,12 +59,24 @@ describe('GET /api/paystack/verify', () => {
     mockSingle.mockReset().mockResolvedValue({ data: null });
     mockEq.mockClear();
     mockSelectChain.mockClear();
+    mockRpc.mockClear();
   });
 
   it('redirects to /tutorials when no reference is provided', async () => {
     const res = await GET(makeRequest());
     expect(res.status).toBe(307);
     expect(res.headers.get('location')).toBe('http://localhost:3000/tutorials');
+  });
+
+  it('redirects to /tutorials when PAYSTACK_SECRET_KEY is not set', async () => {
+    const saved = process.env.PAYSTACK_SECRET_KEY;
+    delete process.env.PAYSTACK_SECRET_KEY;
+
+    const res = await GET(makeRequest('ref_no_secret'));
+    expect(res.status).toBe(307);
+    expect(res.headers.get('location')).toBe('http://localhost:3000/tutorials');
+
+    process.env.PAYSTACK_SECRET_KEY = saved;
   });
 
   it('redirects to booking-failed when Paystack payment status is not success', async () => {
@@ -116,6 +130,19 @@ describe('GET /api/paystack/verify', () => {
       const res = await GET(makeRequest('ref_private_notes'));
       const location = decodeURIComponent(res.headers.get('location')!);
       expect(location).toContain('Need help with integration');
+    });
+
+    it('includes course in the WhatsApp message when provided', async () => {
+      mockPaystackSuccess({
+        type: 'private',
+        full_name: 'Test Student',
+        phone: '08000000000',
+        course: 'MTH201 Calculus',
+      });
+
+      const res = await GET(makeRequest('ref_private_course'));
+      const location = decodeURIComponent(res.headers.get('location')!);
+      expect(location).toContain('MTH201 Calculus');
     });
 
     it('inserts a booking row with null tutorial_id', async () => {
@@ -196,6 +223,19 @@ describe('GET /api/paystack/verify', () => {
           amountPaid: 5075,
         })
       );
+    });
+
+    it('increments seats_booked after a successful insert', async () => {
+      mockPaystackSuccess({ tutorial_id: 'tut-1', full_name: 'Ada' });
+      await GET(makeRequest('ref_seats'));
+      expect(mockRpc).toHaveBeenCalledWith('increment_seats_booked', { tid: 'tut-1' });
+    });
+
+    it('does not increment seats_booked when booking already exists', async () => {
+      mockPaystackSuccess({ tutorial_id: 'tut-1', full_name: 'Ada' });
+      mockMaybeSingle.mockResolvedValueOnce({ data: { id: 'existing' } });
+      await GET(makeRequest('ref_dup_seats'));
+      expect(mockRpc).not.toHaveBeenCalled();
     });
 
     it('skips insert and still redirects to booking-success when booking already exists', async () => {

@@ -34,13 +34,16 @@ const TutorialCard = ({
     onBook,
 }: TutorialCardProps) => {
     const seatsLeft = seatsTotal - seatsTaken;
-    const percentageTaken = (seatsTaken / seatsTotal) * 100;
-
+    const fullyBooked = seatsLeft <= 0;
+    const percentageTaken = Math.min((seatsTaken / seatsTotal) * 100, 100);
 
     let statusText = "SEATS REMAINING";
     let statusColor = "text-gray-500";
 
-    if (percentageTaken >= 90) {
+    if (fullyBooked) {
+        statusText = "FULLY BOOKED";
+        statusColor = "text-red-700";
+    } else if (percentageTaken >= 90) {
         statusText = "ALMOST FULL";
         statusColor = "text-red-600";
     } else if (percentageTaken >= 75) {
@@ -66,8 +69,8 @@ const TutorialCard = ({
 
     return (
         <div
-            onClick={onBook}
-            className="relative bg-white rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer"
+            onClick={fullyBooked ? undefined : onBook}
+            className={`relative bg-white rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-gray-100 flex flex-col h-full transition-shadow ${fullyBooked ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-md cursor-pointer'}`}
         >
             {/* Course Code + Price */}
             <div className="flex items-center justify-between mb-2">
@@ -123,8 +126,8 @@ const TutorialCard = ({
             </div>
 
             {/* CTA */}
-            <div className="block w-full py-2.5 md:py-3 rounded-xl border-2 border-slate-100 text-slate-700 text-sm md:text-base font-bold text-center hover:border-slate-300 hover:text-slate-900 hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-100">
-                Reserve Spot
+            <div className={`block w-full py-2.5 md:py-3 rounded-xl border-2 text-sm md:text-base font-bold text-center transition-all duration-300 ${fullyBooked ? 'border-gray-200 text-gray-400 bg-gray-50' : 'border-slate-100 text-slate-700 hover:border-slate-300 hover:text-slate-900 hover:shadow-lg hover:scale-105 active:scale-100'}`}>
+                {fullyBooked ? 'Fully Booked' : 'Reserve Spot'}
             </div>
         </div>
     );

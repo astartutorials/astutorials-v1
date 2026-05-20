@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(req: NextRequest) {
   const { email, amount, metadata } = await req.json();
@@ -10,6 +16,19 @@ export async function POST(req: NextRequest) {
   const secret = process.env.PAYSTACK_SECRET_KEY;
   if (!secret) {
     return NextResponse.json({ error: "Payment service not configured" }, { status: 500 });
+  }
+
+  // For group bookings, refuse payment if the tutorial is already full
+  if (metadata?.tutorial_id && metadata?.type !== "private") {
+    const { data: tutorial } = await supabase
+      .from("tutorials")
+      .select("seats_total, seats_booked")
+      .eq("id", metadata.tutorial_id)
+      .single();
+
+    if (tutorial && tutorial.seats_booked >= tutorial.seats_total) {
+      return NextResponse.json({ error: "This tutorial is fully booked." }, { status: 409 });
+    }
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";

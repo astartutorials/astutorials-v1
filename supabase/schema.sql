@@ -10,6 +10,7 @@ CREATE TABLE public.tutorials (
     date DATE,
     time TEXT NOT NULL,
     seats_total INTEGER NOT NULL DEFAULT 30,
+    seats_booked INTEGER NOT NULL DEFAULT 0,
     price INTEGER DEFAULT 1000,
     color_scheme TEXT DEFAULT (ARRAY['blue', 'green', 'pink', 'orange', 'purple', 'yellow', 'indigo', 'teal', 'red', 'cyan'])[floor(random() * 10 + 1)],
     status TEXT DEFAULT 'active', -- active, draft, completed
@@ -59,6 +60,12 @@ CREATE TABLE public.feedback (
     comment TEXT,
     created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Atomically increment seats_booked (called from the verify route)
+CREATE OR REPLACE FUNCTION increment_seats_booked(tid UUID)
+RETURNS void LANGUAGE sql SECURITY DEFINER AS $$
+  UPDATE tutorials SET seats_booked = seats_booked + 1 WHERE id = tid;
+$$;
 
 -- Basic Row Level Security (RLS)
 ALTER TABLE public.tutorials ENABLE ROW LEVEL SECURITY;

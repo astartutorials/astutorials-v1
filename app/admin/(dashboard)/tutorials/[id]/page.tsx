@@ -62,20 +62,16 @@ export default function TutorialAttendancePage() {
 
   useEffect(() => {
     async function load() {
-      const [{ data: tut }, { data: bks }] = await Promise.all([
+      const [{ data: tut }, bksRes] = await Promise.all([
         supabase
           .from("tutorials")
           .select("id, code, title, date, time, seats_total")
           .eq("id", id)
           .single(),
-        supabase
-          .from("bookings")
-          .select("id, full_name, email, phone, payment_status, attended, created_at")
-          .eq("tutorial_id", id)
-          .order("created_at", { ascending: false }),
+        fetch(`/api/admin/tutorials/${id}/bookings`).then((r) => r.json()),
       ]);
       setTutorial(tut);
-      setBookings(bks ?? []);
+      setBookings(Array.isArray(bksRes) ? bksRes : []);
       setLoading(false);
     }
     load();
@@ -83,10 +79,11 @@ export default function TutorialAttendancePage() {
 
   async function toggleAttendance(bookingId: string, current: boolean) {
     setTogglingId(bookingId);
-    await supabase
-      .from("bookings")
-      .update({ attended: !current })
-      .eq("id", bookingId);
+    await fetch(`/api/admin/bookings/${bookingId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ attended: !current }),
+    });
     setBookings((prev) =>
       prev.map((b) => (b.id === bookingId ? { ...b, attended: !current } : b))
     );

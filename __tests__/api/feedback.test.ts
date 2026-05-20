@@ -27,6 +27,16 @@ function makeRequest(body: object) {
 }
 
 describe('POST /api/feedback', () => {
+  it('returns 400 on invalid JSON body', async () => {
+    const req = new NextRequest('http://localhost:3000/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'not json',
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+  });
+
   it('returns 400 when rating is missing', async () => {
     const res = await POST(makeRequest({ comment: 'great' }));
     expect(res.status).toBe(400);
