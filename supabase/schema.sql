@@ -24,6 +24,7 @@ CREATE TABLE public.bookings (
     full_name TEXT NOT NULL,
     email TEXT NOT NULL,
     phone TEXT,
+    course TEXT,
     notes TEXT,
     amount_paid INTEGER,
     payment_status TEXT DEFAULT 'pending', -- pending, paid, failed

@@ -8,6 +8,7 @@ type Booking = {
   full_name: string;
   email: string;
   phone: string | null;
+  course: string | null;
   notes: string | null;
   amount_paid: number | null;
   payment_status: string;
@@ -228,10 +229,14 @@ export default function AdminPaymentsPage() {
                     </div>
 
                     {expandedId === b.id && (
-                      <div className="px-6 pb-4 bg-gray-50/50 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                      <div className="px-6 pb-4 bg-gray-50/50 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-4 gap-4 text-sm">
                         <div>
                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Phone</p>
                           <p className="text-gray-700">{b.phone ?? "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Course</p>
+                          <p className="text-gray-700">{b.course ?? "—"}</p>
                         </div>
                         <div>
                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Payment Reference</p>
