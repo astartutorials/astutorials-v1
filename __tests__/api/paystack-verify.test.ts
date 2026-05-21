@@ -14,6 +14,10 @@ jest.mock('@supabase/supabase-js', () => ({
   })),
 }));
 
+jest.mock('@/lib/posthog-server', () => ({
+  getPostHogClient: jest.fn(() => ({ capture: jest.fn(), identify: jest.fn(), shutdown: jest.fn() })),
+}));
+
 // Mock email helpers — they should never make real network calls in tests
 jest.mock('@/lib/email', () => ({
   sendGroupBookingConfirmation: jest.fn(),

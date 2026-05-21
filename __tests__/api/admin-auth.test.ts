@@ -2,6 +2,10 @@ jest.mock('@/lib/supabase-server', () => ({
   createSupabaseServerClient: jest.fn(),
 }));
 
+jest.mock('@/lib/posthog-server', () => ({
+  getPostHogClient: jest.fn(() => ({ capture: jest.fn(), identify: jest.fn(), shutdown: jest.fn() })),
+}));
+
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { POST as login } from '@/app/api/auth/admin/login/route';
 import { POST as logout } from '@/app/api/auth/admin/logout/route';

@@ -54,6 +54,8 @@ Administrators can:
 | Payments | Paystack |
 | Email | Resend (REST API — no package, plain `fetch`) |
 | Tutor CRM | Notion API (mirrored to Supabase) |
+| Analytics | PostHog (pageviews, funnels, session replay, event capture) |
+| Performance | Vercel Speed Insights (Core Web Vitals) |
 | Testing | Jest 30 + `next/jest` transformer |
 | CI | GitHub Actions |
 | Icons | Lucide React |
@@ -142,8 +144,10 @@ lib/
   validate.ts                     — validateBookingForm() — pure, tested
   supabase-server.ts              — createSupabaseServerClient() for SSR (cookie-based)
   supabase.ts                     — browser Supabase client (anon key — only for public tables)
+  posthog-server.ts               — getPostHogClient() singleton for server-side event capture
   utils.ts                        — cn() Tailwind class merger
 
+instrumentation-client.ts         — PostHog browser init (pageviews, session replay, exception capture)
 middleware.ts                     — Protects all /admin/* routes (reads session from cookie)
 supabase/schema.sql               — Full Postgres schema + RLS policies
 ```
@@ -188,6 +192,10 @@ NOTION_CONNECTION_KEY=secret_...
 
 # App URL (used in payment redirects)
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
+
+# PostHog (analytics)
+NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=phc_...
+NEXT_PUBLIC_POSTHOG_HOST=https://us.posthog.com
 ```
 
 > **Security:** `SUPABASE_SERVICE_ROLE_KEY` bypasses Row Level Security. Only use it in server-side API routes — never import it in client components or `lib/supabase.ts`.
@@ -331,6 +339,19 @@ Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All e
 | `lib/validate.test.ts` | `validateBookingForm` — valid, missing fields, invalid email, whitespace |
 
 **CI:** GitHub Actions runs `npm test -- --ci` on every push and pull request to `main`. See `.github/workflows/ci.yml`.
+
+---
+
+## Analytics & Performance
+
+**PostHog** is integrated for both client and server-side analytics:
+
+- `instrumentation-client.ts` — initialises PostHog in the browser on every page load. Captures pageviews, navigation, session replays, and JS exceptions automatically.
+- `lib/posthog-server.ts` — exports `getPostHogClient()`, a singleton PostHog Node client used in API routes to capture server-side events (payments verified, bookings created, applications submitted, etc.).
+
+Key events captured across the app: booking initiated, payment verified, tutor application submitted, feedback submitted, job application submitted.
+
+**Vercel Speed Insights** is mounted in `app/layout.tsx` via `<SpeedInsights />` and reports Core Web Vitals (LCP, CLS, FID) to the Vercel dashboard automatically — no configuration needed.
 
 ---
 
