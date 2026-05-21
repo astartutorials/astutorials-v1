@@ -1,12 +1,20 @@
 import { NextRequest } from 'next/server';
 
+const mockFrom = jest.fn();
+jest.mock('@supabase/supabase-js', () => ({
+  createClient: jest.fn(() => ({ from: (...args: any[]) => mockFrom(...args) })),
+}));
+
 jest.mock('@/lib/supabase-server', () => ({
   createSupabaseServerClient: jest.fn(),
 }));
 
+process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
+
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { GET as getPublicCareers } from '@/app/api/careers/route';
-import { POST as createCareer } from '@/app/api/admin/careers/route';
+import { GET as getAdminCareers, POST as createCareer } from '@/app/api/admin/careers/route';
 import { PUT as updateCareer, DELETE as deleteCareer } from '@/app/api/admin/careers/[id]/route';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
@@ -164,14 +172,58 @@ describe('DELETE /api/admin/careers/[id]', () => {
   });
 
   it('deletes a career and returns 200', async () => {
-    const mockFrom = jest.fn().mockReturnValue({
+    const deleteFrom = jest.fn().mockReturnValue({
       delete: jest.fn().mockReturnValue({
         eq: jest.fn().mockResolvedValue({ error: null }),
       }),
     });
-    mockClient(ADMIN_USER, mockFrom);
+    mockClient(ADMIN_USER, deleteFrom);
 
     const res = await deleteCareer(makeRequest('DELETE', undefined, 'c1'), makeParams('c1'));
     expect(res.status).toBe(200);
+  });
+});
+
+describe('GET /api/admin/careers', () => {
+  beforeEach(() => {
+    mockServerClient.mockReset();
+    mockFrom.mockReset();
+  });
+
+  it('returns 401 when not authenticated', async () => {
+    mockClient(null);
+    const res = await getAdminCareers();
+    expect(res.status).toBe(401);
+  });
+
+  it('returns all careers regardless of status', async () => {
+    mockClient(ADMIN_USER);
+    const rows = [
+      { id: 'c1', job_id: '#ENG-123', title: 'Engineer', category: 'Engineering', type: 'Full-time', location: 'Remote', status: 'active', created_at: '2025-01-01T00:00:00Z' },
+      { id: 'c2', job_id: '#MKT-456', title: 'Marketer', category: 'Marketing', type: 'Part-time', location: 'Hybrid', status: 'draft', created_at: '2025-01-02T00:00:00Z' },
+    ];
+    mockFrom.mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        order: jest.fn().mockResolvedValue({ data: rows, error: null }),
+      }),
+    });
+
+    const res = await getAdminCareers();
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data).toHaveLength(2);
+    expect(data.find((c: any) => c.status === 'draft')).toBeDefined();
+  });
+
+  it('returns 500 when Supabase errors', async () => {
+    mockClient(ADMIN_USER);
+    mockFrom.mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        order: jest.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } }),
+      }),
+    });
+
+    const res = await getAdminCareers();
+    expect(res.status).toBe(500);
   });
 });
