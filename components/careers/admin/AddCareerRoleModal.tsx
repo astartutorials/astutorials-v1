@@ -2,34 +2,75 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Link as LinkIcon, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+export type CareerFull = {
+  id: string;
+  job_id: string | null;
+  title: string;
+  category: string;
+  type: string;
+  location: string;
+  status: string;
+  created_at: string;
+  description?: string | null;
+  responsibilities?: string | null;
+  requirements?: string | null;
+  application_link?: string | null;
+};
 
 interface AddCareerRoleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated?: () => void;
+  editJob?: CareerFull;
 }
 
 const inputClass =
   "w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-gray-800 bg-white text-sm";
 
+const EMPTY_FORM = {
+  roleTitle: "",
+  department: "",
+  jobType: "Full-time",
+  location: "",
+  description: "",
+  responsibilities: "",
+  requirements: "",
+  applicationLink: "",
+  status: "active",
+};
+
 export default function AddCareerRoleModal({
   isOpen,
   onClose,
   onCreated,
+  editJob,
 }: AddCareerRoleModalProps) {
-  const [formData, setFormData] = useState({
-    roleTitle: "",
-    department: "",
-    jobType: "Full-time",
-    location: "",
-    description: "",
-    responsibilities: "",
-    requirements: "",
-    applicationLink: "",
-  });
+  const isEditing = !!editJob;
+
+  const [formData, setFormData] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (editJob) {
+      setFormData({
+        roleTitle: editJob.title,
+        department: editJob.category,
+        jobType: editJob.type,
+        location: editJob.location,
+        description: editJob.description ?? "",
+        responsibilities: editJob.responsibilities ?? "",
+        requirements: editJob.requirements ?? "",
+        applicationLink: editJob.application_link ?? "",
+        status: editJob.status,
+      });
+    } else {
+      setFormData(EMPTY_FORM);
+    }
+    setError("");
+  }, [editJob, isOpen]);
 
   const set = (key: string, value: string) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -39,17 +80,22 @@ export default function AddCareerRoleModal({
     setIsSubmitting(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/careers", {
-        method: "POST",
+      const url = isEditing
+        ? `/api/admin/careers/${editJob!.id}`
+        : "/api/admin/careers";
+      const method = isEditing ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       if (!res.ok) {
         const d = await res.json();
-        setError(d.message ?? "Failed to create role.");
+        setError(d.message ?? "Failed to save role.");
         return;
       }
-      setFormData({ roleTitle: "", department: "", jobType: "Full-time", location: "", description: "", responsibilities: "", requirements: "", applicationLink: "" });
+      setFormData(EMPTY_FORM);
       onCreated ? onCreated() : onClose();
     } catch {
       setError("An unexpected error occurred.");
@@ -62,7 +108,6 @@ export default function AddCareerRoleModal({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -71,8 +116,7 @@ export default function AddCareerRoleModal({
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
 
-          {/* Modal */}
-          <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="fixed inset-0 z-50 overflow-y-auto" onClick={onClose}>
             <div className="min-h-full flex items-center justify-center p-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 16 }}
@@ -85,9 +129,13 @@ export default function AddCareerRoleModal({
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
                   <div>
-                    <h2 className="text-lg font-bold text-gray-900">Add New Role</h2>
+                    <h2 className="text-lg font-bold text-gray-900">
+                      {isEditing ? "Edit Role" : "Add New Role"}
+                    </h2>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      Create a new job listing visible on the careers page.
+                      {isEditing
+                        ? "Update the details for this job listing."
+                        : "Create a new job listing visible on the careers page."}
                     </p>
                   </div>
                   <button
@@ -103,9 +151,7 @@ export default function AddCareerRoleModal({
                 <form onSubmit={handleSubmit} className="px-6 py-6 space-y-5">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-700">
-                        Role Title
-                      </label>
+                      <label className="text-xs font-bold text-gray-700">Role Title</label>
                       <input
                         type="text"
                         value={formData.roleTitle}
@@ -117,9 +163,7 @@ export default function AddCareerRoleModal({
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-700">
-                        Department
-                      </label>
+                      <label className="text-xs font-bold text-gray-700">Department</label>
                       <input
                         type="text"
                         value={formData.department}
@@ -131,9 +175,7 @@ export default function AddCareerRoleModal({
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-700">
-                        Job Type
-                      </label>
+                      <label className="text-xs font-bold text-gray-700">Job Type</label>
                       <select
                         value={formData.jobType}
                         onChange={(e) => set("jobType", e.target.value)}
@@ -148,9 +190,7 @@ export default function AddCareerRoleModal({
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-700">
-                        Location
-                      </label>
+                      <label className="text-xs font-bold text-gray-700">Location</label>
                       <input
                         type="text"
                         value={formData.location}
@@ -163,9 +203,19 @@ export default function AddCareerRoleModal({
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700">
-                      About Role
-                    </label>
+                    <label className="text-xs font-bold text-gray-700">Status</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => set("status", e.target.value)}
+                      className={`${inputClass} appearance-none cursor-pointer`}
+                    >
+                      <option value="active">Active — visible on careers page</option>
+                      <option value="draft">Draft — hidden from public</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-700">About Role</label>
                     <textarea
                       value={formData.description}
                       onChange={(e) => set("description", e.target.value)}
@@ -177,9 +227,7 @@ export default function AddCareerRoleModal({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-700">
-                        Key Responsibilities
-                      </label>
+                      <label className="text-xs font-bold text-gray-700">Key Responsibilities</label>
                       <textarea
                         value={formData.responsibilities}
                         onChange={(e) => set("responsibilities", e.target.value)}
@@ -190,9 +238,7 @@ export default function AddCareerRoleModal({
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-700">
-                        Requirements
-                      </label>
+                      <label className="text-xs font-bold text-gray-700">Requirements</label>
                       <textarea
                         value={formData.requirements}
                         onChange={(e) => set("requirements", e.target.value)}
@@ -211,10 +257,7 @@ export default function AddCareerRoleModal({
                       </span>
                     </label>
                     <div className="relative">
-                      <LinkIcon
-                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
-                        size={15}
-                      />
+                      <LinkIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
                       <input
                         type="url"
                         value={formData.applicationLink}
@@ -226,10 +269,10 @@ export default function AddCareerRoleModal({
                     </div>
                   </div>
 
-                  {/* Footer */}
                   {error && (
                     <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{error}</p>
                   )}
+
                   <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
                     <button
                       type="button"
@@ -243,7 +286,13 @@ export default function AddCareerRoleModal({
                       disabled={isSubmitting}
                       className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D93025] text-white font-semibold rounded-xl shadow-sm hover:bg-red-700 transition-all text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      {isSubmitting ? <><Loader2 size={15} className="animate-spin" /> Publishing...</> : "Publish Role"}
+                      {isSubmitting ? (
+                        <><Loader2 size={15} className="animate-spin" /> Saving...</>
+                      ) : isEditing ? (
+                        "Save Changes"
+                      ) : (
+                        "Publish Role"
+                      )}
                     </button>
                   </div>
                 </form>

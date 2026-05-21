@@ -16,7 +16,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('careers')
-    .select('id, job_id, title, category, type, location, status, created_at')
+    .select('id, job_id, title, category, type, location, status, created_at, description, responsibilities, requirements, application_link')
     .order('created_at', { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
