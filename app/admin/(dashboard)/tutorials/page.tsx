@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, PlusCircle, Eye, Pencil, Trash2, GraduationCap, Loader2 } from "lucide-react";
+import { Search, PlusCircle, Eye, Pencil, Trash2, GraduationCap, Loader2, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 
 type Tutorial = {
   id: string;
@@ -40,6 +40,14 @@ function formatDate(d: string | null) {
   });
 }
 
+type SortDir = 'asc' | 'desc';
+type TutorialSortKey = 'code' | 'teacher' | 'date' | 'booked' | 'status';
+
+function SortIcon({ field, sortKey, sortDir }: { field: string; sortKey: string; sortDir: SortDir }) {
+  if (sortKey !== field) return <ChevronsUpDown size={12} className="opacity-40" />;
+  return sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />;
+}
+
 export default function AdminTutorialsPage() {
   const router = useRouter();
   const [tutorials, setTutorials] = useState<Tutorial[]>([]);
@@ -47,6 +55,17 @@ export default function AdminTutorialsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<TutorialSortKey>('date');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  function handleSort(key: TutorialSortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
 
   useEffect(() => {
     fetchTutorials();
@@ -77,6 +96,22 @@ export default function AdminTutorialsPage() {
     const matchStatus =
       statusFilter === "all" || t.status === statusFilter;
     return matchSearch && matchStatus;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    if (sortKey === 'booked') {
+      return ((a.bookings?.length ?? 0) - (b.bookings?.length ?? 0)) * dir;
+    }
+    if (sortKey === 'date') {
+      if (!a.date && !b.date) return 0;
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) * dir;
+    }
+    const av = (a[sortKey as keyof Tutorial] as string) ?? '';
+    const bv = (b[sortKey as keyof Tutorial] as string) ?? '';
+    return av.localeCompare(bv) * dir;
   });
 
   const scheduled = tutorials.filter((t) => t.status === "active").length;
@@ -154,11 +189,20 @@ export default function AdminTutorialsPage() {
         <div className="overflow-x-auto">
           <div className="min-w-[760px]">
             <div className="grid grid-cols-12 gap-3 px-6 py-3 bg-gray-50 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-              <div className="col-span-3">Course / Title</div>
-              <div className="col-span-2">Tutor</div>
-              <div className="col-span-2">Date</div>
-              <div className="col-span-2">Seats</div>
-              <div className="col-span-1">Status</div>
+              {(['code', 'teacher', 'date', 'booked', 'status'] as TutorialSortKey[]).map((key, i) => {
+                const labels: Record<TutorialSortKey, string> = { code: 'Course / Title', teacher: 'Tutor', date: 'Date', booked: 'Seats', status: 'Status' };
+                const spans = [3, 2, 2, 2, 1];
+                return (
+                  <button
+                    key={key}
+                    onClick={() => handleSort(key)}
+                    className={`col-span-${spans[i]} flex items-center gap-1 hover:text-gray-600 transition-colors ${sortKey === key ? 'text-[#0B1120]' : ''}`}
+                  >
+                    {labels[key]}
+                    <SortIcon field={key} sortKey={sortKey} sortDir={sortDir} />
+                  </button>
+                );
+              })}
               <div className="col-span-2 text-right">Actions</div>
             </div>
 
@@ -175,7 +219,7 @@ export default function AdminTutorialsPage() {
               </div>
             ) : (
               <div className="divide-y divide-gray-50">
-                {filtered.map((item) => {
+                {sorted.map((item) => {
                   const booked = item.bookings?.length ?? 0;
                   const pct = Math.round((booked / item.seats_total) * 100);
                   return (
