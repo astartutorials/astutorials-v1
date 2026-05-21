@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import posthog from 'posthog-js';
 
 interface TutorialToggleProps {
   activeType: 'group' | 'private';
@@ -8,12 +9,19 @@ interface TutorialToggleProps {
 }
 
 export default function TutorialToggle({ activeType, onTypeChange }: TutorialToggleProps) {
+  function handleTypeChange(type: 'group' | 'private') {
+    if (type !== activeType) {
+      posthog.capture('tutorial_type_switched', { tutorial_type: type, previous_type: activeType });
+    }
+    onTypeChange(type);
+  }
+
   return (
     <div className="inline-flex bg-white/50 backdrop-blur-md p-1.5 rounded-full border border-slate-200 relative shadow-inner">
       <div className="relative flex w-full h-full gap-1">
         {/* Group Button */}
         <button
-          onClick={() => onTypeChange('group')}
+          onClick={() => handleTypeChange('group')}
           className={`relative z-10 px-8 sm:px-12 py-3 rounded-full text-xs sm:text-sm font-bold transition-colors duration-300 ${
             activeType === 'group' ? 'text-white' : 'text-slate-500 hover:text-slate-900'
           }`}
@@ -30,7 +38,7 @@ export default function TutorialToggle({ activeType, onTypeChange }: TutorialTog
 
         {/* Private Button */}
         <button
-          onClick={() => onTypeChange('private')}
+          onClick={() => handleTypeChange('private')}
           className={`relative z-10 px-8 sm:px-12 py-3 rounded-full text-xs sm:text-sm font-bold transition-colors duration-300 ${
             activeType === 'private' ? 'text-white' : 'text-slate-500 hover:text-slate-900'
           }`}

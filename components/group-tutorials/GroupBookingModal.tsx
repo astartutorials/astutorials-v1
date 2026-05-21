@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Calendar, Clock, MapPin, Users, ArrowRight, Loader2 } from "lucide-react";
 import { validateBookingForm } from "@/lib/validate";
+import posthog from "posthog-js";
 
 interface GroupBookingModalProps {
   tutorial: {
@@ -77,8 +78,18 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
         setApiError(data.error ?? "Something went wrong. Please try again.");
         return;
       }
+      posthog.identify(form.email, { name: form.fullName, phone: form.phone, email: form.email });
+      posthog.capture("group_booking_initiated", {
+        tutorial_id: tutorial.id,
+        tutorial_code: tutorial.code,
+        tutorial_title: tutorial.title,
+        teacher: tutorial.teacher,
+        price: tutorial.price,
+        seats_left: tutorial.seatsLeft,
+      });
       window.location.href = data.authorization_url;
-    } catch {
+    } catch (err) {
+      posthog.captureException(err);
       setApiError("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, MapPin, Clock } from "lucide-react";
 import JobApplicationModal from "./JobApplicationModal";
+import posthog from "posthog-js";
 
 export interface JobPosition {
     id: string;
@@ -20,13 +21,23 @@ export interface JobPosition {
 export default function JobCard({ job }: { job: JobPosition }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    function openModal() {
+        posthog.capture("job_listing_viewed", {
+            job_title: job.title,
+            job_category: job.category,
+            job_location: job.location ?? null,
+            job_type: job.type ?? null,
+        });
+        setIsModalOpen(true);
+    }
+
     return (
         <>
             <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                onClick={() => setIsModalOpen(true)}
+                onClick={openModal}
                 className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all group mb-4 cursor-pointer"
             >
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">

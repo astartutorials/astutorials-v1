@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Send, CheckCircle2, AlertCircle, Loader2, Info } from "lucide-react";
+import posthog from "posthog-js";
 
 const EDUCATION_LEVELS = ["Secondary", "Undergraduate", "Postgraduate", "PhD", "Professional Certification"];
 const LEVELS_CAN_TEACH = [
@@ -178,8 +179,18 @@ export default function TutorApplicationForm() {
         throw new Error((data as { error?: string }).error ?? "Submission failed");
       }
 
+      posthog.capture("tutor_application_submitted", {
+        education_level: form.educationLevel,
+        field_of_study: form.fieldOfStudy,
+        years_of_experience: form.yearsOfExperience,
+        teaching_mode: form.teachingMode,
+        has_tutored_before: form.hasTutoredBefore,
+        levels_can_teach: form.levelsCanTeach,
+        has_linkedin: form.linkedinPortfolio.length > 0,
+      });
       setStatus("success");
     } catch (err: unknown) {
+      posthog.captureException(err);
       setApiError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       setStatus("error");
     }

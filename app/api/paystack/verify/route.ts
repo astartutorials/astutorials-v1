@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendGroupBookingConfirmation, sendPrivateBookingReceipt } from "@/lib/email";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,6 +30,16 @@ export async function GET(req: NextRequest) {
   const data = await res.json();
 
   if (!res.ok || !data.status || data.data?.status !== "success") {
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: reference,
+      event: "payment_verification_failed",
+      properties: {
+        payment_reference: reference,
+        reason: data.message ?? "Transaction not successful",
+      },
+    });
+    await posthog.shutdown();
     return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-failed`);
   }
 
@@ -67,6 +78,20 @@ export async function GET(req: NextRequest) {
       await supabase.rpc("increment_seats_booked", { tid: meta.tutorial_id });
     }
   }
+
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: email || reference,
+    event: "payment_verified",
+    properties: {
+      payment_reference: reference,
+      amount_paid: amountPaid,
+      booking_type: meta.type === "private" ? "private" : "group",
+      tutorial_id: meta.tutorial_id ?? null,
+      course: meta.course ?? null,
+    },
+  });
+  await posthog.shutdown();
 
   // Private tutorial → send receipt, then collect extra details before WhatsApp
   if (meta.type === "private") {

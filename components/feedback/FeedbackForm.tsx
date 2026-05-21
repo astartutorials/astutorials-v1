@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Star, Send, ThumbsUp, Loader2 } from "lucide-react";
+import posthog from "posthog-js";
 
 export default function FeedbackForm() {
   const [rating, setRating] = useState(0);
@@ -44,9 +45,14 @@ export default function FeedbackForm() {
             const data = await res.json().catch(() => ({}));
             setError(data.error ?? "Something went wrong. Please try again.");
           } else {
+            posthog.capture("feedback_submitted", {
+              rating,
+              has_comment: comment.trim().length > 0,
+            });
             setSubmitted(true);
           }
-        } catch {
+        } catch (err) {
+          posthog.captureException(err);
           setError("Something went wrong. Please try again.");
         } finally {
           setLoading(false);
