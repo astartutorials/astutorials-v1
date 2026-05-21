@@ -95,5 +95,5 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-success?ref=${reference}`);
+  return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-details?ref=${reference}`);
 }

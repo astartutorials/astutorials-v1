@@ -9,6 +9,9 @@ type Booking = {
   email: string;
   phone: string | null;
   course: string | null;
+  course_of_study: string | null;
+  level: string | null;
+  preferred_schedule: string | null;
   notes: string | null;
   amount_paid: number | null;
   payment_status: string;
@@ -85,15 +88,19 @@ export default function AdminPaymentsPage() {
 
   function exportCSV() {
     const csv = [
-      ["Name", "Email", "Phone", "Tutorial", "Amount", "Notes", "Status", "Reference", "Date"].join(","),
+      ["Name", "Email", "Phone", "Tutorial", "Course", "Course of Study", "Level", "Preferred Schedule", "Notes", "Amount", "Status", "Reference", "Date"].join(","),
       ...filtered.map((b) =>
         [
           `"${b.full_name}"`,
           b.email,
           b.phone ?? "",
-          `"${b.tutorials?.title ?? ""}"`,
-          b.amount_paid ?? b.tutorials?.price ?? 0,
+          `"${b.tutorials?.title ?? "Private Session"}"`,
+          `"${b.course ?? ""}"`,
+          `"${b.course_of_study ?? ""}"`,
+          b.level ?? "",
+          `"${b.preferred_schedule ?? ""}"`,
           `"${b.notes ?? ""}"`,
+          b.amount_paid ?? b.tutorials?.price ?? 0,
           b.payment_status,
           b.payment_reference ?? "",
           formatDate(b.created_at),
@@ -229,22 +236,38 @@ export default function AdminPaymentsPage() {
                     </div>
 
                     {expandedId === b.id && (
-                      <div className="px-6 pb-4 bg-gray-50/50 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Phone</p>
-                          <p className="text-gray-700">{b.phone ?? "—"}</p>
+                      <div className="px-6 pb-5 pt-4 bg-gray-50/50 border-t border-gray-100 space-y-4 text-sm">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Phone</p>
+                            <p className="text-gray-700">{b.phone ?? "—"}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Course</p>
+                            <p className="text-gray-700">{b.course ?? "—"}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Course of Study</p>
+                            <p className="text-gray-700">{b.course_of_study ?? "—"}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Level</p>
+                            <p className="text-gray-700">{b.level ?? "—"}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Course</p>
-                          <p className="text-gray-700">{b.course ?? "—"}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Payment Reference</p>
-                          <p className="text-gray-700 font-mono text-xs break-all">{b.payment_reference ?? "—"}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Notes</p>
-                          <p className="text-gray-700">{b.notes ?? "—"}</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Preferred Schedule</p>
+                            <p className="text-gray-700">{b.preferred_schedule ?? "—"}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Notes</p>
+                            <p className="text-gray-700">{b.notes ?? "—"}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Payment Reference</p>
+                            <p className="text-gray-700 font-mono text-xs break-all">{b.payment_reference ?? "—"}</p>
+                          </div>
                         </div>
                       </div>
                     )}
