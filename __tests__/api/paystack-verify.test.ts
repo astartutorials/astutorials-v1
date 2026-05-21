@@ -169,12 +169,12 @@ describe('GET /api/paystack/verify', () => {
   });
 
   describe('group tutorial payment', () => {
-    it('redirects to booking-success page', async () => {
+    it('redirects to booking-details page', async () => {
       mockPaystackSuccess({ tutorial_id: 'tut-1', full_name: 'Ada Okonkwo', phone: '08012345678' });
 
       const res = await GET(makeRequest('ref_group'));
       expect(res.status).toBe(307);
-      expect(res.headers.get('location')).toContain('booking-success');
+      expect(res.headers.get('location')).toContain('booking-details');
     });
 
     it('inserts a booking record with all fields including amount_paid', async () => {
@@ -239,13 +239,13 @@ describe('GET /api/paystack/verify', () => {
       expect(mockRpc).not.toHaveBeenCalled();
     });
 
-    it('skips insert and still redirects to booking-success when booking already exists', async () => {
+    it('skips insert and still redirects to booking-details when booking already exists', async () => {
       mockPaystackSuccess({ tutorial_id: 'tut-1', full_name: 'Ada', phone: '080' });
       mockMaybeSingle.mockResolvedValueOnce({ data: { id: 'existing-booking' } });
 
       const res = await GET(makeRequest('ref_duplicate'));
       expect(res.status).toBe(307);
-      expect(res.headers.get('location')).toContain('booking-success');
+      expect(res.headers.get('location')).toContain('booking-details');
       expect(mockInsert).not.toHaveBeenCalled();
     });
 
