@@ -55,7 +55,7 @@ Administrators can:
 | Email | Resend (REST API — no package, plain `fetch`) |
 | Tutor CRM | Notion API (mirrored to Supabase) |
 | Analytics | PostHog (pageviews, funnels, session replay, event capture) |
-| Performance | Vercel Speed Insights (Core Web Vitals) |
+| Performance | Vercel Speed Insights (Core Web Vitals) + Vercel Analytics (page traffic) |
 | Testing | Jest 30 + `next/jest` transformer |
 | CI | GitHub Actions |
 | Icons | Lucide React |
@@ -352,6 +352,8 @@ Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All e
 Key events captured across the app: booking initiated, payment verified, tutor application submitted, feedback submitted, job application submitted.
 
 **Vercel Speed Insights** is mounted in `app/layout.tsx` via `<SpeedInsights />` and reports Core Web Vitals (LCP, CLS, FID) to the Vercel dashboard automatically — no configuration needed.
+
+**Vercel Analytics** is mounted alongside it via `<Analytics />` (`@vercel/analytics/next`) and tracks page views and visitor traffic in the Vercel dashboard — no configuration needed.
 
 ---
 
