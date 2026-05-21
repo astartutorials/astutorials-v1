@@ -22,6 +22,14 @@ interface GroupBookingModalProps {
 const inputClass =
   "w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-300 text-gray-800 text-base";
 
+function formatTime(time: string) {
+  const [h, m] = time.split(":").map(Number);
+  if (isNaN(h)) return time;
+  const period = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, "0")} ${period}`;
+}
+
 export default function GroupBookingModal({ tutorial, onClose }: GroupBookingModalProps) {
   const [form, setForm] = useState({
     fullName: "",
@@ -96,7 +104,7 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
             <X size={20} />
           </button>
           <h2 className="text-2xl font-bold text-[var(--astar-navy)]">Reserve Your Spot</h2>
-          <p className="text-gray-500 text-sm mt-1">Complete your details to pay and secure your place.</p>
+          <p className="text-gray-500 text-sm mt-1">Complete your details to pay and secure your SPOT.</p>
         </div>
 
         <div className="px-8 py-6 space-y-5">
@@ -111,7 +119,7 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-600">
                 <Clock size={13} className="text-blue-900 flex-shrink-0" />
-                <span>{tutorial.time}</span>
+                <span>{formatTime(tutorial.time)}</span>
               </div>
               {tutorial.location && (
                 <div className="flex items-center gap-2 text-xs text-gray-600">

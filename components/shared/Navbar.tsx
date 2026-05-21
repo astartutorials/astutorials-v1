@@ -43,12 +43,12 @@ export default function Navbar() {
         : 'bg-[#FDFAF6]/70 backdrop-blur-sm border-transparent'
         }`}
     >
-      <div className="max-w-[1440px] mx-auto px-6 py-4 flex items-center justify-between relative">
+      <div className="max-w-[1440px] mx-auto px-6 py-2 flex items-center justify-between relative">
 
         {/* --- LOGO AREA --- */}
-        <Link 
-          href="/" 
-          className="flex items-center gap-3 z-50 relative group" 
+        <Link
+          href="/"
+          className="flex items-center gap-3 z-50 relative group"
           onClick={(e) => {
             if (window.location.pathname === '/') {
               scrollToSection(e, 'home');
@@ -60,7 +60,7 @@ export default function Navbar() {
             alt="A-Star Logo"
             width={120}
             height={132}
-            className="h-14 md:h-16 w-auto object-contain"
+            className="h-10 md:h-12 w-auto object-contain"
             priority
           />
         </Link>

@@ -23,7 +23,7 @@ export default function Services() {
       icon: User,
       action: "Find a Tutor",
       highlight: true,
-      href: "/tutorials"
+      href: "/tutorials?type=private"
     },
     {
       title: "Exam Mock Sessions",
@@ -31,7 +31,7 @@ export default function Services() {
       icon: BookOpen,
       action: "Start Prep",
       highlight: false,
-      href: "#"
+      href: "/tutorials"
     },
   ];
 
@@ -41,8 +41,6 @@ export default function Services() {
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">Our Academic Services</h2>
         <p className="text-gray-500 text-lg font-light">Comprehensive tutorial programs designed to fit your learning style and schedule.</p>
       </div>
-
-      <h3 className="text-sm font-bold tracking-widest text-gray-400 uppercase text-center mb-6">Our Pillars</h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {services.map((service, index) => (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import TutorialCard from '@/components/group-tutorials/TutorialCard';
 import GroupBookingModal from '@/components/group-tutorials/GroupBookingModal';
 import TutorialToggle from '@/components/tutorials/TutorialToggle';
@@ -38,7 +39,10 @@ const itemVariants = {
 };
 
 export default function TutorialsPage() {
-    const [activeType, setActiveType] = useState<'group' | 'private'>('group');
+    const searchParams = useSearchParams();
+    const [activeType, setActiveType] = useState<'group' | 'private'>(
+        searchParams.get('type') === 'private' ? 'private' : 'group'
+    );
     const [tutorials, setTutorials] = useState<Tutorial[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedTutorial, setSelectedTutorial] = useState<Tutorial | null>(null);
