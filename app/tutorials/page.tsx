@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import TutorialCard from '@/components/group-tutorials/TutorialCard';
 import GroupBookingModal from '@/components/group-tutorials/GroupBookingModal';
@@ -38,7 +38,7 @@ const itemVariants = {
     visible: { y: 0, opacity: 1, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } },
 };
 
-export default function TutorialsPage() {
+function TutorialsContent() {
     const searchParams = useSearchParams();
     const [activeType, setActiveType] = useState<'group' | 'private'>(
         searchParams.get('type') === 'private' ? 'private' : 'group'
@@ -163,5 +163,13 @@ export default function TutorialsPage() {
                 </AnimatePresence>
             </main>
         </div>
+    );
+}
+
+export default function TutorialsPage() {
+    return (
+        <Suspense>
+            <TutorialsContent />
+        </Suspense>
     );
 }
