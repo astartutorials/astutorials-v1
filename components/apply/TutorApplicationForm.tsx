@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Send, CheckCircle2, AlertCircle, Loader2, Info } from "lucide-react";
 
 const EDUCATION_LEVELS = ["Secondary", "Undergraduate", "Postgraduate", "PhD", "Professional Certification"];
 const LEVELS_CAN_TEACH = [
@@ -305,10 +305,19 @@ export default function TutorApplicationForm() {
         <SectionDivider label="Teaching Experience" />
 
         <div className="space-y-2">
-          <label className={labelClass}>Subjects you can teach</label>
+          <div className="flex items-center gap-2">
+            <label className={labelClass}>Courses you can teach</label>
+            <div className="group relative flex items-center">
+              <Info size={14} className="text-gray-400 cursor-pointer" />
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center leading-relaxed">
+                You must have had an A in the courses you want to teach
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+              </div>
+            </div>
+          </div>
           <input
             type="text"
-            placeholder="e.g. Mathematics, Further Maths, Physics"
+            placeholder="e.g. MTH 101, PHY 102, CSC 201"
             value={form.subjectsCanTeach}
             onChange={(e) => set("subjectsCanTeach", e.target.value)}
             className={inputClass}

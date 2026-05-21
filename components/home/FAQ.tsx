@@ -13,7 +13,7 @@ export default function FAQ() {
   const faqs = [
     {
       question: "How do I register for a tutorial?",
-      answer: "Registration is simple. Click on the 'Start Learning' button at the top of the page, select your course code, and choose a tutor that fits your schedule."
+      answer: "Registration is simple. Click on the 'Book Now' button at the top of the page, select your course code, and choose a tutor that fits your schedule."
     },
     {
       question: "Are the tutors qualified?",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 
@@ -23,18 +23,18 @@ const testimonials = [
   },
   {
     quote: "I was running BIO 108 and CHM 108 at the same time. Both had practicals in the same week. I did one session per course and walked into both labs knowing what I was doing.",
-    name: "Kosi Njoku",
+    name: "Kingsley Ejiofor",
     detail: "100L Biochemistry · Babcock University",
     badge: "Passed both practicals same week",
-    initials: "KN",
+    initials: "KE",
     color: "bg-pink-50 text-pink-700",
   },
   {
     quote: "PHY 102 pulled my CGPA down in 100L. I retook it with a tutor from week one. Not week twelve. Finished with an A.",
-    name: "Dubem Okonkwo",
+    name: "Itoro Edidiong",
     detail: "300L Computer Science · Babcock University",
     badge: "PHY 102 — from F to A",
-    initials: "DO",
+    initials: "IE",
     color: "bg-violet-50 text-violet-700",
   },
   {
@@ -47,10 +47,10 @@ const testimonials = [
   },
   {
     quote: "I missed three weeks of CSC 301 due to health issues. By the time I was back, the class had moved on. Four sessions with my A-Star tutor and I learnt Data Structures and Algorithms on time with an A.",
-    name: "Amaka Eze",
+    name: "Oluwakemi Jimoh",
     detail: "300L Computer Science · Babcock University",
     badge: "Caught up, A in DSA",
-    initials: "AE",
+    initials: "OJ",
     color: "bg-emerald-50 text-emerald-700",
   },
 ];
@@ -61,6 +61,16 @@ export default function Testimonials() {
   const scroll = (dir: "left" | "right") => {
     scrollRef.current?.scrollBy({ left: dir === "left" ? -320 : 320, behavior: "smooth" });
   };
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      el.scrollTo({ left: atEnd ? 0 : el.scrollLeft + 320, behavior: "smooth" });
+    }, 10000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <ScrollReveal id="stories" className="w-full px-6 py-10 md:py-16 max-w-[1440px] mx-auto">

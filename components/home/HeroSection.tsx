@@ -19,13 +19,8 @@ export default function HeroSection() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center mb-12 md:mb-16">
         {/* Left: text */}
         <div className="text-center lg:text-left">
-          <div className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-[#23457A] text-[10px] md:text-xs font-bold tracking-wide uppercase shadow-sm">
-            <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#23457A] animate-pulse"></span>
-            Join 4000+ Top Students
-          </div>
-
           <h1 className="text-gray-900 mb-6 font-normal tracking-tighter leading-[1.1] text-4xl md:text-6xl lg:text-7xl">
-            Unlock your academic brilliance with{" "}
+            Unlock your academic potential with{" "}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--astar-red)] to-red-400">
               A-Star Tutorials.
             </span>

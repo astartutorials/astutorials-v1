@@ -16,10 +16,15 @@ export default function CareersPage() {
         async function load() {
             const { data } = await supabase
                 .from("careers")
-                .select("id, title, category, description, type, location")
+                .select("id, title, category, description, type, location, responsibilities, requirements, application_link")
                 .eq("status", "active")
                 .order("created_at", { ascending: false });
-            setJobs((data as JobPosition[]) ?? []);
+            setJobs(
+                ((data ?? []) as any[]).map((d) => ({
+                    ...d,
+                    applicationLink: d.application_link,
+                })) as JobPosition[]
+            );
             setLoading(false);
         }
         load();

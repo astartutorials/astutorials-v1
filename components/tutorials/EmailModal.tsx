@@ -128,7 +128,7 @@ export default function EmailModal({ onClose }: EmailModalProps) {
           {/* Course */}
           <div>
             <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-              Course / Subject <span className="text-[var(--astar-red)]">*</span>
+              Course <span className="text-[var(--astar-red)]">*</span>
             </label>
             <input type="text" placeholder="e.g. MTH201 — Calculus" value={form.course}
               onChange={(e) => set("course", e.target.value)} className={inputClass} />

@@ -1,8 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MapPin, Clock, FileText, CheckCircle, AlertCircle, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { X, FileText, CheckCircle, AlertCircle, ArrowRight, MapPin, Clock } from "lucide-react";
 import { JobPosition } from "./JobCard";
 
 interface JobApplicationModalProps {
@@ -11,12 +10,25 @@ interface JobApplicationModalProps {
     job: JobPosition;
 }
 
+function BulletList({ text }: { text: string }) {
+    const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+    return (
+        <ul className="space-y-2 text-gray-700 text-sm sm:text-base">
+            {lines.map((line, i) => (
+                <li key={i} className="flex items-start gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--astar-red)] flex-shrink-0" />
+                    <span>{line}</span>
+                </li>
+            ))}
+        </ul>
+    );
+}
+
 export default function JobApplicationModal({ isOpen, onClose, job }: JobApplicationModalProps) {
     return (
         <AnimatePresence>
             {isOpen && (
                 <>
-                    {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -25,8 +37,7 @@ export default function JobApplicationModal({ isOpen, onClose, job }: JobApplica
                         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
                     />
 
-                    {/* Modal */}
-                    <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="fixed inset-0 z-50 overflow-y-auto" onClick={onClose}>
                         <div className="min-h-full flex items-center justify-center p-4 sm:p-6 md:p-8">
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -43,7 +54,6 @@ export default function JobApplicationModal({ isOpen, onClose, job }: JobApplica
                                             <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full uppercase tracking-wide">
                                                 {job.category}
                                             </span>
-
                                         </div>
                                         <button
                                             onClick={onClose}
@@ -53,95 +63,67 @@ export default function JobApplicationModal({ isOpen, onClose, job }: JobApplica
                                             <X size={24} />
                                         </button>
                                     </div>
-                                    <h2 className="text-2xl sm:text-3xl font-bold mb-2">{job.title}</h2>
+                                    <h2 className="text-2xl sm:text-3xl font-bold mb-3">{job.title}</h2>
+                                    <div className="flex flex-wrap gap-3 text-xs text-white/80">
+                                        {job.location && (
+                                            <span className="flex items-center gap-1.5"><MapPin size={13} />{job.location}</span>
+                                        )}
+                                        {job.type && (
+                                            <span className="flex items-center gap-1.5"><Clock size={13} />{job.type}</span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Content */}
-                                <div className="px-6 sm:px-8 py-6 sm:py-8 max-h-[60vh] overflow-y-auto">
+                                <div className="px-6 sm:px-8 py-6 sm:py-8 max-h-[60vh] overflow-y-auto space-y-8">
                                     {/* About the Role */}
-                                    <section className="mb-8">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <FileText className="text-[var(--astar-red)]" size={20} />
-                                            <h3 className="text-lg sm:text-xl font-bold text-[var(--astar-navy)]">About the Role</h3>
-                                        </div>
-                                        <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
-                                            As a Senior Frontend Developer at A-Star, you will be responsible for architecting and building the client-side
-                                            of our web applications. You will work closely with our product and design teams to translate
-                                            requirements into high-quality, responsive, and interactive user experiences. We value clean code,
-                                            performance, and accessibility.
-                                        </p>
-                                    </section>
+                                    {job.description && (
+                                        <section>
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <FileText className="text-[var(--astar-red)]" size={20} />
+                                                <h3 className="text-lg sm:text-xl font-bold text-[var(--astar-navy)]">About the Role</h3>
+                                            </div>
+                                            <p className="text-gray-700 leading-relaxed text-sm sm:text-base">{job.description}</p>
+                                        </section>
+                                    )}
 
                                     {/* Key Responsibilities */}
-                                    <section className="mb-8">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <CheckCircle className="text-[var(--astar-red)]" size={20} />
-                                            <h3 className="text-lg sm:text-xl font-bold text-[var(--astar-navy)]">Key Responsibilities</h3>
-                                        </div>
-                                        <ul className="space-y-2 text-gray-700 text-sm sm:text-base">
-                                            <li className="flex items-start gap-2">
-                                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--astar-red)] flex-shrink-0" />
-                                                <span>Develop new user-facing features using React.js and Tailwind CSS.</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--astar-red)] flex-shrink-0" />
-                                                <span>Build reusable code and libraries for future use.</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--astar-red)] flex-shrink-0" />
-                                                <span>Optimize applications for maximum speed and scalability.</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--astar-red)] flex-shrink-0" />
-                                                <span>Collaborate with backend developers and designers to improve usability.</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--astar-red)] flex-shrink-0" />
-                                                <span>Participate in code reviews and mentor junior developers.</span>
-                                            </li>
-                                        </ul>
-                                    </section>
+                                    {job.responsibilities && (
+                                        <section>
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <CheckCircle className="text-[var(--astar-red)]" size={20} />
+                                                <h3 className="text-lg sm:text-xl font-bold text-[var(--astar-navy)]">Key Responsibilities</h3>
+                                            </div>
+                                            <BulletList text={job.responsibilities} />
+                                        </section>
+                                    )}
 
                                     {/* Requirements */}
-                                    <section className="mb-6">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <AlertCircle className="text-[var(--astar-red)]" size={20} />
-                                            <h3 className="text-lg sm:text-xl font-bold text-[var(--astar-navy)]">Requirements</h3>
-                                        </div>
-                                        <ul className="space-y-2 text-gray-700 text-sm sm:text-base">
-                                            <li className="flex items-start gap-2">
-                                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--astar-red)] flex-shrink-0" />
-                                                <span>5+ years of experience in frontend development.</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--astar-red)] flex-shrink-0" />
-                                                <span>Strong proficiency in JavaScript, including DOM manipulation and the JavaScript object model.</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--astar-red)] flex-shrink-0" />
-                                                <span>Thorough understanding of React.js and its core principles.</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--astar-red)] flex-shrink-0" />
-                                                <span>Experience with popular React.js workflows (such as Flux or Redux).</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--astar-red)] flex-shrink-0" />
-                                                <span>Familiarity with RESTful APIs and modern frontend build pipelines and tools.</span>
-                                            </li>
-                                        </ul>
-                                    </section>
+                                    {job.requirements && (
+                                        <section>
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <AlertCircle className="text-[var(--astar-red)]" size={20} />
+                                                <h3 className="text-lg sm:text-xl font-bold text-[var(--astar-navy)]">Requirements</h3>
+                                            </div>
+                                            <BulletList text={job.requirements} />
+                                        </section>
+                                    )}
                                 </div>
 
                                 {/* Footer */}
                                 <div className="border-t border-gray-200 px-6 sm:px-8 py-4 sm:py-6 bg-gray-50 flex flex-col sm:flex-row items-center justify-end gap-3">
-                                    <Link
-                                        href="/apply"
-                                        className="w-full sm:w-auto px-6 py-2.5 bg-[var(--astar-red)] text-white font-semibold hover:bg-red-700 rounded-lg transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        Apply Now
-                                        <ArrowRight size={16} />
-                                    </Link>
+                                    {job.applicationLink ? (
+                                        <a
+                                            href={job.applicationLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full sm:w-auto px-6 py-2.5 bg-[var(--astar-red)] text-white font-semibold hover:bg-red-700 rounded-lg transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            Apply Now <ArrowRight size={16} />
+                                        </a>
+                                    ) : (
+                                        <span className="text-sm text-gray-400">Application link coming soon.</span>
+                                    )}
                                 </div>
                             </motion.div>
                         </div>
