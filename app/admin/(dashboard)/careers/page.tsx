@@ -1,20 +1,9 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Search, Plus, MoreVertical, Edit, Trash2, Loader2, Briefcase } from "lucide-react";
+import { Search, Plus, MoreVertical, Trash2, Loader2, Briefcase, Edit, ToggleLeft, ToggleRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import AddCareerRoleModal from "@/components/careers/admin/AddCareerRoleModal";
-
-type Career = {
-  id: string;
-  job_id: string | null;
-  title: string;
-  category: string;
-  type: string;
-  location: string;
-  status: string;
-  created_at: string;
-};
+import AddCareerRoleModal, { CareerFull } from "@/components/careers/admin/AddCareerRoleModal";
 
 function statusPill(status: string) {
   if (status === "active") return "bg-emerald-50 text-emerald-700";
@@ -29,12 +18,17 @@ function formatDate(d: string) {
 function JobRow({
   job,
   onDelete,
+  onEdit,
+  onStatusChange,
 }: {
-  job: Career;
+  job: CareerFull;
   onDelete: (id: string) => void;
+  onEdit: (job: CareerFull) => void;
+  onStatusChange: (id: string, status: string) => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [togglingStatus, setTogglingStatus] = useState(false);
 
   async function handleDelete() {
     setShowMenu(false);
@@ -43,6 +37,21 @@ function JobRow({
     await fetch(`/api/admin/careers/${job.id}`, { method: "DELETE" });
     onDelete(job.id);
   }
+
+  async function handleToggleStatus() {
+    setShowMenu(false);
+    const newStatus = job.status === "active" ? "draft" : "active";
+    setTogglingStatus(true);
+    await fetch(`/api/admin/careers/${job.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    onStatusChange(job.id, newStatus);
+    setTogglingStatus(false);
+  }
+
+  const busy = deleting || togglingStatus;
 
   return (
     <div className="grid grid-cols-12 gap-3 px-6 py-4 items-center hover:bg-gray-50/60 transition-colors relative">
@@ -70,10 +79,10 @@ function JobRow({
       <div className="col-span-1 flex justify-end relative">
         <button
           onClick={() => setShowMenu(!showMenu)}
-          disabled={deleting}
+          disabled={busy}
           className={`p-2 rounded-full transition-colors ${showMenu ? "bg-gray-100 text-[#0B1120]" : "text-gray-400 hover:text-gray-600"}`}
         >
-          {deleting ? <Loader2 size={16} className="animate-spin" /> : <MoreVertical size={16} />}
+          {busy ? <Loader2 size={16} className="animate-spin" /> : <MoreVertical size={16} />}
         </button>
 
         <AnimatePresence>
@@ -85,8 +94,23 @@ function JobRow({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -8 }}
                 transition={{ duration: 0.12 }}
-                className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20 overflow-hidden"
+                className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20 overflow-hidden"
               >
+                <button
+                  onClick={() => { setShowMenu(false); onEdit(job); }}
+                  className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                >
+                  <Edit size={15} />
+                  Edit Role
+                </button>
+                <button
+                  onClick={handleToggleStatus}
+                  className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                >
+                  {job.status === "active" ? <ToggleLeft size={15} /> : <ToggleRight size={15} />}
+                  {job.status === "active" ? "Set as Draft" : "Set as Active"}
+                </button>
+                <div className="h-px bg-gray-100 my-1" />
                 <button
                   onClick={handleDelete}
                   className="w-full px-4 py-2.5 text-left text-sm font-semibold text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
@@ -104,10 +128,11 @@ function JobRow({
 }
 
 export default function AdminCareersPage() {
-  const [careers, setCareers] = useState<Career[]>([]);
+  const [careers, setCareers] = useState<CareerFull[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingJob, setEditingJob] = useState<CareerFull | undefined>(undefined);
 
   useEffect(() => {
     fetchCareers();
@@ -125,8 +150,22 @@ export default function AdminCareersPage() {
     setCareers((prev) => prev.filter((c) => c.id !== id));
   }
 
-  function handleCreated() {
+  function handleStatusChange(id: string, status: string) {
+    setCareers((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
+  }
+
+  function handleEdit(job: CareerFull) {
+    setEditingJob(job);
+    setIsModalOpen(true);
+  }
+
+  function handleModalClose() {
     setIsModalOpen(false);
+    setEditingJob(undefined);
+  }
+
+  function handleSaved() {
+    handleModalClose();
     fetchCareers();
   }
 
@@ -142,12 +181,10 @@ export default function AdminCareersPage() {
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[#0B1120]">Career Management</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            Manage job openings and listings.
-          </p>
+          <p className="text-sm text-gray-500 mt-0.5">Manage job openings and listings.</p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => { setEditingJob(undefined); setIsModalOpen(true); }}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D93025] text-white font-semibold rounded-xl shadow-sm hover:bg-red-700 transition-all text-sm self-start"
         >
           <Plus size={16} />
@@ -193,7 +230,13 @@ export default function AdminCareersPage() {
             ) : (
               <div className="divide-y divide-gray-50">
                 {filtered.map((job) => (
-                  <JobRow key={job.id} job={job} onDelete={handleDelete} />
+                  <JobRow
+                    key={job.id}
+                    job={job}
+                    onDelete={handleDelete}
+                    onEdit={handleEdit}
+                    onStatusChange={handleStatusChange}
+                  />
                 ))}
               </div>
             )}
@@ -208,8 +251,9 @@ export default function AdminCareersPage() {
 
       <AddCareerRoleModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onCreated={handleCreated}
+        onClose={handleModalClose}
+        onCreated={handleSaved}
+        editJob={editingJob}
       />
     </div>
   );

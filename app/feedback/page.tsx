@@ -11,18 +11,18 @@ export default function FeedbackPage() {
       handle: "Join Channel",
       color: "hover:text-green-500"
     },
-    { 
-      name: "Instagram", 
-      icon: <Instagram size={20} />, 
-      href: "https://instagram.com/astartutorials",
-      handle: "@astartutorials",
+    {
+      name: "Instagram",
+      icon: <Instagram size={20} />,
+      href: "https://instagram.com/astartutorialshq",
+      handle: "@astartutorialshq",
       color: "hover:text-pink-500"
     },
-    { 
-      name: "TikTok", 
-      icon: <Music size={20} />, 
-      href: "https://tiktok.com/@astartutorials",
-      handle: "@astartutorials",
+    {
+      name: "TikTok",
+      icon: <Music size={20} />,
+      href: "https://tiktok.com/@astartutorialshq",
+      handle: "@astartutorialshq",
       color: "hover:text-black"
     },
   ];
