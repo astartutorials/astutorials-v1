@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import ClientFrame from '@/components/shared/ClientFrame'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const spaceGrotesk = Space_Grotesk({ 
   subsets: ['latin'], 
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="en" className={spaceGrotesk.variable}>
       <body className="font-sans antialiased">
         <ClientFrame>{children}</ClientFrame>
+        <SpeedInsights />
       </body>
     </html>
   );

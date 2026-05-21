@@ -7,6 +7,10 @@ jest.mock('@supabase/supabase-js', () => ({
   })),
 }));
 
+jest.mock('@/lib/posthog-server', () => ({
+  getPostHogClient: jest.fn(() => ({ capture: jest.fn(), identify: jest.fn(), shutdown: jest.fn() })),
+}));
+
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 process.env.NOTION_CONNECTION_KEY = 'secret_notion_key';
