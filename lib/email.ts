@@ -50,7 +50,7 @@ export async function sendGroupBookingConfirmation(opts: {
 
       <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
         Please do not reply to this email.<br/>
-        For help, WhatsApp us on <strong>0916 046 5678</strong>.
+        For help, WhatsApp us on <strong>0916 046 5678</strong> or email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
       </p>
       <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
     </div>
@@ -87,7 +87,7 @@ export async function sendPrivateBookingReceipt(opts: {
 
       <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
         Please do not reply to this email.<br/>
-        For help, WhatsApp us on <strong>0916 046 5678</strong>.
+        For help, WhatsApp us on <strong>0916 046 5678</strong> or email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
       </p>
       <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
     </div>
