@@ -12,6 +12,7 @@ import { Info, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import { formatDay, formatPrice } from '@/lib/format';
+import posthog from 'posthog-js';
 
 type Tutorial = {
     id: string;
@@ -125,7 +126,17 @@ function TutorialsContent() {
                                                 seatsTaken={t.seats_booked}
                                                 price={formatPrice(t.price)}
                                                 colorScheme={t.color_scheme}
-                                                onBook={() => setSelectedTutorial(t)}
+                                                onBook={() => {
+                                                    posthog.capture('group_booking_modal_opened', {
+                                                        tutorial_id: t.id,
+                                                        tutorial_code: t.code,
+                                                        tutorial_title: t.title,
+                                                        teacher: t.teacher,
+                                                        price: t.price,
+                                                        seats_left: t.seats_total - t.seats_booked,
+                                                    });
+                                                    setSelectedTutorial(t);
+                                                }}
                                             />
                                         </motion.div>
                                     ))}

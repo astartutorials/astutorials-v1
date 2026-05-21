@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, FileText, CheckCircle, AlertCircle, ArrowRight, MapPin, Clock } from "lucide-react";
 import { JobPosition } from "./JobCard";
+import posthog from "posthog-js";
 
 interface JobApplicationModalProps {
     isOpen: boolean;
@@ -118,6 +119,12 @@ export default function JobApplicationModal({ isOpen, onClose, job }: JobApplica
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="w-full sm:w-auto px-6 py-2.5 bg-[var(--astar-red)] text-white font-semibold hover:bg-red-700 rounded-lg transition-colors flex items-center justify-center gap-2"
+                                            onClick={() => posthog.capture("job_application_link_clicked", {
+                                                job_title: job.title,
+                                                job_category: job.category,
+                                                job_location: job.location ?? null,
+                                                job_type: job.type ?? null,
+                                            })}
                                         >
                                             Apply Now <ArrowRight size={16} />
                                         </a>

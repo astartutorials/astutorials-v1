@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 const NOTION_DATABASE_ID = "fc8883564840431fa1ed4158744542dd";
 
@@ -131,6 +132,26 @@ export async function POST(req: NextRequest) {
     status: "new",
   });
   if (sbError) console.error("[tutor-applications] Supabase insert error:", sbError);
+
+  const posthog = getPostHogClient();
+  posthog.identify({
+    distinctId: String(email),
+    properties: { name: String(fullName ?? ""), email: String(email) },
+  });
+  posthog.capture({
+    distinctId: String(email),
+    event: "tutor_application_received",
+    properties: {
+      education_level: educationLevel ? String(educationLevel) : null,
+      field_of_study: fieldOfStudy ? String(fieldOfStudy) : null,
+      years_of_experience: yearsOfExperience ? String(yearsOfExperience) : null,
+      teaching_mode: teachingMode ? String(teachingMode) : null,
+      has_tutored_before: hasTutoredBefore ? String(hasTutoredBefore) : null,
+      levels_can_teach: Array.isArray(levelsCanTeach) ? levelsCanTeach : [],
+      has_linkedin: !!linkedinPortfolio,
+    },
+  });
+  await posthog.shutdown();
 
   return NextResponse.json({ success: true }, { status: 201 });
 }

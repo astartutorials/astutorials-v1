@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, ArrowRight, Loader2 } from "lucide-react";
 import { validateBookingForm } from "@/lib/validate";
+import posthog from "posthog-js";
 
 interface EmailModalProps {
   onClose: () => void;
@@ -62,8 +63,14 @@ export default function EmailModal({ onClose }: EmailModalProps) {
         setApiError(data.error ?? "Something went wrong. Please try again.");
         return;
       }
+      posthog.identify(form.email, { name: form.fullName, phone: form.phone, email: form.email });
+      posthog.capture("private_booking_initiated", {
+        course: form.course,
+        amount: 6090,
+      });
       window.location.href = data.authorization_url;
-    } catch {
+    } catch (err) {
+      posthog.captureException(err);
       setApiError("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
@@ -90,7 +97,7 @@ export default function EmailModal({ onClose }: EmailModalProps) {
           </button>
           <h2 className="text-2xl font-bold text-[var(--astar-navy)]">Request Private Tutorial</h2>
           <p className="text-gray-500 text-sm mt-1">
-            Fill in your details and pay ₦6,090 to secure your session. We'll connect on WhatsApp after payment.
+            Fill in your details and pay ₦6,090 to secure your session. We&apos;ll connect on WhatsApp after payment.
           </p>
         </div>
 
@@ -160,7 +167,7 @@ export default function EmailModal({ onClose }: EmailModalProps) {
           </button>
 
           <p className="text-center text-[11px] text-gray-400 pb-2">
-            Payment secured by Paystack. You'll be asked a few more questions before being connected via WhatsApp.
+            Payment secured by Paystack. You&apos;ll be asked a few more questions before being connected via WhatsApp.
           </p>
         </form>
       </div>
