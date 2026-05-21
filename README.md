@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react" />
   <img src="https://img.shields.io/badge/Supabase-postgres-3ECF8E?logo=supabase" />
   <img src="https://img.shields.io/badge/Paystack-payments-00C3F7" />
-  <img src="https://img.shields.io/badge/tests-116%20passing-brightgreen" />
+  <img src="https://img.shields.io/badge/tests-158%20passing-brightgreen" />
 </p>
 
 ---
@@ -30,12 +30,13 @@ A-Star Tutorials connects university students with tutors. Students can:
 
 Administrators can:
 
-- Manage tutorials (create, edit, publish/draft, delete)
-- View all bookings with payment references, amount paid, course, and student notes
+- Manage tutorials (create, edit, publish/draft, delete) with sortable columns
+- View all bookings with payment references, amount paid, course, course of study, level, preferred schedule, and student notes
 - Track attendance per session (toggle per student, export CSV)
-- Manage job listings (careers)
-- Review tutor applications
-- See student feedback
+- Manage job listings (careers) with sortable columns and inline editing
+- Review tutor applications (expandable detail rows, status workflow)
+- See student feedback with rating filters
+- Manage admin profile, change password, and register new admins via the Settings page
 
 ---
 
@@ -81,33 +82,39 @@ app/
   page.tsx                        — Home page
   layout.tsx                      — Root layout (font, global CSS)
   tutorials/page.tsx              — Group tutorials listing + booking modal
+  tutorials/private/details/      — Post-payment details form (private bookings)
   apply/page.tsx                  — Tutor application form
   careers/page.tsx                — Job listings
   feedback/page.tsx               — Student feedback form
   group-tutorials/
+    booking-details/              — Post-payment details form (group bookings)
     booking-success/              — Post-payment success page
     booking-failed/               — Post-payment failure page
   admin/
     login/                        — Admin login page
     (dashboard)/                  — Protected admin layout (middleware)
       dashboard/                  — Overview / stats
-      tutorials/                  — List + manage tutorials
+      tutorials/                  — List + manage tutorials (sortable columns)
       tutorials/[id]/             — Attendance list with toggle + CSV export
       tutorials/[id]/edit/        — Edit tutorial form
-      payments/                   — Bookings with expandable detail rows
-      applications/               — Tutor applications
-      careers/                    — Job listing management
-      feedback/                   — Student feedback viewer
-      settings/                   — (Static, not yet wired)
+      payments/                   — Bookings with expandable detail rows + CSV export
+      applications/               — Tutor applications with status workflow
+      careers/                    — Job listing management (sortable, inline edit)
+      feedback/                   — Student feedback viewer with rating filter
+      settings/                   — Admin profile, password change, register new admin
 
 app/api/
   paystack/initialize/            — POST: create Paystack transaction; blocks if fully booked
   paystack/verify/                — GET: verify payment, write booking row, send email, redirect
+  bookings/[ref]/                 — GET: lookup booking by payment reference; PATCH: update course/level/schedule details
   feedback/                       — POST: submit star rating + comment
   tutor-applications/             — POST: submit tutor application → Notion + Supabase
   careers/                        — GET public job listings
   auth/admin/login/               — POST: admin sign in
   auth/admin/logout/              — POST: admin sign out
+  admin/me/                       — GET: admin profile; PATCH: update name and phone
+  admin/auth/update-password/     — POST: verify current password then set new password
+  admin/auth/register/            — POST: create new admin account (service-role, email pre-confirmed)
   admin/tutorials/                — GET all tutorials (includes drafts), POST new tutorial
   admin/tutorials/[id]/           — PUT / DELETE a tutorial
   admin/tutorials/[id]/bookings/  — GET bookings for a specific tutorial (service-role)
@@ -116,6 +123,8 @@ app/api/
   admin/feedback/                 — GET all feedback (service-role, bypasses RLS)
   admin/careers/                  — POST new job listing
   admin/careers/[id]/             — PUT / DELETE a job listing
+  admin/applications/             — GET all tutor applications
+  admin/applications/[id]/        — PATCH: update application status
 
 components/
   shared/                         — Navbar, Footer, ScrollReveal, CountUp, ClientFrame
@@ -124,7 +133,7 @@ components/
   group-tutorials/                — TutorialCard, GroupBookingModal
   feedback/                       — FeedbackForm
   apply/                          — TutorApplicationForm
-  careers/                        — JobCard, JobFilters, JobApplicationModal, CareersHero
+  careers/                        — JobCard, JobFilters, JobApplicationModal, CareersHero, AddCareerRoleModal
   admin/                          — AdminSidebar, AdminLoginForm, AdminLoginLeft
 
 lib/
@@ -205,7 +214,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Payment Flow
 
-Paystack handles all payments. Both private and group bookings write a row to the `bookings` table.
+Paystack handles all payments. Both private and group bookings write a row to the `bookings` table, then redirect the student to a details collection page before proceeding to WhatsApp (private) or a success page (group).
 
 ```
 Client                   Server                      Paystack
@@ -231,18 +240,26 @@ Client                   Server                      Paystack
   |                         |-- INSERT bookings row --   |
   |                         |                            |
   |  if metadata.type === "private":                    |
-  |    send receipt email → redirect to WhatsApp        |
+  |    send receipt email                               |
+  |    redirect to /tutorials/private/details?ref=X    |
+  |    student fills Course, Course of Study,          |
+  |    Level, Schedule → PATCH /api/bookings/[ref]     |
+  |    → open WhatsApp with full message               |
+  |                         |                            |
   |  else (group):                                      |
   |    increment seats_booked                           |
   |    send confirmation email                          |
-  |    redirect to booking-success                      |
+  |    redirect to /group-tutorials/booking-details    |
+  |    student fills Course of Study, Level,           |
+  |    Additional Info → PATCH /api/bookings/[ref]     |
+  |    → redirect to booking-success                   |
 ```
 
-**Amount convention:** the client sends the amount in **naira** (e.g. `5075`). The initialize route multiplies ×100 before sending to Paystack (which expects kobo). The verify route divides by 100 (`Math.round(tx.amount / 100)`) to store naira in `amount_paid`.
+**Amount convention:** the client sends the amount in **naira** (e.g. `6090`). The initialize route multiplies ×100 before sending to Paystack (which expects kobo). The verify route divides by 100 (`Math.round(tx.amount / 100)`) to store naira in `amount_paid`.
 
-**Idempotency:** before inserting, the verify route checks if a booking with the same `payment_reference` already exists. If it does, the insert and seat increment are skipped, and the user is redirected to the success page as normal. This handles Paystack callback retries safely.
+**Idempotency:** before inserting, the verify route checks if a booking with the same `payment_reference` already exists. If it does, the insert and seat increment are skipped, and the user is redirected as normal. This handles Paystack callback retries safely.
 
-**Seat enforcement:** the initialize route queries `seats_booked` vs `seats_total` before creating a transaction for group bookings. If the tutorial is full, it returns 409. After a successful group booking insert, `seats_booked` is incremented via the Postgres function `increment_seats_booked(tid)`. The public tutorials page reads `seats_booked` directly from the `tutorials` table (no join needed, no bookings RLS required).
+**Seat enforcement:** the initialize route queries `seats_booked` vs `seats_total` before creating a transaction for group bookings. If the tutorial is full, it returns 409. After a successful group booking insert, `seats_booked` is incremented via the Postgres function `increment_seats_booked(tid)`.
 
 ---
 
@@ -269,7 +286,11 @@ The admin dashboard lives at `/admin`. It is protected by `middleware.ts`, which
 - **Session:** `getSession()` (reads from cookie — no network call, no rate limiting)
 - **API auth:** all `/api/admin/*` routes independently verify identity using `createSupabaseServerClient().auth.getUser()`
 
-To create an admin user: use the Supabase Auth dashboard to create an account and set `user_metadata.role = "admin"`. There is no public sign-up.
+**Settings page** is fully wired:
+- **Profile tab:** loads name/email/phone from `GET /api/admin/me`, saves name and phone via `PATCH /api/admin/me`
+- **Security tab:** change password via `POST /api/admin/auth/update-password` (verifies current password first); register a new admin via `POST /api/admin/auth/register` (service-role, email pre-confirmed)
+
+To create the first admin user: use the Supabase Auth dashboard to create an account and set `user_metadata.role = "admin"`. Subsequent admins can be created from the Settings → Security tab.
 
 **Important:** admin dashboard pages that display bookings or feedback use API routes (`/api/admin/*`), not the browser Supabase client directly. The browser client uses the anon key and cannot read from `bookings` or `feedback` (no public SELECT RLS policy). Only the service-role client in API routes can access those tables.
 
@@ -285,19 +306,24 @@ npm test -- --ci      # CI mode (used in GitHub Actions)
 
 Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All external calls (Supabase, Paystack, Notion, Resend) are mocked — no real credentials needed.
 
-**Coverage (116 tests, 14 suites):**
+**Coverage (158 tests, 19 suites):**
 
 | File | What's tested |
 |---|---|
 | `middleware.test.ts` | Unauthenticated redirect, authenticated access, login page redirect, `getSession` not `getUser` |
-| `api/paystack-verify.test.ts` | No reference, missing secret key, failed payment, private → WhatsApp (name/phone/course/notes), group → DB insert + seat increment, duplicate idempotency, DB failure → booking-failed, emails sent |
+| `api/paystack-verify.test.ts` | No reference, missing secret key, failed payment, private → details page redirect (name/phone/course/notes), group → DB insert + seat increment + booking-details redirect, duplicate idempotency, DB failure → booking-failed, emails sent |
 | `api/paystack-initialize.test.ts` | Missing fields, missing secret key, naira→kobo conversion, fully booked 409, private type bypasses seat check, Paystack error 502 |
+| `api/bookings-ref.test.ts` | GET: found → 200 with fields, not found → 404, null data → 404, queries by payment_reference; PATCH: success → 200, DB error → 500, camelCase→snake_case mapping, filters by ref |
 | `api/admin-auth.test.ts` | Missing fields, wrong credentials, non-admin role, valid login, `super_admin` role, logout success/failure |
+| `api/admin-me.test.ts` | GET: auth guard, returns name/email/phone from metadata, email-prefix fallback, empty phone fallback; PATCH: auth guard, calls updateUser with correct fields, 500 on failure |
+| `api/admin-update-password.test.ts` | Auth guard, missing fields → 400, too-short password → 400, wrong current password → 400, updateUser failure → 500, success → 200, verifies signInWithPassword called before updateUser |
+| `api/admin-register.test.ts` | Auth guard, missing name/email/password → 400, too-short password → 400, createUser failure → 500, success → 201 with userId, email_confirm: true + full_name metadata |
 | `api/admin-tutorials.test.ts` | Auth guard on GET/POST/PUT/DELETE, validation, draft vs active, DB errors |
 | `api/admin-tutorial-bookings.test.ts` | Auth guard, returns bookings for tutorial, filters by correct `tutorial_id`, DB error |
 | `api/admin-bookings.test.ts` | Auth guard, returns bookings with tutorial join, all queried fields present, DB error |
 | `api/admin-booking-patch.test.ts` | Auth guard, 400 for non-boolean attended, marks attended, correct id and value passed to Supabase, DB error |
 | `api/admin-feedback.test.ts` | Auth guard, returns feedback with tutorial join, DB error |
+| `api/admin-applications.test.ts` | Auth guard, returns applications ordered by date, DB error; PATCH: auth guard, invalid status → 400, valid statuses accepted, DB error → 500 |
 | `api/feedback.test.ts` | Invalid JSON, missing rating, out-of-range (0, 6), non-numeric string, comment trimming, null for whitespace, DB error |
 | `api/tutor-applications.test.ts` | Missing Notion key, invalid JSON, missing fullName/email, Notion failure blocks DB write, Supabase mirror failure returns 201, array → comma join, optional fields stored as null |
 | `api/careers.test.ts` | Public GET with camelCase mapping, admin POST/PUT/DELETE with auth and validation |
@@ -329,6 +355,8 @@ Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All e
 
 **iOS Safari inputs:** use `text-base` (font-size ≥ 16px) on all form inputs. Safari auto-zooms on inputs with font-size < 16px, which breaks the modal UX on mobile.
 
+**Dropdown positioning in overflow containers:** dropdowns inside tables or `overflow-x: auto` wrappers must use `position: fixed` with coordinates from `getBoundingClientRect()`. CSS `overflow-x: auto` forces `overflow-y` to also clip, which silently cuts off absolutely-positioned children.
+
 ---
 
 ## Database Schema (summary)
@@ -343,8 +371,13 @@ tutorials       id, code, title, teacher, description, date, time,
                 confirmed group booking. Never update it directly.
 
 bookings        id, tutorial_id (→ tutorials, nullable for private sessions),
-                full_name, email, phone, course, notes, amount_paid (naira),
+                full_name, email, phone, course, course_of_study, level,
+                preferred_schedule, notes, amount_paid (naira),
                 payment_status, payment_reference (UNIQUE), attended, created_at
+
+                course_of_study, level, preferred_schedule are collected
+                after payment via the details page and written via PATCH
+                /api/bookings/[ref].
 
 feedback        id, tutorial_id (→ tutorials), full_name, email,
                 rating (1–5), comment, created_at
@@ -366,9 +399,3 @@ tutor_applications  id, full_name, email, phone, education_level, institution,
 - `bookings`, `feedback`, `tutor_applications`: no public SELECT — service-role key only
 
 Full schema with RLS policies and the `increment_seats_booked` function: `supabase/schema.sql`
-
----
-
-## Known Gaps (pre-launch)
-
-- **Admin settings page** — UI is present but not wired to any functionality

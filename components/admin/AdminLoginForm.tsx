@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, AlertCircle, Loader2 } from "lucide-react";
 
@@ -88,11 +87,6 @@ export default function AdminLoginForm() {
                 autoComplete="current-password"
                 className="w-full pl-11 pr-4 py-3 rounded-lg border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-300 text-gray-700 text-sm bg-white"
               />
-            </div>
-            <div className="flex justify-end mt-1">
-              <Link href="#" className="text-xs font-semibold text-blue-600 hover:text-blue-700">
-                Forgot Password?
-              </Link>
             </div>
           </div>
 

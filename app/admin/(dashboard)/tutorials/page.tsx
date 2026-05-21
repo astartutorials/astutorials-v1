@@ -57,6 +57,7 @@ export default function AdminTutorialsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<TutorialSortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [fetchError, setFetchError] = useState(false);
 
   function handleSort(key: TutorialSortKey) {
     if (sortKey === key) {
@@ -73,10 +74,16 @@ export default function AdminTutorialsPage() {
 
   async function fetchTutorials() {
     setLoading(true);
-    const res = await fetch("/api/admin/tutorials");
-    const data = await res.json();
-    setTutorials(Array.isArray(data) ? data : []);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/admin/tutorials");
+      const data = await res.json();
+      if (!res.ok) { setFetchError(true); return; }
+      setTutorials(Array.isArray(data) ? data : []);
+    } catch {
+      setFetchError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function deleteTutorial(id: string) {
@@ -135,6 +142,11 @@ export default function AdminTutorialsPage() {
           Schedule Tutorial
         </Link>
       </div>
+      {fetchError && (
+        <div className="mb-5 flex items-center gap-3 bg-red-50 border border-red-100 text-red-700 text-sm font-medium rounded-xl px-4 py-3">
+          Failed to load tutorials. Please refresh the page.
+        </div>
+      )}
 
       {/* Stats strip */}
       <div className="bg-white rounded-xl border border-gray-100 p-3 flex gap-1 mb-5 w-fit">

@@ -155,6 +155,7 @@ export default function AdminCareersPage() {
   const [editingJob, setEditingJob] = useState<CareerFull | undefined>(undefined);
   const [sortKey, setSortKey] = useState<CareerSortKey>('created_at');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [fetchError, setFetchError] = useState(false);
 
   function handleSort(key: CareerSortKey) {
     if (sortKey === key) {
@@ -171,10 +172,16 @@ export default function AdminCareersPage() {
 
   async function fetchCareers() {
     setLoading(true);
-    const res = await fetch("/api/admin/careers");
-    const data = await res.json();
-    setCareers(Array.isArray(data) ? data : []);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/admin/careers");
+      const data = await res.json();
+      if (!res.ok) { setFetchError(true); return; }
+      setCareers(Array.isArray(data) ? data : []);
+    } catch {
+      setFetchError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleDelete(id: string) {
@@ -231,6 +238,11 @@ export default function AdminCareersPage() {
           Add Role
         </button>
       </div>
+      {fetchError && (
+        <div className="mb-5 flex items-center gap-3 bg-red-50 border border-red-100 text-red-700 text-sm font-medium rounded-xl px-4 py-3">
+          Failed to load careers. Please refresh the page.
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl border border-gray-100">
         <div className="px-6 py-4 border-b border-gray-100">

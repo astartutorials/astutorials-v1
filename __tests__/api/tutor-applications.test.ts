@@ -20,7 +20,7 @@ const validBody = {
   educationLevel: "Bachelor's",
   institution: 'University of Lagos',
   fieldOfStudy: 'Computer Science',
-  subjectsCanTeach: 'Mathematics, Physics',
+  coursesCanTeach: 'Mathematics, Physics',
   levelsCanTeach: ['100 Level', '200 Level'],
   yearsOfExperience: '1-2 years',
   teachingMode: 'Online',

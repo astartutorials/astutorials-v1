@@ -58,14 +58,17 @@ export default function AdminPaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "pending" | "failed">("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/bookings")
       .then((r) => r.json())
       .then((data) => {
+        if (data.error) { setFetchError(true); return; }
         setBookings(Array.isArray(data) ? data : []);
-        setLoading(false);
-      });
+      })
+      .catch(() => setFetchError(true))
+      .finally(() => setLoading(false));
   }, []);
 
   const totalRevenue = bookings
@@ -128,6 +131,11 @@ export default function AdminPaymentsPage() {
         <h1 className="text-2xl font-bold text-[#0B1120]">Payments</h1>
         <p className="text-sm text-gray-500 mt-0.5">Track tutorial payments and transactions.</p>
       </div>
+      {fetchError && (
+        <div className="mb-5 flex items-center gap-3 bg-red-50 border border-red-100 text-red-700 text-sm font-medium rounded-xl px-4 py-3">
+          Failed to load payments. Please refresh the page.
+        </div>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {statCards.map((c) => (
