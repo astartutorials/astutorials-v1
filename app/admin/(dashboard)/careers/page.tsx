@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { Search, Plus, MoreVertical, Trash2, Loader2, Briefcase, Edit, ToggleLeft, ToggleRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Search, Plus, MoreVertical, Trash2, Loader2, Briefcase, Edit, ToggleLeft, ToggleRight, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AddCareerRoleModal, { CareerFull } from "@/components/careers/admin/AddCareerRoleModal";
 
@@ -27,8 +27,18 @@ function JobRow({
   onStatusChange: (id: string, status: string) => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
   const [deleting, setDeleting] = useState(false);
   const [togglingStatus, setTogglingStatus] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  function handleMenuToggle() {
+    if (!showMenu && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+    }
+    setShowMenu((v) => !v);
+  }
 
   async function handleDelete() {
     setShowMenu(false);
@@ -54,7 +64,7 @@ function JobRow({
   const busy = deleting || togglingStatus;
 
   return (
-    <div className="grid grid-cols-12 gap-3 px-6 py-4 items-center hover:bg-gray-50/60 transition-colors relative">
+    <div className="grid grid-cols-12 gap-3 px-6 py-4 items-center hover:bg-gray-50/60 transition-colors">
       <div className="col-span-4 flex items-center gap-3">
         <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
           <Briefcase size={18} className="text-[#D93025]" />
@@ -76,9 +86,10 @@ function JobRow({
         </span>
       </div>
 
-      <div className="col-span-1 flex justify-end relative">
+      <div className="col-span-1 flex justify-end">
         <button
-          onClick={() => setShowMenu(!showMenu)}
+          ref={buttonRef}
+          onClick={handleMenuToggle}
           disabled={busy}
           className={`p-2 rounded-full transition-colors ${showMenu ? "bg-gray-100 text-[#0B1120]" : "text-gray-400 hover:text-gray-600"}`}
         >
@@ -94,7 +105,8 @@ function JobRow({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -8 }}
                 transition={{ duration: 0.12 }}
-                className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20 overflow-hidden"
+                style={{ position: "fixed", top: menuPos.top, right: menuPos.right }}
+                className="w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20"
               >
                 <button
                   onClick={() => { setShowMenu(false); onEdit(job); }}
@@ -127,12 +139,31 @@ function JobRow({
   );
 }
 
+type SortDir = 'asc' | 'desc';
+type CareerSortKey = 'title' | 'category' | 'location' | 'type' | 'created_at' | 'status';
+
+function SortIcon({ field, sortKey, sortDir }: { field: string; sortKey: string; sortDir: SortDir }) {
+  if (sortKey !== field) return <ChevronsUpDown size={12} className="opacity-40" />;
+  return sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />;
+}
+
 export default function AdminCareersPage() {
   const [careers, setCareers] = useState<CareerFull[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<CareerFull | undefined>(undefined);
+  const [sortKey, setSortKey] = useState<CareerSortKey>('created_at');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+
+  function handleSort(key: CareerSortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
 
   useEffect(() => {
     fetchCareers();
@@ -169,12 +200,21 @@ export default function AdminCareersPage() {
     fetchCareers();
   }
 
-  const filtered = careers.filter(
-    (c) =>
-      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (c.job_id ?? "").toLowerCase().includes(searchQuery.toLowerCase())
+  const filtered = careers.filter((c) =>
+    c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (c.job_id ?? "").toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const sorted = [...filtered].sort((a, b) => {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    if (sortKey === 'created_at') {
+      return (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0) * dir;
+    }
+    const av = (a[sortKey] as string) ?? '';
+    const bv = (b[sortKey] as string) ?? '';
+    return av.localeCompare(bv) * dir;
+  });
 
   return (
     <div>
@@ -192,7 +232,7 @@ export default function AdminCareersPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100">
         <div className="px-6 py-4 border-b border-gray-100">
           <div className="relative max-w-sm">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
@@ -209,12 +249,23 @@ export default function AdminCareersPage() {
         <div className="overflow-x-auto">
           <div className="min-w-[760px]">
             <div className="grid grid-cols-12 gap-3 px-6 py-3 bg-gray-50 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-              <div className="col-span-4">Role</div>
-              <div className="col-span-2">Department</div>
-              <div className="col-span-2">Location</div>
-              <div className="col-span-1">Type</div>
-              <div className="col-span-1">Posted</div>
-              <div className="col-span-1">Status</div>
+              {([
+                { key: 'title', label: 'Role', span: 4 },
+                { key: 'category', label: 'Department', span: 2 },
+                { key: 'location', label: 'Location', span: 2 },
+                { key: 'type', label: 'Type', span: 1 },
+                { key: 'created_at', label: 'Posted', span: 1 },
+                { key: 'status', label: 'Status', span: 1 },
+              ] as { key: CareerSortKey; label: string; span: number }[]).map(({ key, label, span }) => (
+                <button
+                  key={key}
+                  onClick={() => handleSort(key)}
+                  className={`col-span-${span} flex items-center gap-1 hover:text-gray-600 transition-colors ${sortKey === key ? 'text-[#0B1120]' : ''}`}
+                >
+                  {label}
+                  <SortIcon field={key} sortKey={sortKey} sortDir={sortDir} />
+                </button>
+              ))}
               <div className="col-span-1 text-right">Actions</div>
             </div>
 
@@ -229,7 +280,7 @@ export default function AdminCareersPage() {
               </div>
             ) : (
               <div className="divide-y divide-gray-50">
-                {filtered.map((job) => (
+                {sorted.map((job) => (
                   <JobRow
                     key={job.id}
                     job={job}

@@ -26,7 +26,7 @@ export default function PricingSection() {
                 </p>
 
                 <div className="flex items-baseline justify-center gap-2 mb-8">
-                    <span className="text-4xl md:text-5xl font-bold text-[#335C98]">₦5,000</span>
+                    <span className="text-4xl md:text-5xl font-bold text-[#335C98]">₦6,000</span>
                     <span className="text-gray-500 text-lg">/ session</span>
                 </div>
 

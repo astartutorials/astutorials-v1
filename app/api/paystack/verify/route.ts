@@ -68,16 +68,10 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Private tutorial → connect student with tutor via WhatsApp, send email receipt
+  // Private tutorial → send receipt, then collect extra details before WhatsApp
   if (meta.type === "private") {
-    const phone = meta.phone ?? "";
-    const course = meta.course ? `\nCourse: ${meta.course}` : "";
-    const notes = meta.notes ? `\nNotes: ${meta.notes}` : "";
-    const message = `Hello! I just paid for a private tutorial session.\n\nName: ${fullName}\nPhone: ${phone}${course}${notes}`;
-    const whatsappUrl = `https://api.whatsapp.com/send/?phone=2349160465678&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-
     await sendPrivateBookingReceipt({ to: email, fullName, amountPaid, reference });
-    return NextResponse.redirect(whatsappUrl);
+    return NextResponse.redirect(`${BASE_URL}/tutorials/private/details?ref=${reference}`);
   }
 
   // Group tutorial → send confirmation email, redirect to success page
