@@ -113,7 +113,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3 text-gray-400 text-sm">
                 <Mail className="w-4 h-4 text-[var(--astar-red)] shrink-0" />
-                <span>info@astartutorials.ng</span>
+                <a href="mailto:support@astartutorials.com" className="hover:text-white transition-colors">support@astartutorials.com</a>
               </li>
             </ul>
           </div>
