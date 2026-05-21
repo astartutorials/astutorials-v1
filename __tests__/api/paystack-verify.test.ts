@@ -103,7 +103,7 @@ describe('GET /api/paystack/verify', () => {
   });
 
   describe('private tutorial payment', () => {
-    it('redirects to WhatsApp with the student name and phone in the message', async () => {
+    it('redirects to the details page with the payment reference', async () => {
       mockPaystackSuccess({
         type: 'private',
         full_name: 'Ada Okonkwo',
@@ -114,12 +114,11 @@ describe('GET /api/paystack/verify', () => {
       expect(res.status).toBe(307);
 
       const location = res.headers.get('location')!;
-      expect(location).toContain('api.whatsapp.com');
-      expect(decodeURIComponent(location)).toContain('Ada Okonkwo');
-      expect(decodeURIComponent(location)).toContain('08012345678');
+      expect(location).toContain('/tutorials/private/details');
+      expect(location).toContain('ref=ref_private');
     });
 
-    it('includes notes in the WhatsApp message when provided', async () => {
+    it('redirects to the details page when notes are provided', async () => {
       mockPaystackSuccess({
         type: 'private',
         full_name: 'Test Student',
@@ -128,11 +127,12 @@ describe('GET /api/paystack/verify', () => {
       });
 
       const res = await GET(makeRequest('ref_private_notes'));
-      const location = decodeURIComponent(res.headers.get('location')!);
-      expect(location).toContain('Need help with integration');
+      const location = res.headers.get('location')!;
+      expect(location).toContain('/tutorials/private/details');
+      expect(location).toContain('ref=ref_private_notes');
     });
 
-    it('includes course in the WhatsApp message when provided', async () => {
+    it('redirects to the details page when course is provided', async () => {
       mockPaystackSuccess({
         type: 'private',
         full_name: 'Test Student',
@@ -141,8 +141,9 @@ describe('GET /api/paystack/verify', () => {
       });
 
       const res = await GET(makeRequest('ref_private_course'));
-      const location = decodeURIComponent(res.headers.get('location')!);
-      expect(location).toContain('MTH201 Calculus');
+      const location = res.headers.get('location')!;
+      expect(location).toContain('/tutorials/private/details');
+      expect(location).toContain('ref=ref_private_course');
     });
 
     it('inserts a booking row with null tutorial_id', async () => {

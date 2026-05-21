@@ -24,3 +24,27 @@ export async function GET(
 
   return NextResponse.json(data);
 }
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ ref: string }> }
+) {
+  const { ref } = await params;
+  const body = await request.json();
+
+  const { error } = await supabase
+    .from('bookings')
+    .update({
+      course: body.course ?? undefined,
+      course_of_study: body.courseOfStudy ?? undefined,
+      level: body.level ?? undefined,
+      preferred_schedule: body.preferredSchedule ?? undefined,
+    })
+    .eq('payment_reference', ref);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}

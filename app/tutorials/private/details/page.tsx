@@ -64,7 +64,7 @@ function DetailsForm() {
     return errs;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errs = validate();
     setErrors(errs);
@@ -72,9 +72,19 @@ function DetailsForm() {
 
     setSubmitting(true);
 
+    await fetch(`/api/bookings/${ref}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        course: form.course,
+        courseOfStudy: form.courseOfStudy,
+        level: form.level,
+        preferredSchedule: form.schedule.join(', '),
+      }),
+    });
+
     const name = booking?.full_name ?? '';
     const phone = booking?.phone ?? '';
-    const scheduleText = form.schedule.join(', ');
 
     const lines = [
       'Hello! I just paid for a private tutorial session.',
@@ -84,9 +94,9 @@ function DetailsForm() {
       `Course to be tutored: ${form.course}`,
       `Course of Study: ${form.courseOfStudy}`,
       `Level: ${form.level}`,
-      `Preferred Schedule: ${scheduleText}`,
+      `Preferred Schedule: ${form.schedule.join(', ')}`,
       form.notes ? `Additional Notes: ${form.notes}` : '',
-    ].filter((l) => l !== undefined);
+    ].filter(Boolean);
 
     const message = lines.join('\n');
     const whatsappUrl = `https://api.whatsapp.com/send/?phone=2349160465678&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
