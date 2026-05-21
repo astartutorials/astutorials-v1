@@ -1,13 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { Search, ChevronDown, ExternalLink, Mail } from "lucide-react";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-);
 
 interface Application {
   id: string;
@@ -68,11 +62,9 @@ export default function ApplicationsPage() {
 
   async function fetchApplications() {
     setLoading(true);
-    const { data } = await supabase
-      .from("tutor_applications")
-      .select("*")
-      .order("created_at", { ascending: false });
-    setApplications(data ?? []);
+    const res = await fetch("/api/admin/applications");
+    const data = await res.json();
+    setApplications(Array.isArray(data) ? data : []);
     setLoading(false);
   }
 
@@ -80,7 +72,11 @@ export default function ApplicationsPage() {
 
   async function updateStatus(id: string, status: string) {
     setUpdatingId(id);
-    await supabase.from("tutor_applications").update({ status }).eq("id", id);
+    await fetch(`/api/admin/applications/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
     setApplications((prev) =>
       prev.map((a) => (a.id === id ? { ...a, status } : a))
     );

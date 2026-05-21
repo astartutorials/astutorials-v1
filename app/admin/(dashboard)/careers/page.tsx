@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Search, Plus, MoreVertical, Edit, Trash2, Loader2, Briefcase } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "@/lib/supabase";
 import AddCareerRoleModal from "@/components/careers/admin/AddCareerRoleModal";
 
 type Career = {
@@ -116,11 +115,9 @@ export default function AdminCareersPage() {
 
   async function fetchCareers() {
     setLoading(true);
-    const { data } = await supabase
-      .from("careers")
-      .select("id, job_id, title, category, type, location, status, created_at")
-      .order("created_at", { ascending: false });
-    setCareers((data as Career[]) ?? []);
+    const res = await fetch("/api/admin/careers");
+    const data = await res.json();
+    setCareers(Array.isArray(data) ? data : []);
     setLoading(false);
   }
 
