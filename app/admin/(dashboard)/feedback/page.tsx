@@ -52,14 +52,17 @@ export default function AdminFeedbackPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [minRating, setMinRating] = useState<number>(0);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
-    async function load() {
-      const data = await fetch("/api/admin/feedback").then((r) => r.json());
-      setFeedback(Array.isArray(data) ? data : []);
-      setLoading(false);
-    }
-    load();
+    fetch("/api/admin/feedback")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) { setFetchError(true); return; }
+        setFeedback(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setFetchError(true))
+      .finally(() => setLoading(false));
   }, []);
 
   const avgRating =
@@ -83,6 +86,11 @@ export default function AdminFeedbackPage() {
         <h1 className="text-2xl font-bold text-[#0B1120]">Feedback</h1>
         <p className="text-sm text-gray-500 mt-0.5">Student reviews for tutorials.</p>
       </div>
+      {fetchError && (
+        <div className="mb-5 flex items-center gap-3 bg-red-50 border border-red-100 text-red-700 text-sm font-medium rounded-xl px-4 py-3">
+          Failed to load feedback. Please refresh the page.
+        </div>
+      )}
 
       {/* Stats */}
       <div className="flex flex-wrap gap-4 mb-6">

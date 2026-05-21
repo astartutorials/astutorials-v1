@@ -8,7 +8,7 @@ interface Application {
   full_name: string;
   email: string;
   phone: string | null;
-  subjects_can_teach: string | null;
+  courses_can_teach: string | null;
   levels_can_teach: string | null;
   years_of_experience: string | null;
   teaching_mode: string | null;
@@ -59,13 +59,20 @@ export default function ApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState(false);
 
   async function fetchApplications() {
     setLoading(true);
-    const res = await fetch("/api/admin/applications");
-    const data = await res.json();
-    setApplications(Array.isArray(data) ? data : []);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/admin/applications");
+      const data = await res.json();
+      if (!res.ok) { setFetchError(true); return; }
+      setApplications(Array.isArray(data) ? data : []);
+    } catch {
+      setFetchError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { fetchApplications(); }, []);
@@ -88,7 +95,7 @@ export default function ApplicationsPage() {
       !search ||
       a.full_name.toLowerCase().includes(search.toLowerCase()) ||
       a.email.toLowerCase().includes(search.toLowerCase()) ||
-      (a.subjects_can_teach ?? "").toLowerCase().includes(search.toLowerCase());
+      (a.courses_can_teach ?? "").toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || a.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -100,6 +107,11 @@ export default function ApplicationsPage() {
         <h1 className="text-2xl font-bold text-[#0B1120]">Tutor Applications</h1>
         <p className="text-gray-500 text-sm mt-1">{applications.length} total application{applications.length !== 1 ? "s" : ""}</p>
       </div>
+      {fetchError && (
+        <div className="mb-5 flex items-center gap-3 bg-red-50 border border-red-100 text-red-700 text-sm font-medium rounded-xl px-4 py-3">
+          Failed to load applications. Please refresh the page.
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -107,7 +119,7 @@ export default function ApplicationsPage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by name, email, or subject…"
+            placeholder="Search by name, email, or course…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D93025]/20 focus:border-[#D93025]"
@@ -148,7 +160,7 @@ export default function ApplicationsPage() {
                 </div>
 
                 <div className="hidden sm:block text-sm text-gray-600 min-w-0 flex-shrink-0 w-40 truncate">
-                  {app.subjects_can_teach ?? "—"}
+                  {app.courses_can_teach ?? "—"}
                 </div>
 
                 <div className="hidden md:block text-xs text-gray-400 flex-shrink-0">

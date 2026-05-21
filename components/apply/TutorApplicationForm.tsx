@@ -65,7 +65,7 @@ interface FormState {
   educationLevel: string;
   institution: string;
   fieldOfStudy: string;
-  subjectsCanTeach: string;
+  coursesCanTeach: string;
   levelsCanTeach: string[];
   yearsOfExperience: string;
   teachingMode: string;
@@ -86,7 +86,7 @@ const initialForm: FormState = {
   educationLevel: "",
   institution: "",
   fieldOfStudy: "",
-  subjectsCanTeach: "",
+  coursesCanTeach: "",
   levelsCanTeach: [],
   yearsOfExperience: "",
   teachingMode: "",
@@ -139,7 +139,7 @@ export default function TutorApplicationForm() {
     if (!form.educationLevel) next.educationLevel = "Required";
     if (!form.institution.trim()) next.institution = "Required";
     if (!form.fieldOfStudy.trim()) next.fieldOfStudy = "Required";
-    if (!form.subjectsCanTeach.trim()) next.subjectsCanTeach = "Required";
+    if (!form.coursesCanTeach.trim()) next.coursesCanTeach = "Required";
     if (form.levelsCanTeach.length === 0) next.levelsCanTeach = "Select at least one";
     if (!form.yearsOfExperience) next.yearsOfExperience = "Required";
     if (!form.teachingMode) next.teachingMode = "Required";
@@ -318,11 +318,11 @@ export default function TutorApplicationForm() {
           <input
             type="text"
             placeholder="e.g. MTH 101, PHY 102, CSC 201"
-            value={form.subjectsCanTeach}
-            onChange={(e) => set("subjectsCanTeach", e.target.value)}
+            value={form.coursesCanTeach}
+            onChange={(e) => set("coursesCanTeach", e.target.value)}
             className={inputClass}
           />
-          {errors.subjectsCanTeach && <p className="text-xs text-red-500 font-medium">{errors.subjectsCanTeach}</p>}
+          {errors.coursesCanTeach && <p className="text-xs text-red-500 font-medium">{errors.coursesCanTeach}</p>}
         </div>
 
         <div className="space-y-3">

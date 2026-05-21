@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   GraduationCap,
@@ -38,6 +38,20 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [adminName, setAdminName] = useState("Admin");
+  const [adminEmail, setAdminEmail] = useState("");
+
+  useEffect(() => {
+    fetch("/api/admin/me")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.error) {
+          setAdminName(d.name ?? "Admin");
+          setAdminEmail(d.email ?? "");
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   async function handleLogout() {
     setIsLoggingOut(true);
@@ -116,11 +130,11 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
           {/* User info */}
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl">
             <div className="w-8 h-8 rounded-full bg-[#D93025]/20 text-[#D93025] flex items-center justify-center font-bold text-xs flex-shrink-0">
-              AD
+              {adminName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "AD"}
             </div>
             <div className="min-w-0">
-              <p className="text-white text-xs font-semibold truncate">Admin User</p>
-              <p className="text-white/40 text-[10px] truncate">admin@astartutorials.ng</p>
+              <p className="text-white text-xs font-semibold truncate">{adminName}</p>
+              <p className="text-white/40 text-[10px] truncate">{adminEmail}</p>
             </div>
           </div>
 
