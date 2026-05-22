@@ -36,14 +36,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const role = data.user.user_metadata?.role;
-    if (role !== 'admin' && role !== 'super_admin') {
+    const { getUserRole } = await import('@/lib/rbac');
+    const roleCtx = await getUserRole(
+      supabase,
+      data.user.id,
+      data.user.user_metadata as Record<string, unknown>
+    );
+
+    const adminRoles = ['super_admin', 'org_admin', 'tutor_manager'];
+    if (!roleCtx || !adminRoles.includes(roleCtx.role)) {
       await supabase.auth.signOut();
       const posthog = getPostHogClient();
       posthog.capture({
         distinctId: data.user.id,
         event: 'admin_login_failed',
-        properties: { reason: 'insufficient_role', role: role ?? null },
+        properties: { reason: 'insufficient_role', role: roleCtx?.role ?? null },
       });
       await posthog.shutdown();
       return NextResponse.json(
@@ -55,12 +62,17 @@ export async function POST(request: NextRequest) {
     const posthog = getPostHogClient();
     posthog.identify({
       distinctId: data.user.id,
-      properties: { email: data.user.email, role, name: data.user.user_metadata?.name ?? data.user.email },
+      properties: {
+        email: data.user.email,
+        role: roleCtx.role,
+        orgId: roleCtx.orgId,
+        name: data.user.user_metadata?.full_name ?? data.user.email,
+      },
     });
     posthog.capture({
       distinctId: data.user.id,
       event: 'admin_logged_in',
-      properties: { role },
+      properties: { role: roleCtx.role, orgId: roleCtx.orgId },
     });
     await posthog.shutdown();
 
@@ -68,8 +80,9 @@ export async function POST(request: NextRequest) {
       admin: {
         id: data.user.id,
         email: data.user.email,
-        name: data.user.user_metadata?.name ?? data.user.email,
-        role: data.user.user_metadata?.role,
+        name: data.user.user_metadata?.full_name ?? data.user.email,
+        role: roleCtx.role,
+        orgId: roleCtx.orgId,
       },
     });
   } catch {

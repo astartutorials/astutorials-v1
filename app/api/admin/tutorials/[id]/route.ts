@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { getUserRole, can } from '@/lib/rbac';
 
 export async function PUT(
   request: NextRequest,
@@ -8,29 +9,20 @@ export async function PUT(
   try {
     const { id } = await params;
     const supabase = await createSupabaseServerClient();
-    
-    // Auth check
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const {
-      code,
-      title,
-      teacher,
-      description,
-      date,
-      time,
-      location,
-      capacity,
-      price,
-      colorScheme,
-      status
-    } = body;
+    const ctx = await getUserRole(supabase, user.id, user.user_metadata as Record<string, unknown>);
+    if (!ctx || !can(ctx.role, 'tutorials:update')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
-    // Prepare update object with only provided fields
+    const body = await request.json();
+    const { code, title, teacher, description, date, time, location, capacity, price, colorScheme, status } = body;
+
     const updateData: Record<string, unknown> = {};
     if (code !== undefined) updateData.code = code;
     if (title !== undefined) updateData.title = title;
@@ -45,26 +37,22 @@ export async function PUT(
     if (status !== undefined) updateData.status = status;
     updateData.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabase
-      .from('tutorials')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
+    let query = supabase.from('tutorials').update(updateData).eq('id', id);
+
+    // Non-super_admin users can only edit tutorials in their org
+    if (ctx.role !== 'super_admin' && ctx.orgId) {
+      query = query.eq('org_id', ctx.orgId);
+    }
+
+    const { data, error } = await query.select().single();
 
     if (error) {
-      return NextResponse.json(
-        { error: 'Database Error', message: error.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Database Error', message: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ message: 'Tutorial updated successfully', tutorial: data });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal Server Error', message: error.message }, { status: 500 });
   }
 }
 
@@ -75,30 +63,31 @@ export async function DELETE(
   try {
     const { id } = await params;
     const supabase = await createSupabaseServerClient();
-    
-    // Auth check
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { error } = await supabase
-      .from('tutorials')
-      .delete()
-      .eq('id', id);
+    const ctx = await getUserRole(supabase, user.id, user.user_metadata as Record<string, unknown>);
+    if (!ctx || !can(ctx.role, 'tutorials:delete')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
+    let query = supabase.from('tutorials').delete().eq('id', id);
+
+    // Non-super_admin users can only delete tutorials in their org
+    if (ctx.role !== 'super_admin' && ctx.orgId) {
+      query = query.eq('org_id', ctx.orgId);
+    }
+
+    const { error } = await query;
     if (error) {
-      return NextResponse.json(
-        { error: 'Database Error', message: error.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Database Error', message: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ message: 'Tutorial deleted successfully.' });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal Server Error', message: error.message }, { status: 500 });
   }
 }

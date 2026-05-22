@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { getUserRole, can } from "@/lib/rbac";
 
-const supabase = createClient(
+const serviceSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
@@ -17,6 +18,11 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const ctx = await getUserRole(authClient, user.id, user.user_metadata as Record<string, unknown>);
+  if (!ctx || !can(ctx.role, 'bookings:update')) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const { id } = await params;
   const body = await req.json();
 
@@ -24,7 +30,7 @@ export async function PATCH(
     return NextResponse.json({ error: "attended must be a boolean" }, { status: 400 });
   }
 
-  const { error } = await supabase
+  const { error } = await serviceSupabase
     .from("bookings")
     .update({ attended: body.attended })
     .eq("id", id);

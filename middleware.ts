@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { getUserRole } from '@/lib/rbac';
+
+const VALID_ROLES = ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'];
+const SUPER_ADMIN_ONLY = ['/admin/settings'];
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -25,9 +29,7 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
-  const user = session?.user;
-
+  const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname === '/admin/login';
 
@@ -41,6 +43,31 @@ export async function middleware(request: NextRequest) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = '/admin/dashboard';
     return NextResponse.redirect(dashboardUrl);
+  }
+
+  if (user && !isLoginPage) {
+    const ctx = await getUserRole(
+      supabase,
+      user.id,
+      user.user_metadata as Record<string, unknown>
+    );
+
+    if (!ctx || !VALID_ROLES.includes(ctx.role)) {
+      await supabase.auth.signOut();
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = '/admin/login';
+      return NextResponse.redirect(loginUrl);
+    }
+
+    const isSuperAdminRoute = SUPER_ADMIN_ONLY.some(p => pathname.startsWith(p));
+    if (isSuperAdminRoute && ctx.role !== 'super_admin') {
+      const dashboardUrl = request.nextUrl.clone();
+      dashboardUrl.pathname = '/admin/dashboard';
+      return NextResponse.redirect(dashboardUrl);
+    }
+
+    supabaseResponse.headers.set('x-user-role', ctx.role);
+    if (ctx.orgId) supabaseResponse.headers.set('x-user-org', ctx.orgId);
   }
 
   return supabaseResponse;
