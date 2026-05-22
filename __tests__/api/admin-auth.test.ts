@@ -84,7 +84,7 @@ describe('POST /api/auth/admin/login', () => {
           user: {
             id: 'admin-uuid',
             email: 'admin@astar.com',
-            user_metadata: { role: 'admin', name: 'Admin User' },
+            user_metadata: { role: 'admin', full_name: 'Admin User' },
           },
         },
         error: null,
@@ -95,7 +95,7 @@ describe('POST /api/auth/admin/login', () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.admin.email).toBe('admin@astar.com');
-    expect(data.admin.role).toBe('admin');
+    expect(data.admin.role).toBe('org_admin');
     expect(data.admin.name).toBe('Admin User');
   });
 

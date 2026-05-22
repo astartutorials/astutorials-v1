@@ -25,7 +25,6 @@ function DetailsForm() {
   const [loadError, setLoadError] = useState(false);
 
   const [form, setForm] = useState({
-    course: '',
     courseOfStudy: '',
     level: '',
     schedule: [] as string[],
@@ -41,7 +40,6 @@ function DetailsForm() {
       .then((d) => {
         if (d.error) { setLoadError(true); return; }
         setBooking(d);
-        setForm((prev) => ({ ...prev, course: d.course ?? '' }));
       })
       .catch(() => setLoadError(true));
   }, [ref]);
@@ -57,7 +55,6 @@ function DetailsForm() {
 
   function validate() {
     const errs: Partial<Record<keyof typeof form, string>> = {};
-    if (!form.course.trim()) errs.course = 'Required';
     if (!form.courseOfStudy.trim()) errs.courseOfStudy = 'Required';
     if (!form.level) errs.level = 'Required';
     if (form.schedule.length === 0) errs.schedule = 'Pick at least one';
@@ -76,7 +73,6 @@ function DetailsForm() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        course: form.course,
         courseOfStudy: form.courseOfStudy,
         level: form.level,
         preferredSchedule: form.schedule.join(', '),
@@ -85,13 +81,14 @@ function DetailsForm() {
 
     const name = booking?.full_name ?? '';
     const phone = booking?.phone ?? '';
+    const course = booking?.course ?? '';
 
     const lines = [
       'Hello! I just paid for a private tutorial session.',
       '',
       `Name: ${name}`,
       `Phone: ${phone}`,
-      `Course to be tutored: ${form.course}`,
+      `Course to be tutored: ${course}`,
       `Course of Study: ${form.courseOfStudy}`,
       `Level: ${form.level}`,
       `Preferred Schedule: ${form.schedule.join(', ')}`,
@@ -107,7 +104,7 @@ function DetailsForm() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-[var(--astar-bg)]">
         <div className="text-center">
-          <p className="text-gray-500 mb-2">We couldn't find your booking.</p>
+          <p className="text-gray-500 mb-2">We couldn&apos;t find your booking.</p>
           <a href="/tutorials?type=private" className="text-[var(--astar-red)] font-semibold underline text-sm">
             Back to tutorials
           </a>
@@ -140,21 +137,6 @@ function DetailsForm() {
         </div>
 
         <form onSubmit={handleSubmit} className="px-8 py-7 space-y-5">
-          {/* Course */}
-          <div>
-            <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-              Course to be tutored <span className="text-[var(--astar-red)]">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. MTH201 — Calculus"
-              value={form.course}
-              onChange={(e) => setForm((p) => ({ ...p, course: e.target.value }))}
-              className={inputClass}
-            />
-            {errors.course && <p className="mt-1 text-xs text-red-500">{errors.course}</p>}
-          </div>
-
           {/* Course of Study + Level */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -243,7 +225,7 @@ function DetailsForm() {
           </button>
 
           <p className="text-center text-[11px] text-gray-400 pb-1">
-            We'll use this to match you with the best tutor for your needs.
+            We&apos;ll use this to match you with the best tutor for your needs.
           </p>
         </form>
       </div>

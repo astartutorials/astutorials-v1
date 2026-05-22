@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, PlusCircle, MapPin, Users, GraduationCap, Loader2, X, ChevronRight, CheckCircle2, AlertCircle } from "lucide-react";
+import { Building2, PlusCircle, MapPin, Users, GraduationCap, Loader2, X, ChevronRight, CheckCircle2, AlertCircle, Calendar } from "lucide-react";
 
 type Org = {
   id: string;
@@ -10,6 +10,8 @@ type Org = {
   type: 'university' | 'secondary' | 'primary';
   location: string | null;
   created_at: string;
+  memberCount: number;
+  tutorialCount: number;
 };
 
 const TYPE_STYLES: Record<string, { label: string; bg: string; text: string }> = {
@@ -123,7 +125,7 @@ export default function OrgsPage() {
                 onClick={() => router.push(`/admin/orgs/${org.id}`)}
                 className="bg-white rounded-2xl border border-gray-100 p-6 text-left hover:border-gray-200 hover:shadow-md transition-all group"
               >
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-3">
                   <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${style.bg} ${style.text}`}>
                     <Building2 size={10} />
                     {style.label}
@@ -133,19 +135,24 @@ export default function OrgsPage() {
 
                 <h3 className="font-bold text-[#0B1120] text-base leading-tight mb-1">{org.name}</h3>
 
-                {org.location && (
-                  <p className="flex items-center gap-1.5 text-xs text-gray-500 mb-4">
-                    <MapPin size={11} />
-                    {org.location}
-                  </p>
-                )}
+                <p className="flex items-center gap-1.5 text-xs text-gray-400 mb-4 min-h-[1.25rem]">
+                  {org.location ? (
+                    <><MapPin size={11} className="flex-shrink-0" />{org.location}</>
+                  ) : (
+                    <><Calendar size={11} className="flex-shrink-0" />Since {new Date(org.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}</>
+                  )}
+                </p>
 
                 <div className="flex items-center gap-4 pt-4 border-t border-gray-50">
                   <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                    <Users size={12} />
-                    <span>
-                      {new Date(org.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
-                    </span>
+                    <Users size={12} className="text-gray-400" />
+                    <span className="font-semibold text-[#0B1120]">{org.memberCount}</span>
+                    <span className="text-gray-400">members</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                    <GraduationCap size={12} className="text-gray-400" />
+                    <span className="font-semibold text-[#0B1120]">{org.tutorialCount}</span>
+                    <span className="text-gray-400">tutorials</span>
                   </div>
                 </div>
               </button>

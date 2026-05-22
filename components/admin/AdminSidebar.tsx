@@ -34,15 +34,15 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { name: "Dashboard",         href: "/admin/dashboard",       icon: LayoutDashboard, roles: ['super_admin', 'org_admin', 'tutor_manager', 'viewer'] },
+  { name: "Dashboard",         href: "/admin/dashboard",       icon: LayoutDashboard, roles: ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'] },
   { name: "Organisations",     href: "/admin/orgs",            icon: Building2,       roles: ['super_admin'] },
-  { name: "Tutorials",         href: "/admin/tutorials",       icon: GraduationCap,   roles: ['super_admin', 'org_admin', 'tutor_manager', 'viewer'] },
+  { name: "Tutorials",         href: "/admin/tutorials",       icon: GraduationCap,   roles: ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'] },
   { name: "Schedule Tutorial", href: "/admin/create-tutorial", icon: PlusCircle,      roles: ['super_admin', 'org_admin', 'tutor_manager'] },
-  { name: "Feedback",          href: "/admin/feedback",        icon: MessageSquare,   roles: ['super_admin', 'org_admin', 'tutor_manager'] },
-  { name: "Careers",           href: "/admin/careers",         icon: Briefcase,       roles: ['super_admin', 'org_admin'] },
-  { name: "Applications",      href: "/admin/applications",    icon: Users,           roles: ['super_admin', 'org_admin'] },
+  { name: "Feedback",          href: "/admin/feedback",        icon: MessageSquare,   roles: ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'] },
+  { name: "Careers",           href: "/admin/careers",         icon: Briefcase,       roles: ['super_admin'] },
+  { name: "Applications",      href: "/admin/applications",    icon: Users,           roles: ['super_admin'] },
   { name: "Payments",          href: "/admin/payments",        icon: CreditCard,      roles: ['super_admin', 'org_admin', 'tutor_manager', 'viewer'] },
-  { name: "Settings",          href: "/admin/settings",        icon: Settings,        roles: ['super_admin'] },
+  { name: "Settings",          href: "/admin/settings",        icon: Settings,        roles: ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'] },
 ];
 
 const ROLE_LABELS: Record<AppRole, string> = {
@@ -142,9 +142,8 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             </div>
             <div className="min-w-0">
               <p className="text-white text-xs font-semibold truncate">{adminName}</p>
-              <p className="text-white/40 text-[10px] truncate">
-                {role ? ROLE_LABELS[role] : adminEmail}
-              </p>
+              {role && <p className="text-white/40 text-[10px] truncate">{ROLE_LABELS[role]}</p>}
+              <p className="text-white/40 text-[10px] truncate">{adminEmail}</p>
             </div>
           </div>
 

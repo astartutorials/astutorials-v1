@@ -30,10 +30,16 @@ export async function PATCH(
     return NextResponse.json({ error: "attended must be a boolean" }, { status: 400 });
   }
 
-  const { error } = await serviceSupabase
+  let updateQuery = serviceSupabase
     .from("bookings")
     .update({ attended: body.attended })
     .eq("id", id);
+
+  if (ctx.role !== 'super_admin' && ctx.orgId) {
+    updateQuery = (updateQuery as any).eq('org_id', ctx.orgId);
+  }
+
+  const { error } = await updateQuery;
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });

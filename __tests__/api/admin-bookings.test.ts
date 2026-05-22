@@ -17,7 +17,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { GET } from '@/app/api/admin/bookings/route';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
-const ADMIN_USER = { id: 'admin-id' };
+const ADMIN_USER = { id: 'admin-id', user_metadata: { role: 'admin' } };
 
 function mockAuth(user: object | null) {
   mockServerClient.mockResolvedValue({
@@ -89,5 +89,42 @@ describe('GET /api/admin/bookings', () => {
     expect(selectArg).toContain('notes');
     expect(selectArg).toContain('course');
     expect(selectArg).toContain('amount_paid');
+  });
+
+  it('applies org_id filter when user is org_admin with an assigned org', async () => {
+    // Set up the auth client so getUserRole reads from DB and gets org_id: 'org-uuid'
+    const maybeSingle = jest.fn().mockResolvedValue({ data: { role: 'org_admin', org_id: 'org-uuid' } });
+    mockServerClient.mockResolvedValue({
+      auth: {
+        getUser: jest.fn().mockResolvedValue({
+          data: { user: { id: 'admin-id', user_metadata: {} } },
+          error: null,
+        }),
+      },
+      from: jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            order: jest.fn().mockReturnValue({
+              limit: jest.fn().mockReturnValue({ maybeSingle }),
+            }),
+          }),
+        }),
+      }),
+    } as any);
+
+    // Service client mock: order() returns a thenable that also has .eq()
+    // so the route can either await it directly or chain .eq() first
+    const mockEq = jest.fn().mockResolvedValue({ data: [], error: null });
+    const mockOrderResult = {
+      eq: mockEq,
+      then: (resolve: any) => Promise.resolve({ data: [], error: null }).then(resolve),
+    };
+    const mockOrder = jest.fn().mockReturnValue(mockOrderResult);
+    const mockSelect = jest.fn().mockReturnValue({ order: mockOrder });
+    getFrom().mockReturnValue({ select: mockSelect });
+
+    const res = await GET();
+    expect(res.status).toBe(200);
+    expect(mockEq).toHaveBeenCalledWith('org_id', 'org-uuid');
   });
 });

@@ -25,13 +25,12 @@ export async function GET() {
     .select("id, full_name, email, phone, course, course_of_study, level, preferred_schedule, notes, amount_paid, payment_status, payment_reference, created_at, org_id, tutorials(title, price)")
     .order("created_at", { ascending: false });
 
+  if (ctx.role !== 'super_admin' && ctx.orgId) {
+    query = query.eq('org_id', ctx.orgId);
+  }
+
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Filter by org for non-super_admin
-  const filtered = ctx.role === 'super_admin'
-    ? data
-    : data?.filter((b: any) => b.org_id === ctx.orgId);
-
-  return NextResponse.json(filtered);
+  return NextResponse.json(data);
 }

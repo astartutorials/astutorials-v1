@@ -13,7 +13,7 @@ process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test_anon_key';
 
 import { middleware } from '@/middleware';
 
-const MOCK_USER = { id: 'admin-id', email: 'admin@astar.com' };
+const MOCK_USER = { id: 'admin-id', email: 'admin@astar.com', user_metadata: { role: 'super_admin' } };
 
 function makeRequest(pathname: string) {
   return new NextRequest(`http://localhost:3000${pathname}`);

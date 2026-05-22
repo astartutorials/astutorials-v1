@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import Link from "next/link";
 import { Star, Send, ThumbsUp, Loader2 } from "lucide-react";
 import posthog from "posthog-js";
 
@@ -19,7 +20,13 @@ export default function FeedbackForm() {
           <ThumbsUp className="w-8 h-8 text-green-600" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Thank you!</h2>
-        <p className="text-gray-500">We appreciate your feedback.</p>
+        <p className="text-gray-500 mb-6">We appreciate your feedback.</p>
+        <Link
+          href="/tutorials"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--astar-red)] text-white font-semibold rounded-full shadow-lg shadow-red-500/20 hover:-translate-y-0.5 transition-all text-sm"
+        >
+          Browse Tutorials
+        </Link>
       </div>
     );
   }
