@@ -16,11 +16,11 @@ const selectClass =
 type TabId = "profile" | "tutorials" | "notifications" | "payments" | "security";
 
 const ALL_TABS: { id: TabId; name: string; icon: typeof User; superAdminOnly?: boolean }[] = [
-  { id: "profile", name: "Profile", icon: User },
-  { id: "tutorials", name: "Tutorials", icon: GraduationCap },
-  { id: "notifications", name: "Notifications", icon: BellRing },
-  { id: "payments", name: "Payments", icon: CreditCard },
-  { id: "security", name: "Security", icon: Shield, superAdminOnly: true },
+  { id: "profile",       name: "Profile",       icon: User },
+  { id: "tutorials",     name: "Tutorials",     icon: GraduationCap, superAdminOnly: true },
+  { id: "notifications", name: "Notifications", icon: BellRing,      superAdminOnly: true },
+  { id: "payments",      name: "Payments",      icon: CreditCard,    superAdminOnly: true },
+  { id: "security",      name: "Security",      icon: Shield,        superAdminOnly: true },
 ];
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {

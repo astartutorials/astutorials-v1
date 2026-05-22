@@ -2,9 +2,11 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft, Building2, MapPin, GraduationCap, Users, Pencil, Trash2,
-  UserPlus, X, Loader2, CheckCircle2, AlertCircle, Save, ShieldCheck,
+  UserPlus, X, Loader2, CheckCircle2, AlertCircle, Save, TrendingUp,
+  BookOpen, CreditCard, Calendar,
 } from "lucide-react";
 
 type OrgMember = {
@@ -23,6 +25,38 @@ type OrgDetail = {
   created_at: string;
 };
 
+type OrgStats = {
+  revenue: number;
+  students: number;
+  bookings: number;
+  activeTutorials: number;
+  totalTutorials: number;
+};
+
+type Tutorial = {
+  id: string;
+  code: string;
+  title: string;
+  teacher: string | null;
+  date: string | null;
+  time: string | null;
+  status: string;
+  seats_total: number | null;
+  seats_booked: number;
+};
+
+type RecentBooking = {
+  id: string;
+  full_name: string;
+  email: string;
+  course: string | null;
+  amount_paid: number | null;
+  payment_status: string;
+  created_at: string;
+  tutorial_id: string | null;
+  tutorials: { code: string; title: string } | null;
+};
+
 const ROLE_LABELS: Record<string, string> = {
   org_admin: 'Org Admin',
   tutor_manager: 'Tutor Manager',
@@ -30,17 +64,23 @@ const ROLE_LABELS: Record<string, string> = {
   viewer: 'Viewer',
 };
 
-const ROLE_COLORS: Record<string, string> = {
-  org_admin:     'bg-blue-50 text-blue-700',
-  tutor_manager: 'bg-purple-50 text-purple-700',
-  tutor:         'bg-emerald-50 text-emerald-700',
-  viewer:        'bg-gray-100 text-gray-600',
-};
-
 const TYPE_STYLES: Record<string, { label: string; bg: string; text: string }> = {
   university: { label: 'University', bg: 'bg-blue-50',    text: 'text-blue-700' },
   secondary:  { label: 'Secondary',  bg: 'bg-purple-50',  text: 'text-purple-700' },
   primary:    { label: 'Primary',    bg: 'bg-emerald-50', text: 'text-emerald-700' },
+};
+
+const STATUS_STYLES: Record<string, { label: string; bg: string; text: string }> = {
+  active:    { label: 'Active',    bg: 'bg-emerald-50', text: 'text-emerald-700' },
+  draft:     { label: 'Draft',     bg: 'bg-gray-100',   text: 'text-gray-500' },
+  cancelled: { label: 'Cancelled', bg: 'bg-red-50',     text: 'text-red-600' },
+  completed: { label: 'Completed', bg: 'bg-blue-50',    text: 'text-blue-600' },
+};
+
+const PAYMENT_STYLES: Record<string, { label: string; bg: string; text: string }> = {
+  paid:    { label: 'Paid',    bg: 'bg-emerald-50', text: 'text-emerald-700' },
+  pending: { label: 'Pending', bg: 'bg-yellow-50',  text: 'text-yellow-700' },
+  failed:  { label: 'Failed',  bg: 'bg-red-50',     text: 'text-red-600' },
 };
 
 const inputClass = "w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-gray-800 bg-white text-sm";
@@ -55,13 +95,24 @@ function Toast({ message, type }: { message: string; type: 'success' | 'error' }
   );
 }
 
+function fmtCurrency(n: number) {
+  return '₦' + n.toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function fmtDate(s: string | null) {
+  if (!s) return '—';
+  return new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 export default function OrgDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
 
   const [org, setOrg] = useState<OrgDetail | null>(null);
   const [members, setMembers] = useState<OrgMember[]>([]);
-  const [tutorialCount, setTutorialCount] = useState(0);
+  const [stats, setStats] = useState<OrgStats | null>(null);
+  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
+  const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -77,7 +128,7 @@ export default function OrgDetailPage({ params }: { params: Promise<{ id: string
   const [addSaving, setAddSaving] = useState(false);
   const [addError, setAddError] = useState('');
 
-  // Role change state
+  // Role change / remove state
   const [changingRole, setChangingRole] = useState<string | null>(null);
   const [removingUser, setRemovingUser] = useState<string | null>(null);
 
@@ -91,7 +142,9 @@ export default function OrgDetailPage({ params }: { params: Promise<{ id: string
       if (!res.ok) { router.push('/admin/orgs'); return; }
       setOrg(data.org);
       setMembers(data.members ?? []);
-      setTutorialCount(data.tutorialCount ?? 0);
+      setStats(data.stats ?? null);
+      setTutorials(data.tutorials ?? []);
+      setRecentBookings(data.recentBookings ?? []);
       setEditForm({ name: data.org.name, type: data.org.type, location: data.org.location ?? '' });
     } finally {
       setLoading(false);
@@ -200,16 +253,17 @@ export default function OrgDetailPage({ params }: { params: Promise<{ id: string
   const style = TYPE_STYLES[org.type] ?? TYPE_STYLES.university;
 
   return (
-    <div>
+    <div className="space-y-5">
       {toast && <Toast message={toast.message} type={toast.type} />}
 
-      {/* Back + header */}
-      <button onClick={() => router.push('/admin/orgs')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition-colors mb-5">
+      {/* Back */}
+      <button onClick={() => router.push('/admin/orgs')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition-colors">
         <ArrowLeft size={16} />
         Back to Organisations
       </button>
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-5">
+      {/* Header card */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0">
@@ -228,6 +282,7 @@ export default function OrgDetailPage({ params }: { params: Promise<{ id: string
                   {org.location}
                 </p>
               )}
+              <p className="text-xs text-gray-400 mt-1">Since {fmtDate(org.created_at)}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -241,26 +296,175 @@ export default function OrgDetailPage({ params }: { params: Promise<{ id: string
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Stats */}
-        <div className="flex gap-6 mt-5 pt-5 border-t border-gray-100">
-          <div className="flex items-center gap-2 text-sm">
-            <Users size={15} className="text-gray-400" />
-            <span className="font-bold text-[#0B1120]">{members.length}</span>
-            <span className="text-gray-500">members</span>
+      {/* Stat cards */}
+      {stats && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                <TrendingUp size={15} className="text-emerald-600" />
+              </div>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Revenue</span>
+            </div>
+            <p className="text-2xl font-bold text-[#0B1120]">{fmtCurrency(stats.revenue)}</p>
+            <p className="text-xs text-gray-400 mt-1">All time</p>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <GraduationCap size={15} className="text-gray-400" />
-            <span className="font-bold text-[#0B1120]">{tutorialCount}</span>
-            <span className="text-gray-500">tutorials</span>
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                <Users size={15} className="text-blue-600" />
+              </div>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Students</span>
+            </div>
+            <p className="text-2xl font-bold text-[#0B1120]">{stats.students.toLocaleString()}</p>
+            <p className="text-xs text-gray-400 mt-1">Unique</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+                <CreditCard size={15} className="text-purple-600" />
+              </div>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Bookings</span>
+            </div>
+            <p className="text-2xl font-bold text-[#0B1120]">{stats.bookings.toLocaleString()}</p>
+            <p className="text-xs text-gray-400 mt-1">Total</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                <GraduationCap size={15} className="text-orange-600" />
+              </div>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tutorials</span>
+            </div>
+            <p className="text-2xl font-bold text-[#0B1120]">{stats.activeTutorials}</p>
+            <p className="text-xs text-gray-400 mt-1">{stats.activeTutorials} active · {stats.totalTutorials} total</p>
           </div>
         </div>
+      )}
+
+      {/* Tutorials */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <BookOpen size={16} className="text-gray-400" />
+            <h2 className="font-bold text-gray-900">Tutorials</h2>
+            <span className="text-xs text-gray-400 font-normal">({tutorials.length})</span>
+          </div>
+          <Link
+            href="/admin/create-tutorial"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#0B1120] text-white text-sm font-semibold rounded-xl hover:bg-[#1a2740] transition-all"
+          >
+            + New Tutorial
+          </Link>
+        </div>
+
+        {tutorials.length === 0 ? (
+          <div className="py-12 text-center text-sm text-gray-400">No tutorials yet.</div>
+        ) : (
+          <div className="divide-y divide-gray-50">
+            <div className="grid grid-cols-12 gap-3 px-6 py-3 bg-gray-50 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              <div className="col-span-1">Code</div>
+              <div className="col-span-4">Title</div>
+              <div className="col-span-2">Teacher</div>
+              <div className="col-span-2">Date</div>
+              <div className="col-span-2">Status</div>
+              <div className="col-span-1 text-right">Seats</div>
+            </div>
+            {tutorials.map(t => {
+              const s = STATUS_STYLES[t.status] ?? STATUS_STYLES.draft;
+              return (
+                <Link
+                  key={t.id}
+                  href={`/admin/tutorials/${t.id}`}
+                  className="grid grid-cols-12 gap-3 px-6 py-3.5 items-center hover:bg-gray-50/60 transition-colors"
+                >
+                  <div className="col-span-1 font-mono text-xs text-gray-500">{t.code}</div>
+                  <div className="col-span-4 font-semibold text-sm text-[#0B1120] truncate">{t.title}</div>
+                  <div className="col-span-2 text-sm text-gray-500 truncate">{t.teacher ?? '—'}</div>
+                  <div className="col-span-2 text-sm text-gray-500 flex items-center gap-1">
+                    {t.date ? (
+                      <>
+                        <Calendar size={12} className="text-gray-300 flex-shrink-0" />
+                        {fmtDate(t.date)}
+                      </>
+                    ) : '—'}
+                  </div>
+                  <div className="col-span-2">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${s.bg} ${s.text}`}>
+                      {s.label}
+                    </span>
+                  </div>
+                  <div className="col-span-1 text-right text-sm text-gray-500">
+                    {t.seats_booked}/{t.seats_total ?? '∞'}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {/* Recent Bookings */}
+      {recentBookings.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CreditCard size={16} className="text-gray-400" />
+              <h2 className="font-bold text-gray-900">Recent Bookings</h2>
+              <span className="text-xs text-gray-400 font-normal">(last 10)</span>
+            </div>
+            <Link href="/admin/payments" className="text-xs text-[#D93025] font-semibold hover:underline">
+              View all →
+            </Link>
+          </div>
+          <div className="divide-y divide-gray-50">
+            <div className="grid grid-cols-12 gap-3 px-6 py-3 bg-gray-50 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              <div className="col-span-3">Name</div>
+              <div className="col-span-3">Email</div>
+              <div className="col-span-2">Tutorial</div>
+              <div className="col-span-2">Date</div>
+              <div className="col-span-1 text-right">Amount</div>
+              <div className="col-span-1 text-center">Status</div>
+            </div>
+            {recentBookings.map(b => {
+              const ps = PAYMENT_STYLES[b.payment_status] ?? PAYMENT_STYLES.pending;
+              return (
+                <div key={b.id} className="grid grid-cols-12 gap-3 px-6 py-3.5 items-center hover:bg-gray-50/60 transition-colors">
+                  <div className="col-span-3 font-semibold text-sm text-[#0B1120] truncate">{b.full_name || '—'}</div>
+                  <div className="col-span-3 text-sm text-gray-500 truncate">{b.email}</div>
+                  <div className="col-span-2 text-xs text-gray-500 truncate">
+                    {b.tutorials ? (
+                      <Link href={`/admin/tutorials/${b.tutorial_id}`} className="text-[#D93025] hover:underline font-medium">
+                        {b.tutorials.code}
+                      </Link>
+                    ) : <span className="italic">Private</span>}
+                  </div>
+                  <div className="col-span-2 text-sm text-gray-500">{fmtDate(b.created_at)}</div>
+                  <div className="col-span-1 text-right text-sm font-semibold text-gray-700">
+                    {b.amount_paid != null ? fmtCurrency(b.amount_paid) : '—'}
+                  </div>
+                  <div className="col-span-1 flex justify-center">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${ps.bg} ${ps.text}`}>
+                      {ps.label}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Members */}
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="font-bold text-gray-900">Members</h2>
+          <div className="flex items-center gap-2">
+            <Users size={16} className="text-gray-400" />
+            <h2 className="font-bold text-gray-900">Members</h2>
+            <span className="text-xs text-gray-400 font-normal">({members.length})</span>
+          </div>
           <button
             onClick={() => setShowAddModal(true)}
             className="inline-flex items-center gap-2 px-4 py-2 bg-[#0B1120] text-white text-sm font-semibold rounded-xl hover:bg-[#1a2740] transition-all"
@@ -277,7 +481,6 @@ export default function OrgDetailPage({ params }: { params: Promise<{ id: string
           </div>
         ) : (
           <div className="divide-y divide-gray-50">
-            {/* Header row */}
             <div className="grid grid-cols-12 gap-3 px-6 py-3 bg-gray-50 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
               <div className="col-span-4">Name</div>
               <div className="col-span-4">Email</div>

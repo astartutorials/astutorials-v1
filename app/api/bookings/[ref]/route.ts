@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendPrivateBookingDetails } from '@/lib/email';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,7 +36,6 @@ export async function PATCH(
   const { error } = await supabase
     .from('bookings')
     .update({
-      course: body.course ?? undefined,
       course_of_study: body.courseOfStudy ?? undefined,
       level: body.level ?? undefined,
       preferred_schedule: body.preferredSchedule ?? undefined,
@@ -44,6 +44,29 @@ export async function PATCH(
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Send confirmation email for private bookings (tutorial_id is null)
+  if (body.preferredSchedule) {
+    try {
+      const { data: booking } = await supabase
+        .from('bookings')
+        .select('tutorial_id, email, full_name, course, course_of_study, level, preferred_schedule')
+        .eq('payment_reference', ref)
+        .single();
+
+      if (booking && !booking.tutorial_id) {
+        await sendPrivateBookingDetails({
+          to: booking.email,
+          fullName: booking.full_name,
+          course: booking.course ?? '',
+          courseOfStudy: booking.course_of_study ?? '',
+          level: booking.level ?? '',
+          schedule: booking.preferred_schedule ?? '',
+          reference: ref,
+        });
+      }
+    } catch {}
   }
 
   return NextResponse.json({ ok: true });

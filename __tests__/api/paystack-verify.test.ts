@@ -261,5 +261,43 @@ describe('GET /api/paystack/verify', () => {
       expect(res.status).toBe(307);
       expect(res.headers.get('location')).toContain('booking-failed');
     });
+
+    it('redirects to booking-failed with reason=full when seats fill between initialize and verify', async () => {
+      // Simulates the race condition: a seat was available at payment time but is now full.
+      // single() is called TWICE in the group booking path:
+      //   call 1 → tutorial lookup for email (before the existing-booking check)
+      //   call 2 → seat re-check (only when no existing booking found)
+      mockPaystackSuccess({ tutorial_id: 'tut-full', full_name: 'Ada', phone: '080' });
+
+      // single() call 1: tutorial title/date/time lookup → not found (no email sent is fine)
+      mockSingle.mockResolvedValueOnce({ data: null });
+      // maybeSingle() call: existing booking check → no duplicate
+      mockMaybeSingle.mockResolvedValueOnce({ data: null });
+      // single() call 2: seat re-check → tutorial is now full
+      mockSingle.mockResolvedValueOnce({ data: { seats_total: 30, seats_booked: 30 } });
+
+      const res = await GET(makeRequest('ref_race_condition'));
+      expect(res.status).toBe(307);
+      const location = res.headers.get('location')!;
+      expect(location).toContain('booking-failed');
+      expect(location).toContain('reason=full');
+      expect(mockInsert).not.toHaveBeenCalled();
+    });
+
+    it('redirects to booking-failed with reason=payment on failed Paystack verification', async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: true, data: { status: 'failed', metadata: {} } }),
+      });
+
+      const res = await GET(makeRequest('ref_failed_reason'));
+      expect(res.headers.get('location')).toContain('reason=payment');
+    });
+
+    it('includes the reference in the booking-details redirect for group bookings', async () => {
+      mockPaystackSuccess({ tutorial_id: 'tut-1', full_name: 'Ada' });
+      const res = await GET(makeRequest('ref_group_check'));
+      expect(res.headers.get('location')).toContain('ref=ref_group_check');
+    });
   });
 });

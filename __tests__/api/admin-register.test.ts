@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 
 const mockCreateUser = jest.fn();
+const mockFrom = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     auth: {
@@ -8,6 +9,7 @@ jest.mock('@supabase/supabase-js', () => ({
         createUser: (...args: any[]) => mockCreateUser(...args),
       },
     },
+    from: (...args: any[]) => mockFrom(...args),
   })),
 }));
 
@@ -22,7 +24,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { POST } from '@/app/api/admin/auth/register/route';
 
 const mockServer = jest.mocked(createSupabaseServerClient);
-const ADMIN_USER = { id: 'admin-id', email: 'admin@astar.ng' };
+const ADMIN_USER = { id: 'admin-id', email: 'admin@astar.ng', user_metadata: { role: 'super_admin' } };
 
 function mockAuth(user: object | null) {
   mockServer.mockResolvedValue({
@@ -47,6 +49,10 @@ describe('POST /api/admin/auth/register', () => {
   beforeEach(() => {
     mockServer.mockReset();
     mockCreateUser.mockReset();
+    mockFrom.mockReset();
+    mockFrom.mockReturnValue({
+      insert: jest.fn().mockResolvedValue({ error: null }),
+    });
   });
 
   it('returns 401 when not authenticated', async () => {

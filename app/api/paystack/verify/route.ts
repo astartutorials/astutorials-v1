@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
       },
     });
     await posthog.shutdown();
-    return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-failed`);
+    return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-failed?reason=payment`);
   }
 
   const tx = data.data;
@@ -71,6 +71,18 @@ export async function GET(req: NextRequest) {
     .maybeSingle();
 
   if (!existing) {
+    // Re-check seat availability at verification time to prevent race conditions
+    if (meta.type !== "private" && meta.tutorial_id) {
+      const { data: tutorial } = await supabase
+        .from("tutorials")
+        .select("seats_total, seats_booked")
+        .eq("id", meta.tutorial_id)
+        .single();
+      if (tutorial && tutorial.seats_booked >= tutorial.seats_total) {
+        return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-failed?reason=full`);
+      }
+    }
+
     const { error: insertError } = await supabase.from("bookings").insert({
       tutorial_id: meta.type === "private" ? null : (meta.tutorial_id ?? null),
       org_id: bookingOrgId,
@@ -85,7 +97,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (insertError) {
-      return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-failed`);
+      return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-failed?reason=server`);
     }
 
     // Increment seat counter for group bookings

@@ -142,7 +142,6 @@ describe('PATCH /api/bookings/[ref]', () => {
 
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
-        course: 'ENG101',
         course_of_study: 'English',
         level: '100 Level',
         preferred_schedule: 'Weekday Mornings (8am – 12pm)',

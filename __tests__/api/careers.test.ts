@@ -108,14 +108,14 @@ describe('POST /api/admin/careers', () => {
   });
 
   it('creates a career role and returns 201 with a generated jobId', async () => {
-    const mockFrom = jest.fn().mockReturnValue({
+    mockFrom.mockReturnValue({
       insert: jest.fn().mockReturnValue({
         select: jest.fn().mockReturnValue({
           single: jest.fn().mockResolvedValue({ data: dbCareer, error: null }),
         }),
       }),
     });
-    mockClient(ADMIN_USER, mockFrom);
+    mockClient(ADMIN_USER);
 
     const res = await createCareer(makeRequest('POST', {
       roleTitle: 'Software Engineer', department: 'Engineering',

@@ -24,7 +24,31 @@ export async function GET() {
     .order('created_at', { ascending: true });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+
+  const orgIds = (data ?? []).map(o => o.id);
+
+  const [{ data: roleRows }, { data: tutorialRows }] = await Promise.all([
+    serviceSupabase.from('user_roles').select('org_id').in('org_id', orgIds),
+    serviceSupabase.from('tutorials').select('org_id').in('org_id', orgIds),
+  ]);
+
+  const memberCounts = (roleRows ?? []).reduce<Record<string, number>>((acc, r) => {
+    acc[r.org_id] = (acc[r.org_id] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const tutorialCounts = (tutorialRows ?? []).reduce<Record<string, number>>((acc, t) => {
+    acc[t.org_id] = (acc[t.org_id] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const enriched = (data ?? []).map(o => ({
+    ...o,
+    memberCount: memberCounts[o.id] ?? 0,
+    tutorialCount: tutorialCounts[o.id] ?? 0,
+  }));
+
+  return NextResponse.json(enriched);
 }
 
 export async function POST(request: NextRequest) {

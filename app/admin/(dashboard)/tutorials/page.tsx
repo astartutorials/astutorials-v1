@@ -100,7 +100,7 @@ export default function AdminTutorialsPage() {
   }
 
   const orgOptions = Array.from(
-    new Map(tutorials.filter(t => t.organisations).map(t => [t.org_id, t.organisations!.name])).entries()
+    new Map(tutorials.filter(t => t.organisations && t.org_id).map(t => [t.org_id!, t.organisations!.name])).entries()
   );
 
   const filtered = tutorials.filter((t) => {

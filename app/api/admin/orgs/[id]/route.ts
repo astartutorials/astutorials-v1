@@ -25,15 +25,32 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   const { id } = await params;
 
-  const [{ data: org, error: orgErr }, { data: roleRows }, { count: tutorialCount }] = await Promise.all([
+  const [
+    { data: org, error: orgErr },
+    { data: roleRows },
+    { data: tutorials },
+    { data: paidBookings },
+    { data: allBookings },
+    { data: recentBookings },
+  ] = await Promise.all([
     serviceSupabase.from('organisations').select('*').eq('id', id).single(),
     serviceSupabase.from('user_roles').select('user_id, role, created_at').eq('org_id', id).order('created_at'),
-    serviceSupabase.from('tutorials').select('id', { count: 'exact', head: true }).eq('org_id', id),
+    serviceSupabase.from('tutorials')
+      .select('id, code, title, teacher, date, time, status, seats_total, seats_booked')
+      .eq('org_id', id)
+      .order('created_at', { ascending: false }),
+    serviceSupabase.from('bookings').select('id, amount_paid, email').eq('org_id', id).eq('payment_status', 'paid'),
+    serviceSupabase.from('bookings').select('id, email').eq('org_id', id),
+    serviceSupabase.from('bookings')
+      .select('id, full_name, email, course, amount_paid, payment_status, created_at, tutorial_id, tutorials(code, title)')
+      .eq('org_id', id)
+      .order('created_at', { ascending: false })
+      .limit(10),
   ]);
 
   if (orgErr || !org) return NextResponse.json({ error: 'Organisation not found' }, { status: 404 });
 
-  // Fetch user details for members via admin API
+  // Resolve member user details
   const { data: { users } } = await serviceSupabase.auth.admin.listUsers({ perPage: 1000 });
   const memberIds = (roleRows ?? []).map(r => r.user_id);
   const memberUsers = users.filter(u => memberIds.includes(u.id));
@@ -49,7 +66,22 @@ export async function GET(_req: NextRequest, { params }: Params) {
     };
   });
 
-  return NextResponse.json({ org, members, tutorialCount: tutorialCount ?? 0 });
+  const revenue  = (paidBookings ?? []).reduce((s, b) => s + (b.amount_paid ?? 0), 0);
+  const students = new Set((allBookings ?? []).map(b => b.email)).size;
+
+  return NextResponse.json({
+    org,
+    members,
+    stats: {
+      revenue,
+      students,
+      bookings: (allBookings ?? []).length,
+      activeTutorials: (tutorials ?? []).filter(t => t.status === 'active').length,
+      totalTutorials: (tutorials ?? []).length,
+    },
+    tutorials: tutorials ?? [],
+    recentBookings: recentBookings ?? [],
+  });
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
@@ -81,7 +113,6 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
   const { id } = await params;
 
-  // Block deletion if tutorials exist under this org
   const { count } = await serviceSupabase
     .from('tutorials')
     .select('id', { count: 'exact', head: true })

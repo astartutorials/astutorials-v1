@@ -10,24 +10,44 @@ export interface UserRoleContext {
 
 const PERMISSIONS: Record<AppRole, string[]> = {
   super_admin: ['*'],
+
+  // Runs the organisation: full tutorial control, sees all org data, can invite people
   org_admin: [
     'tutorials:read', 'tutorials:create', 'tutorials:update', 'tutorials:delete',
     'bookings:read', 'bookings:update',
     'payments:read',
-    'careers:read', 'careers:create', 'careers:update', 'careers:delete',
     'feedback:read',
-    'applications:read',
     'invites:create',
-    'settings:read',
+    'careers:read', 'careers:create', 'careers:update', 'careers:delete',
+    'settings:read', 'settings:update',
   ],
+
+  // Schedules and manages tutorials: can create/update but not delete, marks attendance, sees revenue
   tutor_manager: [
     'tutorials:read', 'tutorials:create', 'tutorials:update',
     'bookings:read', 'bookings:update',
     'payments:read',
     'feedback:read',
+    'careers:read',
+    'settings:read', 'settings:update',
   ],
-  tutor: ['tutorials:read', 'bookings:read'],
-  viewer: ['tutorials:read', 'bookings:read', 'payments:read'],
+
+  // Teaches tutorials: sees bookings for their sessions, marks attendance, reads feedback
+  tutor: [
+    'tutorials:read',
+    'bookings:read', 'bookings:update',
+    'feedback:read',
+    'settings:read', 'settings:update',
+  ],
+
+  // Read-only stakeholder: sees everything but changes nothing
+  viewer: [
+    'tutorials:read',
+    'bookings:read',
+    'payments:read',
+    'feedback:read',
+    'settings:read',
+  ],
 };
 
 export function can(role: AppRole, action: string): boolean {
@@ -42,16 +62,20 @@ export async function getUserRole(
   userId: string,
   userMetadata?: Record<string, unknown>
 ): Promise<UserRoleContext | null> {
-  const { data } = await supabase
-    .from('user_roles')
-    .select('role, org_id')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  try {
+    const { data } = await supabase
+      .from('user_roles')
+      .select('role, org_id')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
 
-  if (data) {
-    return { userId, role: data.role as AppRole, orgId: data.org_id ?? null };
+    if (data) {
+      return { userId, role: data.role as AppRole, orgId: data.org_id ?? null };
+    }
+  } catch {
+    // DB unavailable — fall through to metadata
   }
 
   // Fallback to user_metadata during migration period
