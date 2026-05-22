@@ -48,6 +48,20 @@ export async function GET(req: NextRequest) {
   const email = tx.customer?.email ?? "";
   const fullName = meta.full_name ?? tx.customer?.first_name ?? "Student";
   const amountPaid = Math.round(tx.amount / 100);
+  // For group bookings, fetch tutorial upfront so we have org_id and can reuse data for email
+  let tutorialForEmail: { title: string; date: string | null; time: string } | null = null;
+  let bookingOrgId: string | null = meta.org_id ?? null; // private bookings carry org_id in metadata when booking page has context
+  if (meta.type !== "private" && meta.tutorial_id) {
+    const { data: tut } = await supabase
+      .from("tutorials")
+      .select("title, date, time, org_id")
+      .eq("id", meta.tutorial_id)
+      .single();
+    if (tut) {
+      tutorialForEmail = { title: tut.title, date: tut.date, time: tut.time };
+      bookingOrgId = tut.org_id ?? null;
+    }
+  }
 
   // Record the payment — both private and group bookings get a DB row
   const { data: existing } = await supabase
@@ -59,6 +73,7 @@ export async function GET(req: NextRequest) {
   if (!existing) {
     const { error: insertError } = await supabase.from("bookings").insert({
       tutorial_id: meta.type === "private" ? null : (meta.tutorial_id ?? null),
+      org_id: bookingOrgId,
       full_name: fullName,
       email,
       phone: meta.phone ?? null,
@@ -100,24 +115,16 @@ export async function GET(req: NextRequest) {
   }
 
   // Group tutorial → send confirmation email, redirect to success page
-  if (email && meta.tutorial_id) {
-    const { data: tutorial } = await supabase
-      .from("tutorials")
-      .select("title, date, time")
-      .eq("id", meta.tutorial_id)
-      .single();
-
-    if (tutorial) {
-      await sendGroupBookingConfirmation({
-        to: email,
-        fullName,
-        tutorialTitle: tutorial.title,
-        tutorialDate: tutorial.date ?? "Date TBD",
-        tutorialTime: tutorial.time,
-        amountPaid,
-        reference,
-      });
-    }
+  if (email && tutorialForEmail) {
+    await sendGroupBookingConfirmation({
+      to: email,
+      fullName,
+      tutorialTitle: tutorialForEmail.title,
+      tutorialDate: tutorialForEmail.date ?? "Date TBD",
+      tutorialTime: tutorialForEmail.time,
+      amountPaid,
+      reference,
+    });
   }
 
   return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-details?ref=${reference}`);

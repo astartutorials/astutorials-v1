@@ -5,7 +5,11 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import EmailModal from "@/components/tutorials/EmailModal";
 
-export default function PricingSection() {
+interface PricingSectionProps {
+    orgId?: string;
+}
+
+export default function PricingSection({ orgId }: PricingSectionProps) {
     const [modalOpen, setModalOpen] = useState(false);
 
     return (
@@ -38,7 +42,7 @@ export default function PricingSection() {
                 </button>
             </motion.div>
 
-            {modalOpen && <EmailModal onClose={() => setModalOpen(false)} />}
+            {modalOpen && <EmailModal onClose={() => setModalOpen(false)} orgId={orgId} />}
         </section>
     );
 }

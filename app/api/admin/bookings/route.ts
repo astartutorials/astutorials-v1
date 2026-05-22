@@ -22,7 +22,7 @@ export async function GET() {
 
   let query = serviceSupabase
     .from("bookings")
-    .select("id, full_name, email, phone, course, course_of_study, level, preferred_schedule, notes, amount_paid, payment_status, payment_reference, created_at, tutorials(title, price, org_id)")
+    .select("id, full_name, email, phone, course, course_of_study, level, preferred_schedule, notes, amount_paid, payment_status, payment_reference, created_at, org_id, tutorials(title, price)")
     .order("created_at", { ascending: false });
 
   const { data, error } = await query;
@@ -31,7 +31,7 @@ export async function GET() {
   // Filter by org for non-super_admin
   const filtered = ctx.role === 'super_admin'
     ? data
-    : data?.filter((b: any) => b.tutorials?.org_id === ctx.orgId);
+    : data?.filter((b: any) => b.org_id === ctx.orgId);
 
   return NextResponse.json(filtered);
 }

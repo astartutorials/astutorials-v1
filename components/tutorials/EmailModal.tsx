@@ -7,12 +7,13 @@ import posthog from "posthog-js";
 
 interface EmailModalProps {
   onClose: () => void;
+  orgId?: string;
 }
 
 const inputClass =
   "w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-300 text-gray-800 text-base";
 
-export default function EmailModal({ onClose }: EmailModalProps) {
+export default function EmailModal({ onClose, orgId }: EmailModalProps) {
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -54,6 +55,7 @@ export default function EmailModal({ onClose }: EmailModalProps) {
             phone: form.phone,
             course: form.course,
             notes: form.notes,
+            ...(orgId ? { org_id: orgId } : {}),
           },
         }),
       });

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   LayoutDashboard,
   GraduationCap,
@@ -13,11 +13,13 @@ import {
   CreditCard,
   Users,
   Settings,
+  Building2,
   LogOut,
   Loader2,
   X,
 } from "lucide-react";
 import type { AppRole } from "@/lib/rbac";
+import { useAdminUser } from "@/lib/admin-context";
 
 interface AdminSidebarProps {
   isOpen?: boolean;
@@ -33,6 +35,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { name: "Dashboard",         href: "/admin/dashboard",       icon: LayoutDashboard, roles: ['super_admin', 'org_admin', 'tutor_manager', 'viewer'] },
+  { name: "Organisations",     href: "/admin/orgs",            icon: Building2,       roles: ['super_admin'] },
   { name: "Tutorials",         href: "/admin/tutorials",       icon: GraduationCap,   roles: ['super_admin', 'org_admin', 'tutor_manager', 'viewer'] },
   { name: "Schedule Tutorial", href: "/admin/create-tutorial", icon: PlusCircle,      roles: ['super_admin', 'org_admin', 'tutor_manager'] },
   { name: "Feedback",          href: "/admin/feedback",        icon: MessageSquare,   roles: ['super_admin', 'org_admin', 'tutor_manager'] },
@@ -54,22 +57,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [adminName, setAdminName] = useState("Admin");
-  const [adminEmail, setAdminEmail] = useState("");
-  const [role, setRole] = useState<AppRole | null>(null);
-
-  useEffect(() => {
-    fetch("/api/admin/me")
-      .then((r) => r.json())
-      .then((d) => {
-        if (!d.error) {
-          setAdminName(d.name ?? "Admin");
-          setAdminEmail(d.email ?? "");
-          setRole(d.role ?? null);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const { name: adminName, email: adminEmail, role } = useAdminUser();
 
   async function handleLogout() {
     setIsLoggingOut(true);
