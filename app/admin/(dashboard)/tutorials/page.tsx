@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, PlusCircle, Eye, Pencil, Trash2, GraduationCap, Loader2, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { useAdminUser } from "@/lib/admin-context";
 
 type Tutorial = {
   id: string;
@@ -14,6 +15,8 @@ type Tutorial = {
   time: string;
   seats_total: number;
   status: string;
+  org_id: string | null;
+  organisations: { name: string } | null;
   bookings: { id: string }[];
 };
 
@@ -54,10 +57,12 @@ export default function AdminTutorialsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [orgFilter, setOrgFilter] = useState("all");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<TutorialSortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [fetchError, setFetchError] = useState(false);
+  const { role } = useAdminUser();
 
   function handleSort(key: TutorialSortKey) {
     if (sortKey === key) {
@@ -94,15 +99,19 @@ export default function AdminTutorialsPage() {
     setDeletingId(null);
   }
 
+  const orgOptions = Array.from(
+    new Map(tutorials.filter(t => t.organisations).map(t => [t.org_id, t.organisations!.name])).entries()
+  );
+
   const filtered = tutorials.filter((t) => {
     const q = searchQuery.toLowerCase();
     const matchSearch =
       t.code.toLowerCase().includes(q) ||
       t.title.toLowerCase().includes(q) ||
-      t.teacher.toLowerCase().includes(q);
-    const matchStatus =
-      statusFilter === "all" || t.status === statusFilter;
-    return matchSearch && matchStatus;
+      (t.teacher ?? '').toLowerCase().includes(q);
+    const matchStatus = statusFilter === "all" || t.status === statusFilter;
+    const matchOrg = orgFilter === "all" || t.org_id === orgFilter;
+    return matchSearch && matchStatus && matchOrg;
   });
 
   const sorted = [...filtered].sort((a, b) => {
@@ -196,6 +205,18 @@ export default function AdminTutorialsPage() {
             <option value="draft">Drafts</option>
             <option value="completed">Completed</option>
           </select>
+          {role === 'super_admin' && orgOptions.length > 1 && (
+            <select
+              value={orgFilter}
+              onChange={(e) => setOrgFilter(e.target.value)}
+              className="px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm cursor-pointer"
+            >
+              <option value="all">All Organisations</option>
+              {orgOptions.map(([id, name]) => (
+                <option key={id} value={id}>{name}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div className="overflow-x-auto">
@@ -247,6 +268,9 @@ export default function AdminTutorialsPage() {
                         <div className="min-w-0">
                           <p className="font-bold text-[#0B1120] text-sm leading-tight">{item.code}</p>
                           <p className="text-xs text-gray-500 truncate">{item.title}</p>
+                          {role === 'super_admin' && item.organisations && (
+                            <p className="text-[10px] text-blue-500 font-medium truncate mt-0.5">{item.organisations.name}</p>
+                          )}
                         </div>
                       </div>
 

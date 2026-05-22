@@ -5,6 +5,7 @@ import {
   User, GraduationCap, BellRing, CreditCard, Shield,
   Save, Lock, UserPlus, X, Loader2, CheckCircle2, AlertCircle,
 } from "lucide-react";
+import { useAdminUser } from "@/lib/admin-context";
 
 const inputClass =
   "w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-gray-800 bg-white text-sm";
@@ -44,12 +45,14 @@ function Toast({ message, type }: { message: string; type: "success" | "error" }
 }
 
 export default function AdminSettingsPage() {
+  const { name, email, phone, role, loading: roleLoading, refresh: refreshAdmin } = useAdminUser();
+  const isSuperAdmin = role === 'super_admin';
+
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   const [formData, setFormData] = useState({
     adminName: "",
@@ -80,20 +83,10 @@ export default function AdminSettingsPage() {
   const [registerSaving, setRegisterSaving] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/me")
-      .then((r) => r.json())
-      .then((d) => {
-        if (!d.error) {
-          setFormData((prev) => ({
-            ...prev,
-            adminName: d.name ?? "",
-            email: d.email ?? "",
-            phone: d.phone ?? "",
-          }));
-          setIsSuperAdmin(d.role === "super_admin");
-        }
-      });
-  }, []);
+    if (!roleLoading) {
+      setFormData(prev => ({ ...prev, adminName: name, email, phone }));
+    }
+  }, [roleLoading, name, email, phone]);
 
   function showToast(message: string, type: "success" | "error") {
     setToast({ message, type });

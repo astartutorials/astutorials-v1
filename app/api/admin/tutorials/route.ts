@@ -22,7 +22,7 @@ export async function GET() {
 
   let query = serviceSupabase
     .from('tutorials')
-    .select('id, code, title, teacher, date, time, seats_total, status, location, org_id, bookings(id)')
+    .select('id, code, title, teacher, date, time, seats_total, status, location, org_id, organisations(name), bookings(id)')
     .order('created_at', { ascending: false });
 
   // Non-super_admin users only see their org's tutorials

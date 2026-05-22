@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Clock, Eye, Loader2, MapPin } from "lucide-react";
+import { Calendar, Clock, Eye, Loader2, MapPin, Building2 } from "lucide-react";
+import { useAdminUser } from "@/lib/admin-context";
 
 const inputClass =
   "w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm";
+
+type Org = { id: string; name: string };
 
 export default function CreateTutorialPage() {
   const router = useRouter();
@@ -20,9 +23,20 @@ export default function CreateTutorialPage() {
     capacity: "",
     price: "",
   });
+  const [orgId, setOrgId] = useState("");
   const [visible, setVisible] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [orgs, setOrgs] = useState<Org[]>([]);
+  const { role } = useAdminUser();
+
+  useEffect(() => {
+    if (role === 'super_admin') {
+      fetch("/api/admin/orgs").then(r => r.json()).then(data => {
+        if (Array.isArray(data)) setOrgs(data);
+      }).catch(() => {});
+    }
+  }, [role]);
 
   const set = (key: string, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -53,6 +67,7 @@ export default function CreateTutorialPage() {
           capacity: form.capacity ? Number(form.capacity) : 30,
           price: form.price ? Number(form.price) : 0,
           status,
+          ...(role === 'super_admin' && orgId ? { orgId } : {}),
         }),
       });
       if (!res.ok) {
@@ -78,6 +93,25 @@ export default function CreateTutorialPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+        {role === 'super_admin' && orgs.length > 0 && (
+          <div className="mb-8 pb-6 border-b border-gray-100">
+            <div className="flex items-center gap-2 mb-3">
+              <Building2 size={16} className="text-[#D93025]" />
+              <h3 className="font-bold text-[#D93025] text-sm">Organisation</h3>
+            </div>
+            <select
+              value={orgId}
+              onChange={(e) => setOrgId(e.target.value)}
+              className="w-full max-w-sm px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm"
+            >
+              <option value="">Select organisation...</option>
+              {orgs.map(o => (
+                <option key={o.id} value={o.id}>{o.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
           {/* Left — General Info */}
           <div className="space-y-5">
