@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { getUserRole, can } from '@/lib/rbac';
 
 export async function PUT(
   request: NextRequest,
@@ -8,11 +9,15 @@ export async function PUT(
   try {
     const { id } = await params;
     const supabase = await createSupabaseServerClient();
-    
-    // Auth check
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const ctx = await getUserRole(supabase, user.id, user.user_metadata as Record<string, unknown>);
+    if (!ctx || !can(ctx.role, 'careers:update')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -88,11 +93,15 @@ export async function DELETE(
   try {
     const { id } = await params;
     const supabase = await createSupabaseServerClient();
-    
-    // Auth check
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const ctx = await getUserRole(supabase, user.id, user.user_metadata as Record<string, unknown>);
+    if (!ctx || !can(ctx.role, 'careers:delete')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const { error } = await supabase

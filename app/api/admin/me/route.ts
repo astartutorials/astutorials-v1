@@ -1,16 +1,21 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { getUserRole } from '@/lib/rbac';
 
 export async function GET() {
   const supabase = await createSupabaseServerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const ctx = await getUserRole(supabase, user.id, user.user_metadata as Record<string, unknown>);
+
   return NextResponse.json({
     id: user.id,
     email: user.email ?? '',
     name: (user.user_metadata?.full_name as string) ?? user.email?.split('@')[0] ?? 'Admin',
     phone: (user.user_metadata?.phone as string) ?? '',
+    role: ctx?.role ?? null,
+    orgId: ctx?.orgId ?? null,
   });
 }
 

@@ -17,22 +17,38 @@ import {
   Loader2,
   X,
 } from "lucide-react";
+import type { AppRole } from "@/lib/rbac";
 
 interface AdminSidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
 }
 
-const navItems = [
-  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Tutorials", href: "/admin/tutorials", icon: GraduationCap },
-  { name: "Schedule Tutorial", href: "/admin/create-tutorial", icon: PlusCircle },
-  { name: "Feedback", href: "/admin/feedback", icon: MessageSquare },
-  { name: "Careers", href: "/admin/careers", icon: Briefcase },
-  { name: "Applications", href: "/admin/applications", icon: Users },
-  { name: "Payments", href: "/admin/payments", icon: CreditCard },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
+type NavItem = {
+  name: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  roles: AppRole[];
+};
+
+const NAV_ITEMS: NavItem[] = [
+  { name: "Dashboard",         href: "/admin/dashboard",       icon: LayoutDashboard, roles: ['super_admin', 'org_admin', 'tutor_manager', 'viewer'] },
+  { name: "Tutorials",         href: "/admin/tutorials",       icon: GraduationCap,   roles: ['super_admin', 'org_admin', 'tutor_manager', 'viewer'] },
+  { name: "Schedule Tutorial", href: "/admin/create-tutorial", icon: PlusCircle,      roles: ['super_admin', 'org_admin', 'tutor_manager'] },
+  { name: "Feedback",          href: "/admin/feedback",        icon: MessageSquare,   roles: ['super_admin', 'org_admin', 'tutor_manager'] },
+  { name: "Careers",           href: "/admin/careers",         icon: Briefcase,       roles: ['super_admin', 'org_admin'] },
+  { name: "Applications",      href: "/admin/applications",    icon: Users,           roles: ['super_admin', 'org_admin'] },
+  { name: "Payments",          href: "/admin/payments",        icon: CreditCard,      roles: ['super_admin', 'org_admin', 'tutor_manager', 'viewer'] },
+  { name: "Settings",          href: "/admin/settings",        icon: Settings,        roles: ['super_admin'] },
 ];
+
+const ROLE_LABELS: Record<AppRole, string> = {
+  super_admin: 'Super Admin',
+  org_admin: 'Org Admin',
+  tutor_manager: 'Tutor Manager',
+  tutor: 'Tutor',
+  viewer: 'Viewer',
+};
 
 export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
@@ -40,6 +56,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [adminName, setAdminName] = useState("Admin");
   const [adminEmail, setAdminEmail] = useState("");
+  const [role, setRole] = useState<AppRole | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/me")
@@ -48,6 +65,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         if (!d.error) {
           setAdminName(d.name ?? "Admin");
           setAdminEmail(d.email ?? "");
+          setRole(d.role ?? null);
         }
       })
       .catch(() => {});
@@ -65,6 +83,10 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
   const isActive = (path: string) =>
     pathname === path || pathname?.startsWith(`${path}/`);
+
+  const visibleItems = role
+    ? NAV_ITEMS.filter(item => item.roles.includes(role))
+    : NAV_ITEMS;
 
   return (
     <>
@@ -91,7 +113,6 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             <p className="font-bold text-white text-sm leading-tight">A-Star</p>
             <p className="text-white/40 text-[10px] uppercase tracking-widest leading-tight">Admin Panel</p>
           </div>
-          {/* Mobile close button */}
           <button
             onClick={onClose}
             className="lg:hidden absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-white/50 hover:text-white transition-colors"
@@ -102,7 +123,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 py-6 px-3 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) => {
+          {visibleItems.map((item) => {
             const active = isActive(item.href);
             return (
               <Link
@@ -127,18 +148,18 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
         {/* Bottom user + logout */}
         <div className="border-t border-white/10 p-3 space-y-1">
-          {/* User info */}
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl">
             <div className="w-8 h-8 rounded-full bg-[#D93025]/20 text-[#D93025] flex items-center justify-center font-bold text-xs flex-shrink-0">
               {adminName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "AD"}
             </div>
             <div className="min-w-0">
               <p className="text-white text-xs font-semibold truncate">{adminName}</p>
-              <p className="text-white/40 text-[10px] truncate">{adminEmail}</p>
+              <p className="text-white/40 text-[10px] truncate">
+                {role ? ROLE_LABELS[role] : adminEmail}
+              </p>
             </div>
           </div>
 
-          {/* Logout */}
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}

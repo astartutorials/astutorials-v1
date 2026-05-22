@@ -14,12 +14,12 @@ const selectClass =
 
 type TabId = "profile" | "tutorials" | "notifications" | "payments" | "security";
 
-const tabs: { id: TabId; name: string; icon: typeof User }[] = [
+const ALL_TABS: { id: TabId; name: string; icon: typeof User; superAdminOnly?: boolean }[] = [
   { id: "profile", name: "Profile", icon: User },
   { id: "tutorials", name: "Tutorials", icon: GraduationCap },
   { id: "notifications", name: "Notifications", icon: BellRing },
   { id: "payments", name: "Payments", icon: CreditCard },
-  { id: "security", name: "Security", icon: Shield },
+  { id: "security", name: "Security", icon: Shield, superAdminOnly: true },
 ];
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
@@ -49,6 +49,7 @@ export default function AdminSettingsPage() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   const [formData, setFormData] = useState({
     adminName: "",
@@ -89,6 +90,7 @@ export default function AdminSettingsPage() {
             email: d.email ?? "",
             phone: d.phone ?? "",
           }));
+          setIsSuperAdmin(d.role === "super_admin");
         }
       });
   }, []);
@@ -186,7 +188,7 @@ export default function AdminSettingsPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 p-1.5 mb-6 flex flex-wrap gap-1">
-        {tabs.map((tab) => (
+        {ALL_TABS.filter(t => !t.superAdminOnly || isSuperAdmin).map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
