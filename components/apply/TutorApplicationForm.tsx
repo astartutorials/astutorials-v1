@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Send, CheckCircle2, AlertCircle, Loader2, Info } from "lucide-react";
 import posthog from "posthog-js";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const EDUCATION_LEVELS = ["Secondary", "Undergraduate", "Postgraduate", "PhD", "Professional Certification"];
 const LEVELS_CAN_TEACH = [
@@ -119,6 +120,8 @@ export default function TutorApplicationForm() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [apiError, setApiError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<any>(null);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -171,8 +174,9 @@ export default function TutorApplicationForm() {
       const res = await fetch("/api/tutor-applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, turnstileToken }),
       });
+      turnstileRef.current?.reset();
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -524,10 +528,18 @@ export default function TutorApplicationForm() {
           </div>
         )}
 
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '1x00000000000000000000AA'}
+          onSuccess={setTurnstileToken}
+          onExpire={() => setTurnstileToken(null)}
+          options={{ appearance: 'interaction-only' }}
+        />
+
         <div className="pt-4">
           <button
             type="submit"
-            disabled={status === "submitting"}
+            disabled={status === "submitting" || !turnstileToken}
             className="w-full btn-primary bg-[var(--astar-red)] text-white font-bold text-lg py-4 rounded-xl shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-lg"
           >
             {status === "submitting" ? (

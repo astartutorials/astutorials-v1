@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getPostHogClient } from '@/lib/posthog-server';
-
+import { checkLoginRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+    const { allowed } = await checkLoginRateLimit(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Too many login attempts. Please wait 10 minutes and try again.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { email, password } = body;
 

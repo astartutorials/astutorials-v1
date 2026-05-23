@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 const NOTION_DATABASE_ID = "fc8883564840431fa1ed4158744542dd";
 
@@ -49,7 +50,12 @@ export async function POST(req: NextRequest) {
     timeOfDay,
     cvLink,
     linkedinPortfolio,
+    turnstileToken,
   } = body as Record<string, unknown>;
+
+  if (!await verifyTurnstile(typeof turnstileToken === 'string' ? turnstileToken : undefined)) {
+    return NextResponse.json({ error: "Bot verification failed. Please try again." }, { status: 403 });
+  }
 
   if (!fullName || !String(fullName).trim()) {
     return NextResponse.json({ error: "Full name is required" }, { status: 400 });

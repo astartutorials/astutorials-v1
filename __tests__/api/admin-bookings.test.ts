@@ -93,7 +93,8 @@ describe('GET /api/admin/bookings', () => {
 
   it('applies org_id filter when user is org_admin with an assigned org', async () => {
     // Set up the auth client so getUserRole reads from DB and gets org_id: 'org-uuid'
-    const maybeSingle = jest.fn().mockResolvedValue({ data: { role: 'org_admin', org_id: 'org-uuid' } });
+    // getUserRole now uses .order().limit(2) returning an array (nulls-first for platform-wide priority)
+    const limit = jest.fn().mockResolvedValue({ data: [{ role: 'org_admin', org_id: 'org-uuid' }] });
     mockServerClient.mockResolvedValue({
       auth: {
         getUser: jest.fn().mockResolvedValue({
@@ -104,9 +105,7 @@ describe('GET /api/admin/bookings', () => {
       from: jest.fn().mockReturnValue({
         select: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockReturnValue({
-              limit: jest.fn().mockReturnValue({ maybeSingle }),
-            }),
+            order: jest.fn().mockReturnValue({ limit }),
           }),
         }),
       }),

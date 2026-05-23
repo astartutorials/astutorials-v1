@@ -1,4 +1,4 @@
-const FROM = "A-Star Tutorials <bookings@astartutorials.com>";
+const FROM = "Juyi at A-Star Tutorials <bookings@astartutorials.com>";
 const RESEND_URL = "https://api.resend.com/emails";
 
 async function send(to: string, subject: string, html: string) {

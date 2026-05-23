@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   DollarSign, Users, GraduationCap, Star, Calendar,
-  MessageSquare, Building2, TrendingUp, Loader2,
+  MessageSquare, Building2, TrendingUp, Loader2, CreditCard,
 } from "lucide-react";
 import { useAdminUser } from "@/lib/admin-context";
 import { can } from "@/lib/rbac";
@@ -43,12 +43,24 @@ type OrgStat = {
 type RawPaid = { created_at: string; amount_paid: number; org_id: string | null };
 type RawAll  = { created_at: string; email: string; org_id: string | null };
 
+type RecentPayment = {
+  id: string;
+  full_name: string;
+  email: string;
+  amount_paid: number;
+  payment_reference: string | null;
+  created_at: string;
+  org_id: string | null;
+  tutorials: { title: string } | null;
+};
+
 type DashboardData = {
   totals: { revenue: number; students: number; activeTutorials: number; avgRating: number | null; orgCount: number };
   byOrg: OrgStat[];
   orgNames: string[];
   upcoming: any[];
   recentFeedback: any[];
+  recentPayments: RecentPayment[];
   rawPaidBookings: RawPaid[];
   rawAllBookings: RawAll[];
 };
@@ -246,7 +258,7 @@ export default function AdminDashboardPage() {
 
   if (!data || !periodData) return null;
 
-  const { totals, byOrg, orgNames, upcoming, recentFeedback } = data;
+  const { totals, byOrg, orgNames, upcoming, recentFeedback, recentPayments } = data;
   const { filteredByOrg, timeSeries, periodRevenue, periodStudents } = periodData;
 
   const revenueChartData  = filteredByOrg.map(o => ({ name: o.orgName, value: o.revenue }));
@@ -421,6 +433,45 @@ export default function AdminDashboardPage() {
             </ResponsiveContainer>
           </div>
         </>
+      )}
+
+      {/* Recent Payments — payments:read only */}
+      {showRevenue && (
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 className="text-base font-bold text-[#0B1120] flex items-center gap-2">
+              <CreditCard size={16} className="text-[#D93025]" />
+              Recent Payments
+            </h2>
+            <Link href="/admin/payments" className="text-xs font-semibold text-[#D93025] hover:underline">View All →</Link>
+          </div>
+          {recentPayments.length > 0 ? (
+            <div className="divide-y divide-gray-50">
+              {recentPayments.map((p) => (
+                <div key={p.id} className="px-6 py-4 flex items-center gap-4 hover:bg-gray-50/50 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center font-bold text-sm text-emerald-600 flex-shrink-0">
+                    {initials(p.full_name)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[#0B1120] text-sm leading-tight truncate">{p.full_name}</p>
+                    <p className="text-xs text-gray-500 truncate">{p.tutorials?.title ?? 'Private Session'}</p>
+                    {isSuperAdmin && p.org_id && (
+                      <p className="text-[10px] text-gray-400 mt-0.5">{byOrg.find(o => o.orgId === p.org_id)?.orgName ?? ''}</p>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+                    <span className="text-sm font-bold text-emerald-600">{fmtFull(p.amount_paid)}</span>
+                    <span className="text-[10px] text-gray-400">{timeAgo(p.created_at)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="px-6 py-10 text-center">
+              <p className="text-sm text-gray-400">No payments recorded yet.</p>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Upcoming + Feedback */}

@@ -4,6 +4,11 @@ jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({ from: jest.fn() })),
 }));
 
+const mockVerifyTurnstile = jest.fn().mockResolvedValue(true);
+jest.mock('@/lib/turnstile', () => ({
+  verifyTurnstile: (...args: any[]) => mockVerifyTurnstile(...args),
+}));
+
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 
@@ -27,6 +32,14 @@ function makeRequest(body: object) {
 }
 
 describe('POST /api/feedback', () => {
+  beforeEach(() => mockVerifyTurnstile.mockResolvedValue(true));
+
+  it('returns 403 when Turnstile verification fails', async () => {
+    mockVerifyTurnstile.mockResolvedValueOnce(false);
+    const res = await POST(makeRequest({ rating: 4, turnstileToken: 'bad-token' }));
+    expect(res.status).toBe(403);
+  });
+
   it('returns 400 on invalid JSON body', async () => {
     const req = new NextRequest('http://localhost:3000/api/feedback', {
       method: 'POST',

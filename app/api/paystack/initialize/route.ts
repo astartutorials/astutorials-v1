@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,7 +8,11 @@ const supabase = createClient(
 );
 
 export async function POST(req: NextRequest) {
-  const { email, amount, metadata } = await req.json();
+  const { email, amount, metadata, turnstileToken } = await req.json();
+
+  if (!await verifyTurnstile(turnstileToken)) {
+    return NextResponse.json({ error: "Bot verification failed. Please try again." }, { status: 403 });
+  }
 
   if (!email || !amount) {
     return NextResponse.json({ error: "Email and amount are required" }, { status: 400 });

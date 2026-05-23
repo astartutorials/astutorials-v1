@@ -17,6 +17,8 @@ import {
   LogOut,
   Loader2,
   X,
+  BarChart2,
+  ExternalLink,
 } from "lucide-react";
 import type { AppRole } from "@/lib/rbac";
 import { useAdminUser } from "@/lib/admin-context";
@@ -133,6 +135,22 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             );
           })}
         </nav>
+
+        {/* PostHog analytics link — super_admin only */}
+        {role === 'super_admin' && (
+          <div className="px-3 pb-4">
+            <a
+              href="https://app.posthog.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/50 hover:text-white/90 hover:bg-white/5 transition-all"
+            >
+              <BarChart2 size={18} className="flex-shrink-0" />
+              <span className="text-sm">Analytics</span>
+              <ExternalLink size={12} className="ml-auto opacity-50" />
+            </a>
+          </div>
+        )}
 
         {/* Bottom user + logout */}
         <div className="border-t border-white/10 p-3 space-y-1">

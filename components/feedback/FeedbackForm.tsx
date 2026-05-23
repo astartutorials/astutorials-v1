@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { Star, Send, ThumbsUp, Loader2 } from "lucide-react";
 import posthog from "posthog-js";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function FeedbackForm() {
   const [rating, setRating] = useState(0);
@@ -12,6 +13,8 @@ export default function FeedbackForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [comment, setComment] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<any>(null);
 
   if (submitted) {
     return (
@@ -46,8 +49,9 @@ export default function FeedbackForm() {
           const res = await fetch("/api/feedback", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ rating, comment }),
+            body: JSON.stringify({ rating, comment, turnstileToken }),
           });
+          turnstileRef.current?.reset();
           if (!res.ok) {
             const data = await res.json().catch(() => ({}));
             setError(data.error ?? "Something went wrong. Please try again.");
@@ -111,9 +115,17 @@ export default function FeedbackForm() {
           <p className="text-sm text-red-500 text-center -mt-4">{error}</p>
         )}
 
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '1x00000000000000000000AA'}
+          onSuccess={setTurnstileToken}
+          onExpire={() => setTurnstileToken(null)}
+          options={{ appearance: 'interaction-only' }}
+        />
+
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !turnstileToken}
           className="w-full btn-primary bg-[var(--astar-red)] text-white font-bold text-lg py-4 rounded-full shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0"
         >
           {loading ? (

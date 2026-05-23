@@ -63,16 +63,18 @@ export async function getUserRole(
   userMetadata?: Record<string, unknown>
 ): Promise<UserRoleContext | null> {
   try {
-    const { data } = await supabase
+    // Prefer the platform-wide row (org_id IS NULL) — super_admin has no org scope.
+    // Fall back to the most-recent org-scoped row if no platform-wide role exists.
+    const { data: rows } = await supabase
       .from('user_roles')
       .select('role, org_id')
       .eq('user_id', userId)
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .maybeSingle();
+      .order('org_id', { ascending: true, nullsFirst: true })
+      .limit(2);
 
-    if (data) {
-      return { userId, role: data.role as AppRole, orgId: data.org_id ?? null };
+    const row = rows?.[0];
+    if (row) {
+      return { userId, role: row.role as AppRole, orgId: row.org_id ?? null };
     }
   } catch {
     // DB unavailable — fall through to metadata

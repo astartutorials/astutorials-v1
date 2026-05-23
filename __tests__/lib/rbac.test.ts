@@ -79,9 +79,8 @@ describe('can()', () => {
 });
 
 describe('getUserRole()', () => {
-  function makeSupabaseWithRow(row: object | null) {
-    const maybeSingle = jest.fn().mockResolvedValue({ data: row });
-    const limit = jest.fn().mockReturnValue({ maybeSingle });
+  function makeSupabaseWithRows(rows: object[] | null) {
+    const limit = jest.fn().mockResolvedValue({ data: rows });
     const order = jest.fn().mockReturnValue({ limit });
     const eq = jest.fn().mockReturnValue({ order });
     const select = jest.fn().mockReturnValue({ eq });
@@ -89,14 +88,25 @@ describe('getUserRole()', () => {
   }
 
   it('returns the role and orgId from the DB when a row is found', async () => {
-    const supabase = makeSupabaseWithRow({ role: 'org_admin', org_id: 'org-uuid' });
+    const supabase = makeSupabaseWithRows([{ role: 'org_admin', org_id: 'org-uuid' }]);
     const result = await getUserRole(supabase, 'user-1');
     expect(result?.role).toBe('org_admin');
     expect(result?.orgId).toBe('org-uuid');
   });
 
   it('returns null orgId when org_id is null in the DB', async () => {
-    const supabase = makeSupabaseWithRow({ role: 'super_admin', org_id: null });
+    const supabase = makeSupabaseWithRows([{ role: 'super_admin', org_id: null }]);
+    const result = await getUserRole(supabase, 'user-1');
+    expect(result?.role).toBe('super_admin');
+    expect(result?.orgId).toBeNull();
+  });
+
+  it('prefers the platform-wide row (org_id NULL) over an org-scoped row', async () => {
+    // DB returns nulls-first: super_admin row comes before org_admin row
+    const supabase = makeSupabaseWithRows([
+      { role: 'super_admin', org_id: null },
+      { role: 'org_admin', org_id: 'org-uuid' },
+    ]);
     const result = await getUserRole(supabase, 'user-1');
     expect(result?.role).toBe('super_admin');
     expect(result?.orgId).toBeNull();
@@ -120,13 +130,13 @@ describe('getUserRole()', () => {
   });
 
   it('returns null when DB has no row and metadata has no recognized role', async () => {
-    const supabase = makeSupabaseWithRow(null);
+    const supabase = makeSupabaseWithRows([]);
     const result = await getUserRole(supabase, 'user-1', { role: 'unknown' });
     expect(result).toBeNull();
   });
 
   it('prefers DB data over user_metadata', async () => {
-    const supabase = makeSupabaseWithRow({ role: 'tutor', org_id: 'org-2' });
+    const supabase = makeSupabaseWithRows([{ role: 'tutor', org_id: 'org-2' }]);
     // Even though metadata says super_admin, DB says tutor
     const result = await getUserRole(supabase, 'user-1', { role: 'super_admin' });
     expect(result?.role).toBe('tutor');

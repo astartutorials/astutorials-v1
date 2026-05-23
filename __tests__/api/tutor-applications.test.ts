@@ -7,6 +7,11 @@ jest.mock('@supabase/supabase-js', () => ({
   })),
 }));
 
+const mockVerifyTurnstile = jest.fn().mockResolvedValue(true);
+jest.mock('@/lib/turnstile', () => ({
+  verifyTurnstile: (...args: any[]) => mockVerifyTurnstile(...args),
+}));
+
 jest.mock('@/lib/posthog-server', () => ({
   getPostHogClient: jest.fn(() => ({ capture: jest.fn(), identify: jest.fn(), shutdown: jest.fn() })),
 }));
@@ -47,6 +52,13 @@ describe('POST /api/tutor-applications', () => {
   beforeEach(() => {
     (global.fetch as jest.Mock).mockReset();
     mockSbInsert.mockReset();
+    mockVerifyTurnstile.mockResolvedValue(true);
+  });
+
+  it('returns 403 when Turnstile verification fails', async () => {
+    mockVerifyTurnstile.mockResolvedValueOnce(false);
+    const res = await POST(makeRequest({ ...validBody, turnstileToken: 'bad-token' }));
+    expect(res.status).toBe(403);
   });
 
   it('returns 500 when NOTION_CONNECTION_KEY is not set', async () => {
