@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getPostHogClient } from '@/lib/posthog-server';
 import { checkLoginRateLimit } from '@/lib/rate-limit';
+import { logAuditEvent } from '@/lib/audit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,6 +85,17 @@ export async function POST(request: NextRequest) {
       properties: { role: roleCtx.role, orgId: roleCtx.orgId },
     });
     await posthog.shutdown();
+
+    await logAuditEvent({
+      actorId: data.user.id,
+      actorEmail: data.user.email ?? '',
+      action: 'admin.login',
+      orgId: roleCtx.orgId,
+      details: {
+        role: roleCtx.role,
+        name: data.user.user_metadata?.full_name ?? data.user.email,
+      },
+    });
 
     return NextResponse.json({
       admin: {

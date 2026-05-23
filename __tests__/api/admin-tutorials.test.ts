@@ -5,6 +5,8 @@ jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({ from: jest.fn() })),
 }));
 
+jest.mock('@/lib/audit', () => ({ logAuditEvent: jest.fn() }));
+
 // auth client (used by POST / PUT / DELETE)
 jest.mock('@/lib/supabase-server', () => ({
   createSupabaseServerClient: jest.fn(),
@@ -192,6 +194,11 @@ describe('DELETE /api/admin/tutorials/[id]', () => {
 
   it('deletes a tutorial and returns 200', async () => {
     const mockFrom = jest.fn().mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          single: jest.fn().mockResolvedValue({ data: { code: 'CS101', title: 'Test Tutorial', org_id: null } }),
+        }),
+      }),
       delete: jest.fn().mockReturnValue({
         eq: jest.fn().mockResolvedValue({ error: null }),
       }),

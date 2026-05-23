@@ -316,11 +316,13 @@ describe('DELETE /api/admin/orgs/[id]', () => {
 
   it('deletes the org and returns 200 when no tutorials exist', async () => {
     mockAuth(SUPER_ADMIN);
-    // Count check returns 0
+    // Call 1: tutorial count check
     const mockEq = jest.fn().mockResolvedValue({ count: 0, error: null });
     const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
     mockServiceFrom.mockReturnValueOnce({ select: mockSelect });
-    // Delete call
+    // Call 2: org name fetch before delete
+    mockServiceFrom.mockReturnValueOnce(makeChain({ name: 'Test Org' }));
+    // Call 3: delete
     mockServiceFrom.mockReturnValueOnce(makeChain(null));
 
     const res = await deleteOrg(fakeReq, makeParams('org-1'));
@@ -330,9 +332,13 @@ describe('DELETE /api/admin/orgs/[id]', () => {
 
   it('returns 500 on DB error during delete', async () => {
     mockAuth(SUPER_ADMIN);
+    // Call 1: tutorial count check
     const mockEq = jest.fn().mockResolvedValue({ count: 0, error: null });
     const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
     mockServiceFrom.mockReturnValueOnce({ select: mockSelect });
+    // Call 2: org name fetch before delete
+    mockServiceFrom.mockReturnValueOnce(makeChain({ name: 'Test Org' }));
+    // Call 3: delete with error
     mockServiceFrom.mockReturnValueOnce(makeChain(null, { message: 'DB error' }));
 
     expect((await deleteOrg(fakeReq, makeParams('org-1'))).status).toBe(500);
