@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react" />
   <img src="https://img.shields.io/badge/Supabase-postgres-3ECF8E?logo=supabase" />
   <img src="https://img.shields.io/badge/Paystack-payments-00C3F7" />
-  <img src="https://img.shields.io/badge/tests-254%20passing-brightgreen" />
+  <img src="https://img.shields.io/badge/tests-255%20passing-brightgreen" />
 </p>
 
 ---
@@ -352,7 +352,7 @@ npm test -- --ci      # CI mode (used in GitHub Actions)
 
 Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All external calls (Supabase, Paystack, Notion, Resend) are mocked — no real credentials needed.
 
-**Coverage (254 tests, 24 suites):**
+**Coverage (255 tests, 24 suites):**
 
 | File | What's tested |
 |---|---|
@@ -363,7 +363,7 @@ Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All e
 | `api/admin-auth.test.ts` | Missing fields, wrong credentials, non-admin role, valid login, `super_admin` role, logout success/failure, rate limit 429 |
 | `api/admin-me.test.ts` | GET: auth guard, returns name/email/phone from metadata, email-prefix fallback, empty phone fallback; PATCH: auth guard, calls updateUser with correct fields, 500 on failure |
 | `api/admin-update-password.test.ts` | Auth guard, missing fields → 400, too-short password → 400, wrong current password → 400, updateUser failure → 500, success → 200, verifies signInWithPassword called before updateUser |
-| `api/admin-register.test.ts` | Auth guard, missing name/email/password → 400, too-short password → 400, createUser failure → 500, success → 201 with userId, email_confirm: true + full_name metadata |
+| `api/admin-register.test.ts` | Auth guard, missing name/email/password → 400, too-short password → 400, missing orgId → 400, createUser failure → 500, success → 201 with userId, email_confirm: true + full_name metadata |
 | `api/admin-tutorials.test.ts` | Auth guard on GET/POST/PUT/DELETE, validation, draft vs active, DB errors |
 | `api/admin-tutorial-bookings.test.ts` | Auth guard, returns bookings for tutorial, filters by correct `tutorial_id`, DB error |
 | `api/admin-bookings.test.ts` | Auth guard, returns bookings with tutorial join, all queried fields present, org_id filter for org_admin, DB error |

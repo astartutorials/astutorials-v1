@@ -89,11 +89,19 @@ describe('POST /api/admin/auth/register', () => {
     expect(data.error).toMatch(/8 characters/i);
   });
 
+  it('returns 400 when orgId is missing', async () => {
+    mockAuth(ADMIN_USER);
+    const res = await POST(makeRequest({ name: 'New Admin', email: 'new@test.com', password: 'password123' }));
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toMatch(/orgId/i);
+  });
+
   it('returns 500 when createUser fails', async () => {
     mockAuth(ADMIN_USER);
     mockCreateUser.mockResolvedValue({ data: null, error: { message: 'Email already exists' } });
 
-    const res = await POST(makeRequest({ name: 'New Admin', email: 'existing@test.com', password: 'password123' }));
+    const res = await POST(makeRequest({ name: 'New Admin', email: 'existing@test.com', password: 'password123', orgId: 'org-uuid' }));
     expect(res.status).toBe(500);
     const data = await res.json();
     expect(data.error).toBe('Email already exists');
@@ -106,7 +114,7 @@ describe('POST /api/admin/auth/register', () => {
       error: null,
     });
 
-    const res = await POST(makeRequest({ name: 'New Admin', email: 'new@test.com', password: 'password123' }));
+    const res = await POST(makeRequest({ name: 'New Admin', email: 'new@test.com', password: 'password123', orgId: 'org-uuid' }));
     expect(res.status).toBe(201);
     const data = await res.json();
     expect(data.ok).toBe(true);
@@ -120,7 +128,7 @@ describe('POST /api/admin/auth/register', () => {
       error: null,
     });
 
-    await POST(makeRequest({ name: 'Staff Member', email: 'staff@test.com', password: 'securepass1' }));
+    await POST(makeRequest({ name: 'Staff Member', email: 'staff@test.com', password: 'securepass1', orgId: 'org-uuid' }));
 
     expect(mockCreateUser).toHaveBeenCalledWith({
       email: 'staff@test.com',
