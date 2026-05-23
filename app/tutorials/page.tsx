@@ -27,6 +27,7 @@ type Tutorial = {
     seats_booked: number;
     price: number;
     color_scheme: string;
+    org_id: string | null;
 };
 
 const containerVariants = {
@@ -52,7 +53,7 @@ function TutorialsContent() {
         async function load() {
             const { data } = await supabase
                 .from('tutorials')
-                .select('id, code, title, teacher, description, date, time, location, seats_total, seats_booked, price, color_scheme')
+                .select('id, code, title, teacher, description, date, time, location, seats_total, seats_booked, price, color_scheme, org_id')
                 .eq('status', 'active')
                 .order('date', { ascending: true });
             setTutorials((data as Tutorial[]) ?? []);
@@ -166,7 +167,7 @@ function TutorialsContent() {
                             transition={{ duration: 0.4 }}
                             className="space-y-10 md:space-y-14"
                         >
-                            <PricingSection />
+                            <PricingSection orgId={tutorials[0]?.org_id ?? undefined} />
                             <FeaturesGrid />
                             <HowItWorks />
                         </motion.div>

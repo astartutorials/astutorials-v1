@@ -76,6 +76,7 @@ function DetailsForm() {
         courseOfStudy: form.courseOfStudy,
         level: form.level,
         preferredSchedule: form.schedule.join(', '),
+        notes: form.notes || undefined,
       }),
     });
 

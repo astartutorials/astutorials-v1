@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Search, Download, TrendingUp, Clock, XCircle, CheckCircle, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Download, TrendingUp, Clock, XCircle, CheckCircle, Loader2, ChevronDown, ChevronUp, Ban } from "lucide-react";
 
 type Booking = {
   id: string;
@@ -24,6 +24,7 @@ function statusPill(status: string) {
   if (status === "paid") return "bg-emerald-50 text-emerald-700";
   if (status === "pending") return "bg-amber-50 text-amber-700";
   if (status === "failed") return "bg-red-50 text-red-700";
+  if (status === "cancelled") return "bg-gray-100 text-gray-500";
   return "bg-gray-100 text-gray-600";
 }
 
@@ -56,9 +57,11 @@ export default function AdminPaymentsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "pending" | "failed">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "paid" | "pending" | "failed" | "cancelled">("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState(false);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/bookings")
@@ -70,6 +73,23 @@ export default function AdminPaymentsPage() {
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, []);
+
+  async function handleCancel(id: string) {
+    setCancellingId(id);
+    setConfirmCancelId(null);
+    try {
+      const res = await fetch(`/api/admin/bookings/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'cancelled' }),
+      });
+      if (res.ok) {
+        setBookings(prev => prev.map(b => b.id === id ? { ...b, payment_status: 'cancelled' } : b));
+      }
+    } finally {
+      setCancellingId(null);
+    }
+  }
 
   const totalRevenue = bookings
     .filter((b) => b.payment_status === "paid")
@@ -169,6 +189,7 @@ export default function AdminPaymentsPage() {
           <option value="paid">Paid</option>
           <option value="pending">Pending</option>
           <option value="failed">Failed</option>
+          <option value="cancelled">Cancelled</option>
         </select>
         <button
           onClick={exportCSV}
@@ -277,6 +298,37 @@ export default function AdminPaymentsPage() {
                             <p className="text-gray-700 font-mono text-xs break-all">{b.payment_reference ?? "—"}</p>
                           </div>
                         </div>
+
+                        {b.payment_status !== 'cancelled' && b.payment_status !== 'failed' && (
+                          <div className="pt-2 border-t border-gray-100">
+                            {confirmCancelId === b.id ? (
+                              <div className="flex items-center gap-3">
+                                <span className="text-sm text-gray-600">Cancel this booking?</span>
+                                <button
+                                  onClick={() => handleCancel(b.id)}
+                                  disabled={cancellingId === b.id}
+                                  className="px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                                >
+                                  {cancellingId === b.id ? <Loader2 size={12} className="animate-spin" /> : null}
+                                  Yes, cancel
+                                </button>
+                                <button
+                                  onClick={() => setConfirmCancelId(null)}
+                                  className="px-3 py-1.5 border border-gray-200 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                  Keep
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setConfirmCancelId(b.id)}
+                                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-600 transition-colors font-medium"
+                              >
+                                <Ban size={13} /> Cancel booking
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

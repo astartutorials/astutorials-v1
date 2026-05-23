@@ -27,13 +27,14 @@ interface Application {
   created_at: string;
 }
 
-const STATUS_OPTIONS = ["new", "reviewing", "shortlisted", "rejected"];
+const STATUS_OPTIONS = ["new", "reviewing", "shortlisted", "rejected", "accepted"];
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-blue-50 text-blue-700",
   reviewing: "bg-yellow-50 text-yellow-700",
   shortlisted: "bg-emerald-50 text-emerald-700",
   rejected: "bg-red-50 text-red-600",
+  accepted: "bg-teal-50 text-teal-700",
 };
 
 function formatDate(iso: string) {
