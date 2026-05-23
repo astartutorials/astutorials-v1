@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getUserRole, can } from '@/lib/rbac';
+import { logAuditEvent } from '@/lib/audit';
 
 export async function PUT(
   request: NextRequest,
@@ -50,6 +51,18 @@ export async function PUT(
       return NextResponse.json({ error: 'Database Error', message: error.message }, { status: 500 });
     }
 
+    const changedFields = Object.keys(updateData).filter(k => k !== 'updated_at');
+    await logAuditEvent({
+      actorId: user.id,
+      actorEmail: user.email ?? '',
+      action: 'tutorial.updated',
+      targetType: 'tutorial',
+      targetId: id,
+      targetLabel: `${data.code} — ${data.title}`,
+      orgId: data.org_id ?? ctx.orgId,
+      details: { changed: changedFields.join(', ') },
+    });
+
     return NextResponse.json({ message: 'Tutorial updated successfully', tutorial: data });
   } catch (error: any) {
     return NextResponse.json({ error: 'Internal Server Error', message: error.message }, { status: 500 });
@@ -74,6 +87,13 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // Fetch title before deleting for the audit label
+    const { data: tutorialData } = await supabase
+      .from('tutorials')
+      .select('code, title, org_id')
+      .eq('id', id)
+      .single();
+
     let query = supabase.from('tutorials').delete().eq('id', id);
 
     // Non-super_admin users can only delete tutorials in their org
@@ -85,6 +105,16 @@ export async function DELETE(
     if (error) {
       return NextResponse.json({ error: 'Database Error', message: error.message }, { status: 500 });
     }
+
+    await logAuditEvent({
+      actorId: user.id,
+      actorEmail: user.email ?? '',
+      action: 'tutorial.deleted',
+      targetType: 'tutorial',
+      targetId: id,
+      targetLabel: tutorialData ? `${tutorialData.code} — ${tutorialData.title}` : id,
+      orgId: tutorialData?.org_id ?? ctx.orgId,
+    });
 
     return NextResponse.json({ message: 'Tutorial deleted successfully.' });
   } catch (error: any) {

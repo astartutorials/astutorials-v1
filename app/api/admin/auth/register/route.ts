@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getUserRole, can, AppRole } from '@/lib/rbac';
+import { logAuditEvent } from '@/lib/audit';
 
 const adminSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -57,6 +58,17 @@ export async function POST(request: NextRequest) {
     await adminSupabase.auth.admin.deleteUser(data.user.id);
     return NextResponse.json({ error: roleError.message }, { status: 500 });
   }
+
+  await logAuditEvent({
+    actorId: user.id,
+    actorEmail: user.email ?? '',
+    action: 'user.registered',
+    targetType: 'user',
+    targetId: data.user.id,
+    targetLabel: `${name} <${email}>`,
+    orgId,
+    details: { role },
+  });
 
   return NextResponse.json({ ok: true, userId: data.user.id }, { status: 201 });
 }

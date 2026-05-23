@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getUserRole, AppRole } from '@/lib/rbac';
+import { logAuditEvent } from '@/lib/audit';
 
 const serviceSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,6 +36,17 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     .eq('org_id', id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await logAuditEvent({
+    actorId: user.id,
+    actorEmail: user.email ?? '',
+    action: 'member.role_changed',
+    targetType: 'user',
+    targetId: userId,
+    orgId: id,
+    details: { role },
+  });
+
   return NextResponse.json({ ok: true });
 }
 
@@ -58,5 +70,15 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     .eq('org_id', id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await logAuditEvent({
+    actorId: user.id,
+    actorEmail: user.email ?? '',
+    action: 'member.removed',
+    targetType: 'user',
+    targetId: userId,
+    orgId: id,
+  });
+
   return NextResponse.json({ ok: true });
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getUserRole, can, AppRole } from '@/lib/rbac';
+import { sendInviteEmail } from '@/lib/email';
+import { logAuditEvent } from '@/lib/audit';
 
 const serviceSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -66,6 +68,32 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Fetch org name for the invite email (best effort)
+  let orgName: string | null = null;
+  if (data.org_id) {
+    const { data: org } = await serviceSupabase
+      .from('organisations')
+      .select('name')
+      .eq('id', data.org_id)
+      .single();
+    orgName = org?.name ?? null;
+  }
+
+  const inviterName = (user.user_metadata?.full_name as string) ?? user.email ?? 'A-Star Admin';
+  await sendInviteEmail({ to: email, invitedBy: inviterName, role, orgName, token: data.token });
+
+  await logAuditEvent({
+    actorId: user.id,
+    actorEmail: user.email ?? '',
+    action: 'invite.sent',
+    targetType: 'invite',
+    targetId: data.id,
+    targetLabel: email,
+    orgId: targetOrgId,
+    details: { role, orgName },
+  });
+
   return NextResponse.json(data, { status: 201 });
 }
 
@@ -89,5 +117,15 @@ export async function DELETE(request: NextRequest) {
 
   const { error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await logAuditEvent({
+    actorId: user.id,
+    actorEmail: user.email ?? '',
+    action: 'invite.deleted',
+    targetType: 'invite',
+    targetId: id,
+    orgId: ctx.orgId,
+  });
+
   return NextResponse.json({ ok: true });
 }

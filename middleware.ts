@@ -33,14 +33,15 @@ export async function middleware(request: NextRequest) {
   const user = session?.user ?? null;
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname === '/admin/login';
+  const isInvitePage = pathname === '/admin/invite';
 
-  if (!user && !isLoginPage) {
+  if (!user && !isLoginPage && !isInvitePage) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/admin/login';
     return NextResponse.redirect(loginUrl);
   }
 
-  if (user && isLoginPage) {
+  if (user && (isLoginPage || isInvitePage)) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = '/admin/dashboard';
     return NextResponse.redirect(dashboardUrl);

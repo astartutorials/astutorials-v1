@@ -19,6 +19,7 @@ import {
   X,
   BarChart2,
   ExternalLink,
+  ClipboardList,
 } from "lucide-react";
 import type { AppRole } from "@/lib/rbac";
 import { useAdminUser } from "@/lib/admin-context";
@@ -44,6 +45,7 @@ const NAV_ITEMS: NavItem[] = [
   { name: "Careers",           href: "/admin/careers",         icon: Briefcase,       roles: ['super_admin'] },
   { name: "Applications",      href: "/admin/applications",    icon: Users,           roles: ['super_admin'] },
   { name: "Payments",          href: "/admin/payments",        icon: CreditCard,      roles: ['super_admin', 'org_admin', 'tutor_manager', 'viewer'] },
+  { name: "Activity Log",      href: "/admin/audit-logs",      icon: ClipboardList,   roles: ['super_admin'] },
   { name: "Settings",          href: "/admin/settings",        icon: Settings,        roles: ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'] },
 ];
 

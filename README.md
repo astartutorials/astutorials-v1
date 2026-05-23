@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react" />
   <img src="https://img.shields.io/badge/Supabase-postgres-3ECF8E?logo=supabase" />
   <img src="https://img.shields.io/badge/Paystack-payments-00C3F7" />
-  <img src="https://img.shields.io/badge/tests-255%20passing-brightgreen" />
+  <img src="https://img.shields.io/badge/tests-269%20passing-brightgreen" />
 </p>
 
 ---
@@ -208,6 +208,9 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=phc_...
 NEXT_PUBLIC_POSTHOG_HOST=https://us.posthog.com
 
+# Admin booking notifications (optional)
+ADMIN_NOTIFICATION_EMAIL=bookings@astartutorials.com
+
 # Cloudflare Turnstile (bot protection on public forms)
 # Get keys at https://dash.cloudflare.com → Turnstile
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=0x...    # public, safe to expose
@@ -219,7 +222,9 @@ UPSTASH_REDIS_REST_URL=https://...
 UPSTASH_REDIS_REST_TOKEN=...
 ```
 
-> **Optional vars:** `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `UPSTASH_REDIS_REST_URL`, and `UPSTASH_REDIS_REST_TOKEN` can be omitted locally — bot protection is automatically skipped when these are not set.
+```
+
+> **Optional vars:** `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, and `ADMIN_NOTIFICATION_EMAIL` can be omitted locally — the relevant features are silently skipped when not set.
 
 > **Security:** `SUPABASE_SERVICE_ROLE_KEY` bypasses Row Level Security. Only use it in server-side API routes — never import it in client components or `lib/supabase.ts`.
 
@@ -352,7 +357,7 @@ npm test -- --ci      # CI mode (used in GitHub Actions)
 
 Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All external calls (Supabase, Paystack, Notion, Resend) are mocked — no real credentials needed.
 
-**Coverage (255 tests, 24 suites):**
+**Coverage (269 tests, 26 suites):**
 
 | File | What's tested |
 |---|---|

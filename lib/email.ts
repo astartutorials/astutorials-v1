@@ -1,4 +1,5 @@
 const FROM = "Juyi at A-Star Tutorials <bookings@astartutorials.com>";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://astartutorials.com";
 const RESEND_URL = "https://api.resend.com/emails";
 
 async function send(to: string, subject: string, html: string) {
@@ -138,4 +139,92 @@ export async function sendPrivateBookingDetails(opts: {
   `;
 
   await send(to, "Private Tutorial — Session Details Confirmed", html);
+}
+
+export async function sendNewBookingNotification(opts: {
+  bookingType: 'group' | 'private';
+  fullName: string;
+  email: string;
+  phone: string | null;
+  amountPaid: number;
+  reference: string;
+  tutorialTitle?: string;
+  course?: string;
+}) {
+  const notifyEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
+  if (!notifyEmail) return;
+
+  const { bookingType, fullName, email, phone, amountPaid, reference, tutorialTitle, course } = opts;
+  const subject = bookingType === 'group'
+    ? `New Group Booking — ${tutorialTitle ?? 'Tutorial'}`
+    : `New Private Booking — ${fullName}`;
+
+  const rows = [
+    ['Type', bookingType === 'group' ? 'Group Tutorial' : 'Private Tutorial'],
+    ['Student', fullName],
+    ['Email', email],
+    ...(phone ? [['Phone', phone]] : []),
+    ...(tutorialTitle ? [['Tutorial', tutorialTitle]] : []),
+    ...(course ? [['Course', course]] : []),
+    ['Amount', `₦${amountPaid.toLocaleString()}`],
+    ['Reference', reference],
+  ] as [string, string][];
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">New Booking</h2>
+      <p style="margin-top:0;color:#666">A new payment has been verified.</p>
+      <table style="width:100%;border-collapse:collapse;margin:24px 0;font-size:14px">
+        ${rows.map(([label, value]) => `
+          <tr>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;color:#888;width:40%">${label}</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${value}</td>
+          </tr>`).join('')}
+      </table>
+      <a href="${BASE_URL}/admin/payments" style="display:inline-block;background:#D93025;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px">
+        View in Admin Panel
+      </a>
+      <p style="font-size:12px;color:#aaa;margin-top:32px">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+
+  await send(notifyEmail, subject, html);
+}
+
+export async function sendInviteEmail(opts: {
+  to: string;
+  invitedBy: string;
+  role: string;
+  orgName: string | null;
+  token: string;
+}) {
+  const { to, invitedBy, role, orgName, token } = opts;
+  const link = `${BASE_URL}/admin/invite?token=${token}`;
+
+  const roleLabel: Record<string, string> = {
+    org_admin: 'Org Admin',
+    tutor_manager: 'Tutor Manager',
+    tutor: 'Tutor',
+    viewer: 'Viewer',
+  };
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">You've been invited</h2>
+      <p style="margin-top:0;color:#666">
+        ${invitedBy} has invited you to join A-Star Tutorials${orgName ? ` (${orgName})` : ''} as <strong>${roleLabel[role] ?? role}</strong>.
+      </p>
+      <p style="font-size:14px;color:#444;margin:24px 0 8px">Click below to set up your account. This link expires in 7 days.</p>
+      <a href="${link}" style="display:inline-block;background:#D93025;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">
+        Accept Invitation
+      </a>
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        If you weren't expecting this, you can safely ignore it.<br/>
+        For help, email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+
+  await send(to, `You've been invited to A-Star Tutorials`, html);
 }

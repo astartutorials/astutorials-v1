@@ -2,6 +2,8 @@ jest.mock('@/lib/supabase-server', () => ({
   createSupabaseServerClient: jest.fn(),
 }));
 
+jest.mock('@/lib/audit', () => ({ logAuditEvent: jest.fn() }));
+
 jest.mock('@/lib/posthog-server', () => ({
   getPostHogClient: jest.fn(() => ({ capture: jest.fn(), identify: jest.fn(), shutdown: jest.fn() })),
 }));

@@ -22,6 +22,7 @@ jest.mock('@/lib/posthog-server', () => ({
 jest.mock('@/lib/email', () => ({
   sendGroupBookingConfirmation: jest.fn(),
   sendPrivateBookingReceipt: jest.fn(),
+  sendNewBookingNotification: jest.fn(),
 }));
 
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';

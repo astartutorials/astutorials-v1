@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getUserRole, can } from '@/lib/rbac';
+import { logAuditEvent } from '@/lib/audit';
 
 const serviceSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -84,6 +85,17 @@ export async function POST(request: NextRequest) {
     if (error) {
       return NextResponse.json({ error: 'Database Error', message: error.message }, { status: 500 });
     }
+
+    await logAuditEvent({
+      actorId: user.id,
+      actorEmail: user.email ?? '',
+      action: 'tutorial.created',
+      targetType: 'tutorial',
+      targetId: data.id,
+      targetLabel: `${data.code} — ${data.title}`,
+      orgId: orgId,
+      details: { teacher: data.teacher, date: data.date, status: data.status },
+    });
 
     return NextResponse.json({ message: 'Tutorial successfully created', tutorial: data }, { status: 201 });
   } catch (error: any) {

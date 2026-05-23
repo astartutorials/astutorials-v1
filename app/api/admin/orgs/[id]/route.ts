@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getUserRole } from '@/lib/rbac';
+import { logAuditEvent } from '@/lib/audit';
 
 const serviceSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -85,7 +86,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
-  const { err } = await assertSuperAdmin(req);
+  const { user, err } = await assertSuperAdmin(req);
   if (err) return err;
 
   const { id } = await params;
@@ -104,11 +105,22 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await logAuditEvent({
+    actorId: user!.id,
+    actorEmail: user!.email ?? '',
+    action: 'org.updated',
+    targetType: 'organisation',
+    targetId: id,
+    targetLabel: data.name,
+    details: updateData,
+  });
+
   return NextResponse.json(data);
 }
 
 export async function DELETE(req: NextRequest, { params }: Params) {
-  const { err } = await assertSuperAdmin(req);
+  const { user, err } = await assertSuperAdmin(req);
   if (err) return err;
 
   const { id } = await params;
@@ -125,7 +137,24 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     );
   }
 
+  // Fetch name before deleting for audit label
+  const { data: orgData } = await serviceSupabase
+    .from('organisations')
+    .select('name')
+    .eq('id', id)
+    .single();
+
   const { error } = await serviceSupabase.from('organisations').delete().eq('id', id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await logAuditEvent({
+    actorId: user!.id,
+    actorEmail: user!.email ?? '',
+    action: 'org.deleted',
+    targetType: 'organisation',
+    targetId: id,
+    targetLabel: orgData?.name ?? id,
+  });
+
   return NextResponse.json({ ok: true });
 }

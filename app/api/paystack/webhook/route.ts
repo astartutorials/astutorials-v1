@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { verifyPaystackSignature } from "@/lib/paystack-signature";
 import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendNewBookingNotification } from "@/lib/email";
 import { getPostHogClient } from "@/lib/posthog-server";
 
@@ -8,49 +9,35 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+export async function POST(req: NextRequest) {
+  const rawBody = await req.text();
+  const signature = req.headers.get("x-paystack-signature");
 
-export async function GET(req: NextRequest) {
-  const reference = req.nextUrl.searchParams.get("reference");
-
-  if (!reference) {
-    return NextResponse.redirect(`${BASE_URL}/tutorials`);
+  if (!verifyPaystackSignature(rawBody, signature)) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  const secret = process.env.PAYSTACK_SECRET_KEY;
-  if (!secret) {
-    return NextResponse.redirect(`${BASE_URL}/tutorials`);
+  let event: { event: string; data: any };
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const res = await fetch(
-    `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
-    { headers: { Authorization: `Bearer ${secret}` } }
-  );
-
-  const data = await res.json();
-
-  if (!res.ok || !data.status || data.data?.status !== "success") {
-    const posthog = getPostHogClient();
-    posthog.capture({
-      distinctId: reference,
-      event: "payment_verification_failed",
-      properties: {
-        payment_reference: reference,
-        reason: data.message ?? "Transaction not successful",
-      },
-    });
-    await posthog.shutdown();
-    return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-failed?reason=payment`);
+  if (event.event !== "charge.success") {
+    return NextResponse.json({ received: true });
   }
 
-  const tx = data.data;
+  const tx = event.data;
   const meta = tx.metadata ?? {};
+  const reference = tx.reference as string;
   const email = tx.customer?.email ?? "";
   const fullName = meta.full_name ?? tx.customer?.first_name ?? "Student";
   const amountPaid = Math.round(tx.amount / 100);
-  // For group bookings, fetch tutorial upfront so we have org_id and can reuse data for email
+
   let tutorialForEmail: { title: string; date: string | null; time: string } | null = null;
-  let bookingOrgId: string | null = meta.org_id ?? null; // private bookings carry org_id in metadata when booking page has context
+  let bookingOrgId: string | null = meta.org_id ?? null;
+
   if (meta.type !== "private" && meta.tutorial_id) {
     const { data: tut } = await supabase
       .from("tutorials")
@@ -63,7 +50,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Record the payment — both private and group bookings get a DB row
+  // Idempotency — skip if already processed
   const { data: existing } = await supabase
     .from("bookings")
     .select("id")
@@ -71,7 +58,6 @@ export async function GET(req: NextRequest) {
     .maybeSingle();
 
   if (!existing) {
-    // Re-check seat availability at verification time to prevent race conditions
     if (meta.type !== "private" && meta.tutorial_id) {
       const { data: tutorial } = await supabase
         .from("tutorials")
@@ -79,7 +65,7 @@ export async function GET(req: NextRequest) {
         .eq("id", meta.tutorial_id)
         .single();
       if (tutorial && tutorial.seats_booked >= tutorial.seats_total) {
-        return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-failed?reason=full`);
+        return NextResponse.json({ error: "Tutorial fully booked" }, { status: 409 });
       }
     }
 
@@ -97,10 +83,9 @@ export async function GET(req: NextRequest) {
     });
 
     if (insertError) {
-      return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-failed?reason=server`);
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
-    // Increment seat counter for group bookings
     if (meta.type !== "private" && meta.tutorial_id) {
       await supabase.rpc("increment_seats_booked", { tid: meta.tutorial_id });
     }
@@ -116,11 +101,11 @@ export async function GET(req: NextRequest) {
       booking_type: meta.type === "private" ? "private" : "group",
       tutorial_id: meta.tutorial_id ?? null,
       course: meta.course ?? null,
+      source: "webhook",
     },
   });
   await posthog.shutdown();
 
-  // Admin notification for all verified bookings
   await sendNewBookingNotification({
     bookingType: meta.type === "private" ? "private" : "group",
     fullName,
@@ -132,14 +117,9 @@ export async function GET(req: NextRequest) {
     course: meta.course ?? undefined,
   });
 
-  // Private tutorial → send receipt, then collect extra details before WhatsApp
   if (meta.type === "private") {
     await sendPrivateBookingReceipt({ to: email, fullName, amountPaid, reference });
-    return NextResponse.redirect(`${BASE_URL}/tutorials/private/details?ref=${reference}`);
-  }
-
-  // Group tutorial → send confirmation email, redirect to success page
-  if (email && tutorialForEmail) {
+  } else if (email && tutorialForEmail) {
     await sendGroupBookingConfirmation({
       to: email,
       fullName,
@@ -151,5 +131,5 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  return NextResponse.redirect(`${BASE_URL}/group-tutorials/booking-details?ref=${reference}`);
+  return NextResponse.json({ received: true });
 }
