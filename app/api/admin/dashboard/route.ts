@@ -35,6 +35,14 @@ export async function GET() {
     .order('created_at', { ascending: false })
     .limit(5);
 
+  let recentPaymentsQuery = serviceSupabase
+    .from('bookings')
+    .select('id, full_name, email, amount_paid, payment_reference, created_at, org_id, tutorials(title)')
+    .eq('payment_status', 'paid')
+    .order('created_at', { ascending: false })
+    .limit(8);
+  if (visibleOrgIds) recentPaymentsQuery = (recentPaymentsQuery as any).in('org_id', visibleOrgIds);
+
   const [
     { data: orgs },
     { data: tutorials },
@@ -43,6 +51,7 @@ export async function GET() {
     { data: feedbackRows },
     { data: upcoming },
     { data: recentFeedbackRaw },
+    { data: recentPaymentsRaw },
   ] = await Promise.all([
     serviceSupabase.from('organisations').select('id, name, type, location').order('created_at'),
     serviceSupabase.from('tutorials').select('id, org_id, status'),
@@ -51,6 +60,7 @@ export async function GET() {
     serviceSupabase.from('feedback').select('rating, tutorials(org_id)'),
     upcomingQuery,
     feedbackQuery,
+    recentPaymentsQuery,
   ]);
 
   const recentFeedback = visibleOrgIds
@@ -107,6 +117,7 @@ export async function GET() {
     orgNames: filteredOrgs.map(o => o.name),
     upcoming: upcoming ?? [],
     recentFeedback: recentFeedback ?? [],
+    recentPayments: recentPaymentsRaw ?? [],
     // Raw booking streams — client aggregates these for time-period chart views
     rawPaidBookings: filteredPaid.map(b => ({ created_at: b.created_at, amount_paid: b.amount_paid ?? 0, org_id: b.org_id })),
     rawAllBookings: filteredAll.map(b => ({ created_at: b.created_at, email: b.email, org_id: b.org_id })),

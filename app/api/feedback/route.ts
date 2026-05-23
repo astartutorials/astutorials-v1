@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,11 +8,15 @@ const supabase = createClient(
 );
 
 export async function POST(req: NextRequest) {
-  let rating: unknown, comment: unknown;
+  let rating: unknown, comment: unknown, turnstileToken: unknown;
   try {
-    ({ rating, comment } = await req.json());
+    ({ rating, comment, turnstileToken } = await req.json());
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  if (!await verifyTurnstile(typeof turnstileToken === 'string' ? turnstileToken : undefined)) {
+    return NextResponse.json({ error: "Bot verification failed. Please try again." }, { status: 403 });
   }
 
   if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {

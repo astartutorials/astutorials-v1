@@ -7,6 +7,11 @@ jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({ from: jest.fn(() => ({ select: mockSelect })) })),
 }));
 
+const mockVerifyTurnstile = jest.fn().mockResolvedValue(true);
+jest.mock('@/lib/turnstile', () => ({
+  verifyTurnstile: (...args: any[]) => mockVerifyTurnstile(...args),
+}));
+
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 process.env.PAYSTACK_SECRET_KEY = 'sk_test_dummy';
@@ -26,6 +31,13 @@ describe('POST /api/paystack/initialize', () => {
   beforeEach(() => {
     (global.fetch as jest.Mock).mockReset();
     mockSingle.mockReset().mockResolvedValue({ data: { seats_total: 30, seats_booked: 0 } });
+    mockVerifyTurnstile.mockResolvedValue(true);
+  });
+
+  it('returns 403 when Turnstile verification fails', async () => {
+    mockVerifyTurnstile.mockResolvedValueOnce(false);
+    const res = await POST(makeRequest({ email: 'test@example.com', amount: 5000, turnstileToken: 'bad' }));
+    expect(res.status).toBe(403);
   });
 
   it('returns 400 when email is missing', async () => {

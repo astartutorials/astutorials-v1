@@ -32,15 +32,16 @@ function mockAuth(user: object | null) {
 }
 
 // Universal chainable/awaitable mock for Supabase query builders.
-// The dashboard route builds upcomingQuery and feedbackQuery BEFORE Promise.all,
+// The dashboard route builds upcomingQuery, feedbackQuery and recentPaymentsQuery BEFORE Promise.all,
 // so from() is called in this order:
 //   1. from('tutorials')  → upcomingQuery
 //   2. from('feedback')   → feedbackQuery
-//   3. from('organisations')
-//   4. from('tutorials')
-//   5. from('bookings')   (paid)
-//   6. from('bookings')   (all)
-//   7. from('feedback')   (ratings)
+//   3. from('bookings')   → recentPaymentsQuery
+//   4. from('organisations')
+//   5. from('tutorials')
+//   6. from('bookings')   (paid)
+//   7. from('bookings')   (all)
+//   8. from('feedback')   (ratings)
 function makeChain(data: any) {
   const result = { data, error: null };
   const chain: any = {
@@ -59,6 +60,7 @@ const ACTIVE_TUT = { id: 'tut-1', org_id: 'org-1', status: 'active' };
 const DRAFT_TUT = { id: 'tut-2', org_id: 'org-1', status: 'draft' };
 const PAID_BOOKING = { id: 'b1', email: 'ada@test.com', amount_paid: 5000, created_at: '2025-06-01', org_id: 'org-1' };
 const ALL_BOOKING = { id: 'b1', email: 'ada@test.com', org_id: 'org-1', created_at: '2025-06-01' };
+const RECENT_PAYMENT = { id: 'b1', full_name: 'Ada Okonkwo', email: 'ada@test.com', amount_paid: 5000, payment_reference: 'ref_1', created_at: '2025-06-01', org_id: 'org-1', tutorials: { title: 'Calculus' } };
 const FEEDBACK_ROW = { rating: 4, tutorials: { org_id: 'org-1' } };
 const UPCOMING_ROW = { id: 'tut-1', code: 'MTH201', title: 'Calculus', date: '2026-06-01', time: '10am', org_id: 'org-1', organisations: { name: 'Babcock' } };
 const RECENT_FEEDBACK = { full_name: 'Ada', rating: 4, created_at: '2025-06-01', tutorials: { title: 'Calculus', org_id: 'org-1', organisations: { name: 'Babcock' } } };
@@ -66,6 +68,7 @@ const RECENT_FEEDBACK = { full_name: 'Ada', rating: 4, created_at: '2025-06-01',
 function setupMocks(opts: {
   upcoming?: any[];
   recentFeedback?: any[];
+  recentPayments?: any[];
   orgs?: any[];
   tutorials?: any[];
   paidBookings?: any[];
@@ -75,6 +78,7 @@ function setupMocks(opts: {
   const {
     upcoming = [UPCOMING_ROW],
     recentFeedback = [RECENT_FEEDBACK],
+    recentPayments = [RECENT_PAYMENT],
     orgs = [ORG],
     tutorials = [ACTIVE_TUT, DRAFT_TUT],
     paidBookings = [PAID_BOOKING],
@@ -82,15 +86,16 @@ function setupMocks(opts: {
     feedbackRows = [FEEDBACK_ROW],
   } = opts;
 
-  // Call order matches the route (upcomingQuery and feedbackQuery built first)
+  // Call order matches the route (upcomingQuery, feedbackQuery, recentPaymentsQuery built first)
   mockServiceFrom
-    .mockReturnValueOnce(makeChain(upcoming))      // 1: tutorials → upcomingQuery
-    .mockReturnValueOnce(makeChain(recentFeedback))// 2: feedback  → feedbackQuery
-    .mockReturnValueOnce(makeChain(orgs))          // 3: organisations (Promise.all[0])
-    .mockReturnValueOnce(makeChain(tutorials))     // 4: tutorials  (Promise.all[1])
-    .mockReturnValueOnce(makeChain(paidBookings))  // 5: bookings paid (Promise.all[2])
-    .mockReturnValueOnce(makeChain(allBookings))   // 6: bookings all  (Promise.all[3])
-    .mockReturnValueOnce(makeChain(feedbackRows)); // 7: feedback ratings (Promise.all[4])
+    .mockReturnValueOnce(makeChain(upcoming))        // 1: tutorials → upcomingQuery
+    .mockReturnValueOnce(makeChain(recentFeedback))  // 2: feedback  → feedbackQuery
+    .mockReturnValueOnce(makeChain(recentPayments))  // 3: bookings  → recentPaymentsQuery
+    .mockReturnValueOnce(makeChain(orgs))            // 4: organisations (Promise.all[0])
+    .mockReturnValueOnce(makeChain(tutorials))       // 5: tutorials  (Promise.all[1])
+    .mockReturnValueOnce(makeChain(paidBookings))    // 6: bookings paid (Promise.all[2])
+    .mockReturnValueOnce(makeChain(allBookings))     // 7: bookings all  (Promise.all[3])
+    .mockReturnValueOnce(makeChain(feedbackRows));   // 8: feedback ratings (Promise.all[4])
 }
 
 describe('GET /api/admin/dashboard', () => {
@@ -119,6 +124,7 @@ describe('GET /api/admin/dashboard', () => {
     expect(data).toHaveProperty('orgNames');
     expect(data).toHaveProperty('upcoming');
     expect(data).toHaveProperty('recentFeedback');
+    expect(data).toHaveProperty('recentPayments');
     expect(data).toHaveProperty('rawPaidBookings');
     expect(data).toHaveProperty('rawAllBookings');
   });
@@ -221,5 +227,17 @@ describe('GET /api/admin/dashboard', () => {
     const data = await res.json();
     expect(data.rawPaidBookings[0].amount_paid).toBe(5000);
     expect(data.rawPaidBookings[0].org_id).toBe('org-1');
+  });
+
+  it('recentPayments contains full_name, amount_paid, and tutorial title', async () => {
+    mockAuth(SUPER_ADMIN);
+    setupMocks();
+
+    const res = await GET();
+    const data = await res.json();
+    expect(data.recentPayments).toHaveLength(1);
+    expect(data.recentPayments[0].full_name).toBe('Ada Okonkwo');
+    expect(data.recentPayments[0].amount_paid).toBe(5000);
+    expect(data.recentPayments[0].tutorials.title).toBe('Calculus');
   });
 });

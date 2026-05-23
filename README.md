@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react" />
   <img src="https://img.shields.io/badge/Supabase-postgres-3ECF8E?logo=supabase" />
   <img src="https://img.shields.io/badge/Paystack-payments-00C3F7" />
-  <img src="https://img.shields.io/badge/tests-158%20passing-brightgreen" />
+  <img src="https://img.shields.io/badge/tests-254%20passing-brightgreen" />
 </p>
 
 ---
@@ -37,6 +37,8 @@ Administrators can:
 - Review tutor applications (expandable detail rows, status workflow)
 - See student feedback with rating filters
 - Manage admin profile, change password, and register new admins via the Settings page
+- **Multi-tenant:** super admins manage all organisations; org admins see only their org's data
+- View cross-org revenue, student, and tutorial statistics on the dashboard
 
 ---
 
@@ -104,6 +106,8 @@ app/
       careers/                    — Job listing management (sortable, inline edit)
       feedback/                   — Student feedback viewer with rating filter
       settings/                   — Admin profile, password change, register new admin
+      orgs/                       — Organisation list (super_admin only)
+      orgs/[id]/                  — Org detail: stats, members, tutorials, recent bookings
 
 app/api/
   paystack/initialize/            — POST: create Paystack transaction; blocks if fully booked
@@ -120,13 +124,18 @@ app/api/
   admin/tutorials/                — GET all tutorials (includes drafts), POST new tutorial
   admin/tutorials/[id]/           — PUT / DELETE a tutorial
   admin/tutorials/[id]/bookings/  — GET bookings for a specific tutorial (service-role)
-  admin/bookings/                 — GET all bookings (service-role, bypasses RLS)
+  admin/bookings/                 — GET all bookings (service-role, bypasses RLS; org-scoped for org_admin)
   admin/bookings/[id]/            — PATCH: update attended field
   admin/feedback/                 — GET all feedback (service-role, bypasses RLS)
   admin/careers/                  — POST new job listing
   admin/careers/[id]/             — PUT / DELETE a job listing
   admin/applications/             — GET all tutor applications
   admin/applications/[id]/        — PATCH: update application status
+  admin/dashboard/                — GET: aggregated cross-org stats, upcoming tutorials, recent feedback
+  admin/orgs/                     — GET org list with member + tutorial counts; POST create org (super_admin)
+  admin/orgs/[id]/                — GET org detail with stats; PATCH update; DELETE (blocks if tutorials exist)
+  admin/orgs/[id]/members/        — PATCH: update member role; DELETE: remove member (super_admin)
+  admin/invites/                  — GET pending invites; POST send invite; DELETE revoke invite
 
 components/
   shared/                         — Navbar, Footer, ScrollReveal, CountUp, ClientFrame
@@ -142,6 +151,8 @@ lib/
   email.ts                        — sendGroupBookingConfirmation(), sendPrivateBookingReceipt()
   format.ts                       — formatDay(), formatPrice() — pure, tested
   validate.ts                     — validateBookingForm() — pure, tested
+  rbac.ts                         — getUserRole(), can(role, action), AppRole type
+  admin-context.tsx               — AdminProvider + useAdminUser() hook (shared context for admin layout)
   supabase-server.ts              — createSupabaseServerClient() for SSR (cookie-based)
   supabase.ts                     — browser Supabase client (anon key — only for public tables)
   posthog-server.ts               — getPostHogClient() singleton for server-side event capture
@@ -196,7 +207,19 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 # PostHog (analytics)
 NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=phc_...
 NEXT_PUBLIC_POSTHOG_HOST=https://us.posthog.com
+
+# Cloudflare Turnstile (bot protection on public forms)
+# Get keys at https://dash.cloudflare.com → Turnstile
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=0x...    # public, safe to expose
+TURNSTILE_SECRET_KEY=0x...              # server-side only, never expose to browser
+
+# Upstash Redis (admin login rate limiting — optional but recommended in production)
+# Get credentials at https://console.upstash.com
+UPSTASH_REDIS_REST_URL=https://...
+UPSTASH_REDIS_REST_TOKEN=...
 ```
+
+> **Optional vars:** `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `UPSTASH_REDIS_REST_URL`, and `UPSTASH_REDIS_REST_TOKEN` can be omitted locally — bot protection is automatically skipped when these are not set.
 
 > **Security:** `SUPABASE_SERVICE_ROLE_KEY` bypasses Row Level Security. Only use it in server-side API routes — never import it in client components or `lib/supabase.ts`.
 
@@ -279,8 +302,9 @@ Emails are sent via the **Resend REST API** (no package — plain `fetch`). Both
 |---|---|---|
 | `sendGroupBookingConfirmation` | After group booking DB insert | Student |
 | `sendPrivateBookingReceipt` | After private booking DB insert | Student |
+| `sendPrivateBookingDetails` | After student submits details form (private) | Student |
 
-From address: `A-Star Tutorials <bookings@astartutorials.com>`
+From address: `Juyi at A-Star Tutorials <bookings@astartutorials.com>`
 
 > Emails must be `await`ed in the verify route before returning the redirect response. Vercel terminates serverless functions the moment a response is sent — not awaiting means emails never complete.
 
@@ -298,6 +322,20 @@ The admin dashboard lives at `/admin`. It is protected by `middleware.ts`, which
 - **Profile tab:** loads name/email/phone from `GET /api/admin/me`, saves name and phone via `PATCH /api/admin/me`
 - **Security tab:** change password via `POST /api/admin/auth/update-password` (verifies current password first); register a new admin via `POST /api/admin/auth/register` (service-role, email pre-confirmed)
 
+**RBAC — roles and permissions** (`lib/rbac.ts`):
+
+| Role | Scope | Access |
+|---|---|---|
+| `super_admin` | Platform-wide | Everything — all orgs, all data, org management |
+| `org_admin` | One org | All data for their org; cannot manage orgs or other orgs |
+| `tutor_manager` | One org | Tutorials, bookings, payments, feedback, careers (read); settings |
+| `tutor` | One org | Tutorials read, bookings read + mark attendance, feedback read |
+| `viewer` | One org | Read-only access to tutorials |
+
+Roles are stored in the `user_roles` table (`org_id IS NULL` = platform-wide for super_admin; `org_id IS NOT NULL` = org-scoped). The `getUserRole()` function reads from this table first, falling back to `user_metadata.role` for legacy accounts.
+
+To seed super admins: run `supabase/migrations/003_seed_super_admins.sql` (looks up users by email in `auth.users` and inserts a platform-wide `user_roles` row).
+
 To create the first admin user: use the Supabase Auth dashboard to create an account and set `user_metadata.role = "admin"`. Subsequent admins can be created from the Settings → Security tab.
 
 **Important:** admin dashboard pages that display bookings or feedback use API routes (`/api/admin/*`), not the browser Supabase client directly. The browser client uses the anon key and cannot read from `bookings` or `feedback` (no public SELECT RLS policy). Only the service-role client in API routes can access those tables.
@@ -314,27 +352,32 @@ npm test -- --ci      # CI mode (used in GitHub Actions)
 
 Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All external calls (Supabase, Paystack, Notion, Resend) are mocked — no real credentials needed.
 
-**Coverage (158 tests, 19 suites):**
+**Coverage (254 tests, 24 suites):**
 
 | File | What's tested |
 |---|---|
 | `middleware.test.ts` | Unauthenticated redirect, authenticated access, login page redirect, `getSession` not `getUser` |
-| `api/paystack-verify.test.ts` | No reference, missing secret key, failed payment, private → details page redirect (name/phone/course/notes), group → DB insert + seat increment + booking-details redirect, duplicate idempotency, DB failure → booking-failed, emails sent |
-| `api/paystack-initialize.test.ts` | Missing fields, missing secret key, naira→kobo conversion, fully booked 409, private type bypasses seat check, Paystack error 502 |
+| `api/paystack-verify.test.ts` | No reference, missing secret key, failed payment, private → details page redirect (name/phone/course/notes), group → DB insert + seat increment + booking-details redirect, duplicate idempotency, DB failure → booking-failed, emails sent, race condition (seat fills between initialize and verify), reason=payment on failed verification |
+| `api/paystack-initialize.test.ts` | Missing fields, missing secret key, naira→kobo conversion, fully booked 409, private type bypasses seat check, Paystack error 502, Turnstile rejection 403 |
 | `api/bookings-ref.test.ts` | GET: found → 200 with fields, not found → 404, null data → 404, queries by payment_reference; PATCH: success → 200, DB error → 500, camelCase→snake_case mapping, filters by ref |
-| `api/admin-auth.test.ts` | Missing fields, wrong credentials, non-admin role, valid login, `super_admin` role, logout success/failure |
+| `api/admin-auth.test.ts` | Missing fields, wrong credentials, non-admin role, valid login, `super_admin` role, logout success/failure, rate limit 429 |
 | `api/admin-me.test.ts` | GET: auth guard, returns name/email/phone from metadata, email-prefix fallback, empty phone fallback; PATCH: auth guard, calls updateUser with correct fields, 500 on failure |
 | `api/admin-update-password.test.ts` | Auth guard, missing fields → 400, too-short password → 400, wrong current password → 400, updateUser failure → 500, success → 200, verifies signInWithPassword called before updateUser |
 | `api/admin-register.test.ts` | Auth guard, missing name/email/password → 400, too-short password → 400, createUser failure → 500, success → 201 with userId, email_confirm: true + full_name metadata |
 | `api/admin-tutorials.test.ts` | Auth guard on GET/POST/PUT/DELETE, validation, draft vs active, DB errors |
 | `api/admin-tutorial-bookings.test.ts` | Auth guard, returns bookings for tutorial, filters by correct `tutorial_id`, DB error |
-| `api/admin-bookings.test.ts` | Auth guard, returns bookings with tutorial join, all queried fields present, DB error |
+| `api/admin-bookings.test.ts` | Auth guard, returns bookings with tutorial join, all queried fields present, org_id filter for org_admin, DB error |
 | `api/admin-booking-patch.test.ts` | Auth guard, 400 for non-boolean attended, marks attended, correct id and value passed to Supabase, DB error |
 | `api/admin-feedback.test.ts` | Auth guard, returns feedback with tutorial join, DB error |
 | `api/admin-applications.test.ts` | Auth guard, returns applications ordered by date, DB error; PATCH: auth guard, invalid status → 400, valid statuses accepted, DB error → 500 |
-| `api/feedback.test.ts` | Invalid JSON, missing rating, out-of-range (0, 6), non-numeric string, comment trimming, null for whitespace, DB error |
-| `api/tutor-applications.test.ts` | Missing Notion key, invalid JSON, missing fullName/email, Notion failure blocks DB write, Supabase mirror failure returns 201, array → comma join, optional fields stored as null |
+| `api/admin-dashboard.test.ts` | Auth guard, 403 for no valid role, response shape, revenue totals, unique-email student count, activeTutorials excludes drafts, avgRating calculation, null when no feedback, byOrg count, byOrg sorted by revenue descending, upcoming tutorials, rawPaidBookings shape |
+| `api/admin-orgs.test.ts` | GET: auth guard, 403 for org_admin, enriched member+tutorial counts, 500; POST: validation, all valid institution types, 201, 500; GET [id]: 404, 200 with stats+members+tutorials, revenue aggregation; PATCH [id]: 200, 500; DELETE [id]: 409 when tutorials exist, 200, 500 |
+| `api/admin-org-members.test.ts` | PATCH: auth guard, 403 for org_admin, missing userId/role, invalid role, 200, all valid roles, 500; DELETE: auth guard, 403, missing userId, 200, 500 |
+| `api/admin-invites.test.ts` | GET: auth guard, 403 for no permission, 200, 500; POST: validation, all valid roles, 400 for super_admin role, 201, 500; DELETE: missing id, 200, 500 |
+| `api/feedback.test.ts` | Invalid JSON, missing rating, out-of-range (0, 6), non-numeric string, comment trimming, null for whitespace, DB error, Turnstile rejection 403 |
+| `api/tutor-applications.test.ts` | Missing Notion key, invalid JSON, missing fullName/email, Notion failure blocks DB write, Supabase mirror failure returns 201, array → comma join, optional fields stored as null, Turnstile rejection 403 |
 | `api/careers.test.ts` | Public GET with camelCase mapping, admin POST/PUT/DELETE with auth and validation |
+| `lib/rbac.test.ts` | `can()` — super_admin wildcard, exact permission match, role-specific permissions, applications:read is super_admin only, invites:create for org_admin, careers CRUD for org_admin; `getUserRole()` — DB row returned, DB throws → fallback to metadata, 'admin' → 'org_admin' mapping, null when no recognised role, DB preferred over metadata, platform-wide row prioritised over org-scoped row |
 | `lib/format.test.ts` | `formatDay`, `formatPrice` edge cases |
 | `lib/validate.test.ts` | `validateBookingForm` — valid, missing fields, invalid email, whitespace |
 
@@ -385,9 +428,20 @@ Key events captured across the app: booking initiated, payment verified, tutor a
 ## Database Schema (summary)
 
 ```
+organisations   id, name, type (university|secondary|primary), location, created_at
+
+user_roles      id, user_id (→ auth.users), org_id (→ organisations, NULL = platform-wide),
+                role (super_admin|org_admin|tutor_manager|tutor|viewer), invited_by, created_at
+
+                Unique: one platform-wide row per user (WHERE org_id IS NULL)
+                        one org-scoped row per user per org (WHERE org_id IS NOT NULL)
+
+invites         id, token (hex, unique), email, org_id (→ organisations),
+                role, invited_by (→ auth.users), expires_at, accepted_at, created_at
+
 tutorials       id, code, title, teacher, description, date, time,
                 seats_total, seats_booked, price (naira), color_scheme,
-                status, created_at
+                status, org_id (→ organisations), created_at
 
                 seats_booked is incremented atomically via the Postgres
                 function increment_seats_booked(tid UUID) after each
@@ -396,7 +450,12 @@ tutorials       id, code, title, teacher, description, date, time,
 bookings        id, tutorial_id (→ tutorials, nullable for private sessions),
                 full_name, email, phone, course, course_of_study, level,
                 preferred_schedule, notes, amount_paid (naira),
-                payment_status, payment_reference (UNIQUE), attended, created_at
+                payment_status, payment_reference (UNIQUE), attended,
+                org_id (→ organisations), created_at
+
+                org_id is the source of truth for revenue attribution — never
+                derive it by joining through tutorials. Set at insert time from
+                tutorials.org_id (group) or metadata.org_id (private).
 
                 course_of_study, level, preferred_schedule are collected
                 after payment via the details page and written via PATCH
@@ -419,6 +478,14 @@ tutor_applications  id, full_name, email, phone, education_level, institution,
 **RLS policies:**
 - `tutorials`: public SELECT for `status = 'active'`
 - `careers`: public SELECT for `status = 'active'`
+- `organisations`: authenticated SELECT
+- `user_roles`: users can SELECT their own rows only
+- `invites`: public SELECT (token acts as the secret)
 - `bookings`, `feedback`, `tutor_applications`: no public SELECT — service-role key only
 
 Full schema with RLS policies and the `increment_seats_booked` function: `supabase/schema.sql`
+
+Migrations in `supabase/migrations/`:
+- `001_rbac.sql` — creates organisations, user_roles, invites; adds org_id to tutorials; migrates existing users
+- `002_bookings_org_id.sql` — adds org_id to bookings
+- `003_seed_super_admins.sql` — promotes specified emails to platform-wide super_admin

@@ -6,6 +6,11 @@ jest.mock('@/lib/posthog-server', () => ({
   getPostHogClient: jest.fn(() => ({ capture: jest.fn(), identify: jest.fn(), shutdown: jest.fn() })),
 }));
 
+const mockCheckLoginRateLimit = jest.fn().mockResolvedValue({ allowed: true });
+jest.mock('@/lib/rate-limit', () => ({
+  checkLoginRateLimit: (...args: any[]) => mockCheckLoginRateLimit(...args),
+}));
+
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { POST as login } from '@/app/api/auth/admin/login/route';
 import { POST as logout } from '@/app/api/auth/admin/logout/route';
@@ -26,7 +31,18 @@ function makeLoginRequest(body: object) {
 }
 
 describe('POST /api/auth/admin/login', () => {
-  beforeEach(() => mockSupabase.mockReset());
+  beforeEach(() => {
+    mockSupabase.mockReset();
+    mockCheckLoginRateLimit.mockResolvedValue({ allowed: true });
+  });
+
+  it('returns 429 when the rate limit is exceeded', async () => {
+    mockCheckLoginRateLimit.mockResolvedValueOnce({ allowed: false });
+    const res = await login(makeLoginRequest({ email: 'admin@test.com', password: 'pass' }));
+    expect(res.status).toBe(429);
+    const data = await res.json();
+    expect(data.error).toMatch(/too many/i);
+  });
 
   it('returns 400 when email is missing', async () => {
     const res = await login(makeLoginRequest({ password: 'secret' }));

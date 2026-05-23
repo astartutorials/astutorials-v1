@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { X, Calendar, Clock, MapPin, Users, ArrowRight, Loader2 } from "lucide-react";
 import { validateBookingForm } from "@/lib/validate";
 import posthog from "posthog-js";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 interface GroupBookingModalProps {
   tutorial: {
@@ -41,6 +42,8 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
   const [errors, setErrors] = useState<ReturnType<typeof validateBookingForm>>({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<any>(null);
 
   const set = (key: keyof typeof form, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -64,6 +67,7 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
         body: JSON.stringify({
           email: form.email,
           amount: tutorial.price,
+          turnstileToken,
           metadata: {
             tutorial_id: tutorial.id,
             full_name: form.fullName,
@@ -72,6 +76,7 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
           },
         }),
       });
+      turnstileRef.current?.reset();
 
       const data = await res.json();
       if (!res.ok) {
@@ -192,11 +197,19 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
                 className={`${inputClass} resize-none`} />
             </div>
 
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '1x00000000000000000000AA'}
+              onSuccess={setTurnstileToken}
+              onExpire={() => setTurnstileToken(null)}
+              options={{ appearance: 'interaction-only' }}
+            />
+
             {apiError && <p className="text-sm text-red-600 font-medium">{apiError}</p>}
 
             <button
               type="submit"
-              disabled={loading || tutorial.seatsLeft <= 0}
+              disabled={loading || tutorial.seatsLeft <= 0 || !turnstileToken}
               className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-red-700 transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (
