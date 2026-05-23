@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
   if (!ASSIGNABLE_ROLES.includes(role)) {
     return NextResponse.json({ error: `Invalid role. Must be one of: ${ASSIGNABLE_ROLES.join(', ')}` }, { status: 400 });
   }
+  if (!orgId) {
+    return NextResponse.json({ error: 'orgId is required when registering an admin user.' }, { status: 400 });
+  }
 
   const { data, error } = await adminSupabase.auth.admin.createUser({
     email,

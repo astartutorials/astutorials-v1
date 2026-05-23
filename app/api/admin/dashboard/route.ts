@@ -33,7 +33,7 @@ export async function GET() {
     .from('feedback')
     .select('full_name, rating, created_at, tutorials(title, org_id, organisations(name))')
     .order('created_at', { ascending: false })
-    .limit(5);
+    .limit(visibleOrgIds ? 100 : 5);
 
   let recentPaymentsQuery = serviceSupabase
     .from('bookings')
@@ -64,7 +64,7 @@ export async function GET() {
   ]);
 
   const recentFeedback = visibleOrgIds
-    ? (recentFeedbackRaw ?? []).filter((f: any) => visibleOrgIds.includes(f.tutorials?.org_id))
+    ? (recentFeedbackRaw ?? []).filter((f: any) => visibleOrgIds.includes(f.tutorials?.org_id)).slice(0, 5)
     : recentFeedbackRaw;
 
   const filteredOrgs = visibleOrgIds
