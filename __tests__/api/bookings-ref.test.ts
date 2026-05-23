@@ -149,6 +149,42 @@ describe('PATCH /api/bookings/[ref]', () => {
     );
   });
 
+  it('writes notes to DB when provided', async () => {
+    const mockUpdate = jest.fn().mockReturnValue({
+      eq: jest.fn().mockResolvedValue({ error: null }),
+    });
+    mockFrom.mockReturnValue({ update: mockUpdate });
+
+    await PATCH(
+      makePatchReq('ref-notes', {
+        courseOfStudy: 'Computer Science',
+        level: '300 Level',
+        preferredSchedule: 'Saturday',
+        notes: 'I need help with integration by parts',
+      }),
+      makeParams('ref-notes')
+    );
+
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ notes: 'I need help with integration by parts' })
+    );
+  });
+
+  it('does not include notes in update when not provided', async () => {
+    const mockUpdate = jest.fn().mockReturnValue({
+      eq: jest.fn().mockResolvedValue({ error: null }),
+    });
+    mockFrom.mockReturnValue({ update: mockUpdate });
+
+    await PATCH(
+      makePatchReq('ref-no-notes', { courseOfStudy: 'Law', level: '200 Level' }),
+      makeParams('ref-no-notes')
+    );
+
+    const updateArg = mockUpdate.mock.calls[0][0];
+    expect(updateArg).not.toHaveProperty('notes');
+  });
+
   it('filters update by payment_reference', async () => {
     const mockEq = jest.fn().mockResolvedValue({ error: null });
     mockFrom.mockReturnValue({

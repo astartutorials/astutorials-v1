@@ -228,3 +228,65 @@ export async function sendInviteEmail(opts: {
 
   await send(to, `You've been invited to A-Star Tutorials`, html);
 }
+
+export async function sendApplicationShortlisted(opts: { to: string; fullName: string }) {
+  const { to, fullName } = opts;
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">Great news, ${fullName}!</h2>
+      <p style="margin-top:0;color:#666;line-height:1.6">
+        Thank you for applying to tutor with A-Star Tutorials. We've reviewed your application and are pleased to let you know that you've been <strong>shortlisted</strong> for further consideration.
+      </p>
+      <p style="color:#666;line-height:1.6">
+        A member of our team will be in touch soon with next steps. In the meantime, feel free to reach out if you have any questions.
+      </p>
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        For help, email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+  await send(to, 'Your A-Star Tutorials application — update', html);
+}
+
+export async function sendApplicationRejected(opts: { to: string; fullName: string }) {
+  const { to, fullName } = opts;
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">Hi ${fullName},</h2>
+      <p style="margin-top:0;color:#666;line-height:1.6">
+        Thank you for your interest in joining A-Star Tutorials as a tutor and for the time you took to apply.
+      </p>
+      <p style="color:#666;line-height:1.6">
+        After careful consideration, we won't be moving forward with your application at this time. We encourage you to apply again in the future as our needs change.
+      </p>
+      <p style="color:#666;line-height:1.6">We wish you all the best.</p>
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        For help, email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+  await send(to, 'Your A-Star Tutorials application', html);
+}
+
+export async function sendApplicationAccepted(opts: { to: string; fullName: string }) {
+  const { to, fullName } = opts;
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">Congratulations, ${fullName}!</h2>
+      <p style="margin-top:0;color:#666;line-height:1.6">
+        We're delighted to let you know that your application to join A-Star Tutorials has been <strong>accepted</strong>. Welcome to the team!
+      </p>
+      <p style="color:#666;line-height:1.6">
+        You'll receive a separate email shortly with a link to set up your account on our platform. If you don't see it within 24 hours, please check your spam folder.
+      </p>
+      <p style="color:#666;line-height:1.6">We look forward to working with you.</p>
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        For help, email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+  await send(to, 'Your A-Star Tutorials application — accepted!', html);
+}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { getUserRole, can } from "@/lib/rbac";
+import { logAuditEvent } from "@/lib/audit";
 
 const serviceSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,21 +27,65 @@ export async function PATCH(
   const { id } = await params;
   const body = await req.json();
 
-  if (typeof body.attended !== "boolean") {
-    return NextResponse.json({ error: "attended must be a boolean" }, { status: 400 });
+  // ── Attendance toggle ────────────────────────────────────────────────────
+  if (typeof body.attended === "boolean") {
+    let updateQuery = serviceSupabase
+      .from("bookings")
+      .update({ attended: body.attended })
+      .eq("id", id);
+
+    if (ctx.role !== 'super_admin' && ctx.orgId) {
+      updateQuery = (updateQuery as any).eq('org_id', ctx.orgId);
+    }
+
+    const { error } = await updateQuery;
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
   }
 
-  let updateQuery = serviceSupabase
-    .from("bookings")
-    .update({ attended: body.attended })
-    .eq("id", id);
+  // ── Cancellation ─────────────────────────────────────────────────────────
+  if (body.status === 'cancelled') {
+    const { data: booking, error: fetchErr } = await serviceSupabase
+      .from('bookings')
+      .select('id, full_name, email, payment_status, tutorial_id, org_id')
+      .eq('id', id)
+      .single();
 
-  if (ctx.role !== 'super_admin' && ctx.orgId) {
-    updateQuery = (updateQuery as any).eq('org_id', ctx.orgId);
+    if (fetchErr || !booking) {
+      return NextResponse.json({ error: 'Booking not found.' }, { status: 404 });
+    }
+    if (ctx.role !== 'super_admin' && ctx.orgId && booking.org_id !== ctx.orgId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    if (booking.payment_status === 'cancelled') {
+      return NextResponse.json({ error: 'Booking is already cancelled.' }, { status: 409 });
+    }
+
+    const wasPaid = booking.payment_status === 'paid';
+
+    const { error: updateErr } = await serviceSupabase
+      .from('bookings')
+      .update({ payment_status: 'cancelled' })
+      .eq('id', id);
+
+    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
+
+    if (wasPaid && booking.tutorial_id) {
+      await serviceSupabase.rpc('decrement_seats_booked', { tid: booking.tutorial_id });
+    }
+
+    await logAuditEvent({
+      actorId: user.id,
+      actorEmail: user.email ?? '',
+      action: 'booking.cancelled',
+      targetType: 'booking',
+      targetId: id,
+      targetLabel: `${booking.full_name} <${booking.email}>`,
+      orgId: booking.org_id,
+    });
+
+    return NextResponse.json({ ok: true });
   }
 
-  const { error } = await updateQuery;
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
 }

@@ -39,6 +39,7 @@ export async function PATCH(
       course_of_study: body.courseOfStudy ?? undefined,
       level: body.level ?? undefined,
       preferred_schedule: body.preferredSchedule ?? undefined,
+      ...(body.notes !== undefined ? { notes: body.notes } : {}),
     })
     .eq('payment_reference', ref);
 

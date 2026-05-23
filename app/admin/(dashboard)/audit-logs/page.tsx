@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { ClipboardList, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { ClipboardList, ChevronLeft, ChevronRight, RefreshCw, Search, X } from 'lucide-react';
 
 interface AuditLog {
   id: string;
@@ -31,6 +31,8 @@ const ACTION_STYLES: Record<string, string> = {
   'org.deleted':         'bg-red-100 text-red-700',
   'member.role_changed': 'bg-orange-100 text-orange-700',
   'member.removed':      'bg-red-100 text-red-700',
+  'booking.cancelled':        'bg-red-100 text-red-700',
+  'application.status_changed': 'bg-indigo-100 text-indigo-700',
 };
 
 const ACTION_LABELS: Record<string, string> = {
@@ -47,6 +49,8 @@ const ACTION_LABELS: Record<string, string> = {
   'org.deleted':         'Org deleted',
   'member.role_changed': 'Role changed',
   'member.removed':      'Member removed',
+  'booking.cancelled':        'Booking cancelled',
+  'application.status_changed': 'Application updated',
 };
 
 function formatDate(iso: string) {
@@ -64,11 +68,27 @@ export default function AuditLogsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [filterAction, setFilterAction] = useState('');
+  const [filterActor, setFilterActor] = useState('');
+  const [filterFrom, setFilterFrom] = useState('');
+  const [filterTo, setFilterTo] = useState('');
+
+  const hasFilters = filterAction || filterActor || filterFrom || filterTo;
+
+  const buildUrl = useCallback((p: number) => {
+    const params = new URLSearchParams({ page: String(p) });
+    if (filterAction) params.set('action', filterAction);
+    if (filterActor) params.set('actor', filterActor);
+    if (filterFrom) params.set('from', filterFrom);
+    if (filterTo) params.set('to', filterTo);
+    return `/api/admin/audit-logs?${params}`;
+  }, [filterAction, filterActor, filterFrom, filterTo]);
+
   const fetchLogs = useCallback(async (p: number) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/audit-logs?page=${p}`);
+      const res = await fetch(buildUrl(p));
       if (!res.ok) throw new Error('Failed to load audit logs');
       const json = await res.json();
       setLogs(json.logs);
@@ -80,9 +100,16 @@ export default function AuditLogsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [buildUrl]);
 
   useEffect(() => { fetchLogs(1); }, [fetchLogs]);
+
+  function clearFilters() {
+    setFilterAction('');
+    setFilterActor('');
+    setFilterFrom('');
+    setFilterTo('');
+  }
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -104,6 +131,56 @@ export default function AuditLogsPage() {
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           Refresh
         </button>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3 mb-5">
+        <select
+          value={filterAction}
+          onChange={(e) => setFilterAction(e.target.value)}
+          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none"
+        >
+          <option value="">All actions</option>
+          {Object.entries(ACTION_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
+        </select>
+
+        <div className="relative">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Filter by email…"
+            value={filterActor}
+            onChange={(e) => setFilterActor(e.target.value)}
+            className="pl-8 pr-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none w-48"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={filterFrom}
+            onChange={(e) => setFilterFrom(e.target.value)}
+            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none"
+          />
+          <span className="text-gray-400 text-sm">to</span>
+          <input
+            type="date"
+            value={filterTo}
+            onChange={(e) => setFilterTo(e.target.value)}
+            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none"
+          />
+        </div>
+
+        {hasFilters && (
+          <button
+            onClick={clearFilters}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-colors"
+          >
+            <X size={13} /> Clear
+          </button>
+        )}
       </div>
 
       {error && (

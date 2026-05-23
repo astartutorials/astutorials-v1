@@ -20,14 +20,24 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));
+  const action = searchParams.get('action') ?? '';
+  const actor = searchParams.get('actor') ?? '';
+  const from = searchParams.get('from') ?? '';
+  const to = searchParams.get('to') ?? '';
   const limit = 50;
   const offset = (page - 1) * limit;
 
-  const { data, error, count } = await serviceSupabase
+  let query = serviceSupabase
     .from('audit_logs')
     .select('*, organisations(name)', { count: 'exact' })
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1);
+    .order('created_at', { ascending: false });
+
+  if (action) query = query.eq('action', action);
+  if (actor) query = query.ilike('actor_email', `%${actor}%`);
+  if (from) query = query.gte('created_at', from);
+  if (to) query = query.lte('created_at', to + 'T23:59:59Z');
+
+  const { data, error, count } = await query.range(offset, offset + limit - 1);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

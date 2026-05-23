@@ -97,6 +97,12 @@ export default function AdminLoginForm() {
             </div>
           )}
 
+          <div className="flex justify-end">
+            <a href="/admin/forgot-password" className="text-xs text-gray-400 hover:text-[#D93025] transition-colors">
+              Forgot password?
+            </a>
+          </div>
+
           <button
             type="submit"
             disabled={isLoading}

@@ -34,14 +34,15 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname === '/admin/login';
   const isInvitePage = pathname === '/admin/invite';
+  const isPasswordResetPage = pathname === '/admin/forgot-password' || pathname === '/admin/reset-password';
 
-  if (!user && !isLoginPage && !isInvitePage) {
+  if (!user && !isLoginPage && !isInvitePage && !isPasswordResetPage) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/admin/login';
     return NextResponse.redirect(loginUrl);
   }
 
-  if (user && (isLoginPage || isInvitePage)) {
+  if (user && (isLoginPage || isInvitePage) && !isPasswordResetPage) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = '/admin/dashboard';
     return NextResponse.redirect(dashboardUrl);

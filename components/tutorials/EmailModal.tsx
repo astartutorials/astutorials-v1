@@ -20,7 +20,6 @@ export default function EmailModal({ onClose, orgId }: EmailModalProps) {
     email: "",
     phone: "",
     course: "",
-    notes: "",
   });
   const [errors, setErrors] = useState<Partial<typeof form>>({});
   const [loading, setLoading] = useState(false);
@@ -32,7 +31,7 @@ export default function EmailModal({ onClose, orgId }: EmailModalProps) {
     setForm((prev) => ({ ...prev, [key]: value }));
 
   function validate() {
-    const errs = validateBookingForm(form) as Partial<typeof form>;
+    const errs: Partial<Record<keyof typeof form | 'course', string>> = validateBookingForm(form);
     if (!form.course.trim()) errs.course = "Required";
     return errs;
   }
@@ -58,7 +57,6 @@ export default function EmailModal({ onClose, orgId }: EmailModalProps) {
             full_name: form.fullName,
             phone: form.phone,
             course: form.course,
-            notes: form.notes,
             ...(orgId ? { org_id: orgId } : {}),
           },
         }),
@@ -147,16 +145,6 @@ export default function EmailModal({ onClose, orgId }: EmailModalProps) {
             <input type="text" placeholder="e.g. MTH201 — Calculus" value={form.course}
               onChange={(e) => set("course", e.target.value)} className={inputClass} />
             {errors.course && <p className="mt-1 text-xs text-red-500">{errors.course}</p>}
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-              Additional Notes <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <textarea rows={3} placeholder="Specific topics or areas you're struggling with..."
-              value={form.notes} onChange={(e) => set("notes", e.target.value)}
-              className={`${inputClass} resize-none`} />
           </div>
 
           <Turnstile

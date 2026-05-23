@@ -20,7 +20,6 @@ function BookingDetailsForm() {
   const [form, setForm] = useState({
     courseOfStudy: '',
     level: '',
-    notes: '',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -57,7 +56,6 @@ function BookingDetailsForm() {
       body: JSON.stringify({
         courseOfStudy: form.courseOfStudy,
         level: form.level,
-        notes: form.notes || undefined,
       }),
     });
 
@@ -134,20 +132,6 @@ function BookingDetailsForm() {
               </select>
               {errors.level && <p className="mt-1 text-xs text-red-500">{errors.level}</p>}
             </div>
-          </div>
-
-          {/* Additional Info */}
-          <div>
-            <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-              Additional Info <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <textarea
-              rows={3}
-              placeholder="Specific topics, areas you're struggling with, or anything else we should know..."
-              value={form.notes}
-              onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-              className={`${inputClass} resize-none`}
-            />
           </div>
 
           <button
