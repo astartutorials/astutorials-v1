@@ -12,8 +12,56 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 export const metadata: Metadata = {
-  title: "A-Star | Unlock Your Academic Brilliance",
-  description: "Personalized tutoring designed specifically for Tertiary Institutions.",
+  metadataBase: new URL("https://astartutorials.com"),
+  title: {
+    default: "A-Star Tutorials | Academic Excellence for Tertiary Students",
+    template: "%s | A-Star Tutorials",
+  },
+  description:
+    "Personalized one-on-one and group tutoring for tertiary institution students. Book expert tutors at A-Star Tutorials and unlock your academic potential.",
+  keywords: [
+    "tutoring",
+    "tertiary education",
+    "Babcock University",
+    "academic excellence",
+    "private tutor",
+    "group tutorials",
+    "university tutoring Nigeria",
+  ],
+  authors: [{ name: "A-Star Tutorials", url: "https://astartutorials.com" }],
+  creator: "A-Star Tutorials",
+  openGraph: {
+    type: "website",
+    locale: "en_NG",
+    url: "https://astartutorials.com",
+    siteName: "A-Star Tutorials",
+    title: "A-Star Tutorials | Academic Excellence for Tertiary Students",
+    description:
+      "Personalized one-on-one and group tutoring for tertiary institution students. Book expert tutors and unlock your academic potential.",
+    images: [
+      {
+        url: "/tutor-hero.png",
+        width: 1200,
+        height: 630,
+        alt: "A-Star Tutorials – Academic Excellence for Tertiary Students",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "A-Star Tutorials | Academic Excellence for Tertiary Students",
+    description:
+      "Personalized one-on-one and group tutoring for tertiary institution students.",
+    images: ["/tutor-hero.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
 };
 
 export default function RootLayout({
