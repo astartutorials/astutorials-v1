@@ -44,7 +44,7 @@ function LinkedInIcon() {
 }
 
 const socials = [
-  { Icon: WhatsAppIcon, href: "https://whatsapp.com/channel/0029VavS6E5EwEjtZ3eM4t2R", label: "WhatsApp" },
+  { Icon: WhatsAppIcon, href: "https://api.whatsapp.com/send/?phone=2349160465678&text=Hello, I want to make some enquiries. My name is&type=phone_number&app_absent=0", label: "WhatsApp" },
   { Icon: InstagramIcon, href: "https://instagram.com/astartutorialshq", label: "Instagram" },
   { Icon: TikTokIcon, href: "https://tiktok.com/@astartutorialshq", label: "TikTok" },
   { Icon: LinkedInIcon, href: "https://linkedin.com/company/astartutorials", label: "LinkedIn" },
