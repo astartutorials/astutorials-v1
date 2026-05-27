@@ -1,8 +1,12 @@
 import TutorApplicationForm from "@/components/apply/TutorApplicationForm";
 
 export const metadata = {
-  title: "Apply to Tutor | A-Star Tutorials",
-  description: "Join our team of expert tutors at A-Star Tutorials.",
+  title: "Become a Tutor",
+  description:
+    "Apply to join A-Star Tutorials as a tutor. Share your expertise, set your own schedule, and help tertiary students achieve academic excellence.",
+  alternates: {
+    canonical: "https://astartutorials.com/apply",
+  },
 };
 
 export default function ApplyPage() {
