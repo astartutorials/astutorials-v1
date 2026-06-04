@@ -35,7 +35,7 @@ export default function HeroSection() {
               href="/tutorials"
               className="btn-primary flex-1 px-4 py-3.5 rounded-full text-sm md:text-base font-medium text-center shadow-xl shadow-red-500/10 whitespace-nowrap"
             >
-              Book Now
+              Book a Tutorial Session
             </Link>
           </div>
         </div>
