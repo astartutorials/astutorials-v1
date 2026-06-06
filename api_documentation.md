@@ -158,6 +158,24 @@ Permanently remove a tutorial session.
 
 ---
 
+### `GET /api/cron/expire-tutorials` — `[x] Implemented`
+
+**Used by: Vercel Cron (nightly, 1am UTC)**  
+**Auth**: `Authorization: Bearer <CRON_SECRET>` — set automatically by Vercel.
+
+Finds all tutorials with `status = 'active'` and a past `date`, flips them to `completed`, and writes an audit log entry for each. Safe to call manually for backfills.
+
+**Response `200`:**
+
+```json
+{ "updated": 3 }
+```
+
+**Response `401`:** Missing or incorrect `CRON_SECRET`.  
+**Response `500`:** Database read or write failure.
+
+---
+
 ## 3. Bookings & Payments
 
 ### `POST /bookings/group` — `[x] Implemented`

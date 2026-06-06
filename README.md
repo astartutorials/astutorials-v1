@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react" />
   <img src="https://img.shields.io/badge/Supabase-postgres-3ECF8E?logo=supabase" />
   <img src="https://img.shields.io/badge/Paystack-payments-00C3F7" />
-  <img src="https://img.shields.io/badge/tests-288%20passing-brightgreen" />
+  <img src="https://img.shields.io/badge/tests-296%20passing-brightgreen" />
 </p>
 
 ---
@@ -232,11 +232,15 @@ TURNSTILE_SECRET_KEY=0x...              # server-side only, never expose to brow
 # Get credentials at https://console.upstash.com
 UPSTASH_REDIS_REST_URL=https://...
 UPSTASH_REDIS_REST_TOKEN=...
+
+# Vercel Cron (auto-expires past tutorials nightly)
+# Set this in the Vercel dashboard; Vercel sends it automatically as a Bearer token
+CRON_SECRET=your_random_secret
 ```
 
 ```
 
-> **Optional vars:** `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, and `ADMIN_NOTIFICATION_EMAIL` can be omitted locally — the relevant features are silently skipped when not set.
+> **Optional vars:** `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `ADMIN_NOTIFICATION_EMAIL`, and `CRON_SECRET` can be omitted locally — the relevant features are silently skipped when not set.
 
 > **Security:** `SUPABASE_SERVICE_ROLE_KEY` bypasses Row Level Security. Only use it in server-side API routes — never import it in client components or `lib/supabase.ts`.
 
@@ -375,7 +379,7 @@ npm test -- --ci      # CI mode (used in GitHub Actions)
 
 Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All external calls (Supabase, Paystack, Notion, Resend) are mocked — no real credentials needed.
 
-**Coverage (288 tests, 27 suites):**
+**Coverage (296 tests, 28 suites):**
 
 | File | What's tested |
 |---|---|
@@ -388,6 +392,7 @@ Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All e
 | `api/admin-update-password.test.ts` | Auth guard, missing fields → 400, too-short password → 400, wrong current password → 400, updateUser failure → 500, success → 200, verifies signInWithPassword called before updateUser |
 | `api/admin-register.test.ts` | Auth guard, missing name/email/password → 400, too-short password → 400, missing orgId → 400, createUser failure → 500, success → 201 with userId, email_confirm: true + full_name metadata |
 | `api/admin-tutorials.test.ts` | Auth guard on GET/POST/PUT/DELETE, validation, draft vs active, DB errors |
+| `api/cron-expire-tutorials.test.ts` | Missing/wrong auth → 401, no expired tutorials → 0, DB fetch error → 500, DB update error → 500, correct count returned, logAuditEvent called per tutorial, skipped when none expire |
 | `api/admin-tutorial-bookings.test.ts` | Auth guard, returns bookings for tutorial, filters by correct `tutorial_id`, DB error |
 | `api/admin-bookings.test.ts` | Auth guard, returns bookings with tutorial join, all queried fields present, org_id filter for org_admin, DB error |
 | `api/admin-booking-patch.test.ts` | Auth guard, 400 for non-boolean/missing attended, marks attended, id+value passed to Supabase, DB error; cancellation: 404 not found, 409 already cancelled, 200+seat decrement for paid group, no decrement for pending/private, 500 on update error |
