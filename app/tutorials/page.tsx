@@ -51,10 +51,12 @@ function TutorialsContent() {
 
     useEffect(() => {
         async function load() {
+            const today = new Date().toISOString().split('T')[0];
             const { data } = await supabase
                 .from('tutorials')
                 .select('id, code, title, teacher, description, date, time, location, seats_total, seats_booked, price, color_scheme, org_id')
                 .eq('status', 'active')
+                .gte('date', today)
                 .order('date', { ascending: true });
             setTutorials((data as Tutorial[]) ?? []);
             setLoading(false);
