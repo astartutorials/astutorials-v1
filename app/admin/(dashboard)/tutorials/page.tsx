@@ -34,6 +34,13 @@ function seatBarColor(booked: number, total: number) {
   return "bg-red-500";
 }
 
+export function compareTutorialDates(a: string | null, b: string | null, dir: 1 | -1): number {
+  if (!a && !b) return 0;
+  if (!a) return -1;
+  if (!b) return 1;
+  return (a < b ? -1 : a > b ? 1 : 0) * dir;
+}
+
 function formatDate(d: string | null) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-GB", {
@@ -120,10 +127,7 @@ export default function AdminTutorialsPage() {
       return ((a.bookings?.length ?? 0) - (b.bookings?.length ?? 0)) * dir;
     }
     if (sortKey === 'date') {
-      if (!a.date && !b.date) return 0;
-      if (!a.date) return -1;
-      if (!b.date) return 1;
-      return (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) * dir;
+      return compareTutorialDates(a.date, b.date, dir);
     }
     const av = (a[sortKey as keyof Tutorial] as string) ?? '';
     const bv = (b[sortKey as keyof Tutorial] as string) ?? '';
