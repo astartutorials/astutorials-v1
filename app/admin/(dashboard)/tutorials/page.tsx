@@ -121,8 +121,8 @@ export default function AdminTutorialsPage() {
     }
     if (sortKey === 'date') {
       if (!a.date && !b.date) return 0;
-      if (!a.date) return 1;
-      if (!b.date) return -1;
+      if (!a.date) return -1;
+      if (!b.date) return 1;
       return (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) * dir;
     }
     const av = (a[sortKey as keyof Tutorial] as string) ?? '';
