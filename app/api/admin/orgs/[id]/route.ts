@@ -11,7 +11,7 @@ const serviceSupabase = createClient(
 
 type Params = { params: Promise<{ id: string }> };
 
-async function assertSuperAdmin(req: NextRequest) {
+async function assertSuperAdmin() {
   const authClient = await createSupabaseServerClient();
   const { data: { user }, error } = await authClient.auth.getUser();
   if (error || !user) return { user: null, ctx: null, err: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
@@ -21,7 +21,7 @@ async function assertSuperAdmin(req: NextRequest) {
 }
 
 export async function GET(_req: NextRequest, { params }: Params) {
-  const { err } = await assertSuperAdmin(_req);
+  const { err } = await assertSuperAdmin();
   if (err) return err;
 
   const { id } = await params;
@@ -86,7 +86,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
-  const { user, err } = await assertSuperAdmin(req);
+  const { user, err } = await assertSuperAdmin();
   if (err) return err;
 
   const { id } = await params;
@@ -120,7 +120,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(req: NextRequest, { params }: Params) {
-  const { user, err } = await assertSuperAdmin(req);
+  const { user, err } = await assertSuperAdmin();
   if (err) return err;
 
   const { id } = await params;

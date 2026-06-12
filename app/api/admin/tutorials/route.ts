@@ -98,7 +98,8 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ message: 'Tutorial successfully created', tutorial: data }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Internal Server Error', message: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Internal Server Error', message }, { status: 500 });
   }
 }

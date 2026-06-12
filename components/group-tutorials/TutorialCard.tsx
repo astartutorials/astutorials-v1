@@ -27,7 +27,6 @@ function formatTime(time: string) {
 }
 
 const TutorialCard = ({
-    id,
     code,
     title,
     teacher,

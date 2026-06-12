@@ -22,7 +22,7 @@ function DetailsForm() {
   const ref = searchParams.get('ref') ?? '';
 
   const [booking, setBooking] = useState<{ full_name: string; phone: string; course: string } | null>(null);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState(!ref);
 
   const [form, setForm] = useState({
     courseOfStudy: '',
@@ -34,7 +34,7 @@ function DetailsForm() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!ref) { setLoadError(true); return; }
+    if (!ref) return;
     fetch(`/api/bookings/${ref}`)
       .then((r) => r.json())
       .then((d) => {

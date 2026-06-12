@@ -54,12 +54,28 @@ type RecentPayment = {
   tutorials: { title: string } | null;
 };
 
+type UpcomingTutorial = {
+  id: string;
+  code: string;
+  title: string;
+  date: string;
+  time: string;
+  organisations?: { name: string } | null;
+};
+
+type RecentFeedbackItem = {
+  full_name: string | null;
+  rating: number;
+  created_at: string;
+  tutorials?: { title: string; organisations?: { name: string } | null } | null;
+};
+
 type DashboardData = {
   totals: { revenue: number; students: number; activeTutorials: number; avgRating: number | null; orgCount: number };
   byOrg: OrgStat[];
   orgNames: string[];
-  upcoming: any[];
-  recentFeedback: any[];
+  upcoming: UpcomingTutorial[];
+  recentFeedback: RecentFeedbackItem[];
   recentPayments: RecentPayment[];
   rawPaidBookings: RawPaid[];
   rawAllBookings: RawAll[];
@@ -89,8 +105,7 @@ function buildTimeSeries(
   paid: RawPaid[],
   granularity: 'day' | 'week' | 'month',
   periodStart: Date,
-  orgs: OrgStat[],
-  orgNames: string[]
+  orgs: OrgStat[]
 ): Record<string, number | string>[] {
   const now = new Date();
   const totalDays = Math.max(1, Math.ceil((now.getTime() - periodStart.getTime()) / 86400000));
@@ -134,7 +149,8 @@ function buildTimeSeries(
   });
 }
 
-function CustomTooltip({ active, payload, formatter }: any) {
+type CustomTooltipProps = { active?: boolean; payload?: Array<{ name: string; value: number }>; formatter?: (v: number) => string };
+function CustomTooltip({ active, payload, formatter }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   const { name, value } = payload[0];
   return (
@@ -224,7 +240,7 @@ export default function AdminDashboardPage() {
 
   const periodData = useMemo(() => {
     if (!data) return null;
-    const { rawPaidBookings, rawAllBookings, byOrg: allTimeByOrg, orgNames } = data;
+    const { rawPaidBookings, rawAllBookings, byOrg: allTimeByOrg } = data;
     const { getStart, granularity } = PERIOD_CONFIG[period];
     const cutoff = period === 'all' && rawPaidBookings.length > 0
       ? new Date(Math.min(...rawPaidBookings.map(b => new Date(b.created_at).getTime())))
@@ -242,7 +258,7 @@ export default function AdminDashboardPage() {
 
     const periodRevenue  = paidIn.reduce((s, b) => s + b.amount_paid, 0);
     const periodStudents = new Set(allIn.map(b => b.email)).size;
-    const timeSeries = buildTimeSeries(paidIn, granularity, cutoff, allTimeByOrg, orgNames);
+    const timeSeries = buildTimeSeries(paidIn, granularity, cutoff, allTimeByOrg);
 
     return { filteredByOrg, timeSeries, periodRevenue, periodStudents };
   }, [data, period]);
@@ -486,7 +502,7 @@ export default function AdminDashboardPage() {
           </div>
           {upcoming.length > 0 ? (
             <div className="divide-y divide-gray-50">
-              {upcoming.map((t: any) => (
+              {upcoming.map((t) => (
                 <Link key={t.id} href={`/admin/tutorials/${t.id}`}
                   className="px-6 py-4 flex items-center gap-4 hover:bg-gray-50/60 transition-colors block"
                 >
@@ -530,7 +546,7 @@ export default function AdminDashboardPage() {
             </div>
             {recentFeedback.length > 0 ? (
               <div className="divide-y divide-gray-50">
-                {recentFeedback.map((f: any, i: number) => (
+                {recentFeedback.map((f, i) => (
                   <div key={i} className="px-6 py-4 flex items-center gap-4 hover:bg-gray-50/50 transition-colors">
                     <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-sm text-gray-600 flex-shrink-0">
                       {f.full_name ? initials(f.full_name) : '?'}

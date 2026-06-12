@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { Send, CheckCircle2, AlertCircle, Loader2, Info } from "lucide-react";
 import posthog from "posthog-js";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 const EDUCATION_LEVELS = ["Secondary", "Undergraduate", "Postgraduate", "PhD", "Professional Certification"];
 const LEVELS_CAN_TEACH = [
@@ -121,7 +121,7 @@ export default function TutorApplicationForm() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [apiError, setApiError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const turnstileRef = useRef<any>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
-import { getUserRole, can, AppRole } from '@/lib/rbac';
+import { getUserRole, AppRole } from '@/lib/rbac';
 import { logAuditEvent } from '@/lib/audit';
 
 const adminSupabase = createClient(

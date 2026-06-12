@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Users, Play } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 export default function DashboardPreview() {
   return (

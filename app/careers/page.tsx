@@ -20,7 +20,7 @@ export default function CareersPage() {
                 .eq("status", "active")
                 .order("created_at", { ascending: false });
             setJobs(
-                ((data ?? []) as any[]).map((d) => ({
+                (data ?? []).map((d) => ({
                     ...d,
                     applicationLink: d.application_link,
                 })) as JobPosition[]

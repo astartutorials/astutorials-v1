@@ -28,7 +28,7 @@ export async function GET() {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const filtered = ctx.role !== 'super_admin' && ctx.orgId
-    ? (data ?? []).filter((f: any) => f.tutorials?.org_id === ctx.orgId)
+    ? (data ?? []).filter((f) => (f as { tutorials?: { org_id?: string } | null }).tutorials?.org_id === ctx.orgId)
     : data;
 
   return NextResponse.json(filtered);

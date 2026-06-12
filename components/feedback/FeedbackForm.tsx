@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { Star, Send, ThumbsUp, Loader2 } from "lucide-react";
 import posthog from "posthog-js";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 export default function FeedbackForm() {
   const [rating, setRating] = useState(0);
@@ -14,7 +14,7 @@ export default function FeedbackForm() {
   const [error, setError] = useState<string | null>(null);
   const [comment, setComment] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const turnstileRef = useRef<any>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   if (submitted) {
     return (

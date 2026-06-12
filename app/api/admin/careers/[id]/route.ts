@@ -36,7 +36,7 @@ export async function PUT(
       status: 'status'
     };
 
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     Object.entries(body).forEach(([key, value]) => {
       const dbKey = fieldMap[key];
       if (dbKey && value !== undefined) {
@@ -78,9 +78,10 @@ export async function PUT(
     };
 
     return NextResponse.json({ message: 'Career role updated successfully', job: formattedJob });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message },
       { status: 500 }
     );
   }
@@ -117,9 +118,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: 'Job role deleted successfully.' });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Internal Server Error', message: error.message },
+      { error: 'Internal Server Error', message },
       { status: 500 }
     );
   }

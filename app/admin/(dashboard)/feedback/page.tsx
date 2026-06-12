@@ -186,7 +186,7 @@ export default function AdminFeedbackPage() {
 
               {item.comment && (
                 <p className="text-gray-600 text-sm leading-relaxed italic mb-4">
-                  "{item.comment}"
+                  &ldquo;{item.comment}&rdquo;
                 </p>
               )}
 
