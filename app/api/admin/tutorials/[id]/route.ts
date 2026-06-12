@@ -64,8 +64,9 @@ export async function PUT(
     });
 
     return NextResponse.json({ message: 'Tutorial updated successfully', tutorial: data });
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Internal Server Error', message: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Internal Server Error', message }, { status: 500 });
   }
 }
 
@@ -117,7 +118,8 @@ export async function DELETE(
     });
 
     return NextResponse.json({ message: 'Tutorial deleted successfully.' });
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Internal Server Error', message: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Internal Server Error', message }, { status: 500 });
   }
 }

@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { X, ArrowRight, Loader2 } from "lucide-react";
 import { validateBookingForm } from "@/lib/validate";
 import posthog from "posthog-js";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 interface EmailModalProps {
   onClose: () => void;
@@ -25,7 +25,7 @@ export default function EmailModal({ onClose, orgId }: EmailModalProps) {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const turnstileRef = useRef<any>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   const set = (key: keyof typeof form, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));

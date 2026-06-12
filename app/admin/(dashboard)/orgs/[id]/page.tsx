@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -57,12 +57,6 @@ type RecentBooking = {
   tutorials: { code: string; title: string } | null;
 };
 
-const ROLE_LABELS: Record<string, string> = {
-  org_admin: 'Org Admin',
-  tutor_manager: 'Tutor Manager',
-  tutor: 'Tutor',
-  viewer: 'Viewer',
-};
 
 const TYPE_STYLES: Record<string, { label: string; bg: string; text: string }> = {
   university: { label: 'University', bg: 'bg-blue-50',    text: 'text-blue-700' },
@@ -132,9 +126,7 @@ export default function OrgDetailPage({ params }: { params: Promise<{ id: string
   const [changingRole, setChangingRole] = useState<string | null>(null);
   const [removingUser, setRemovingUser] = useState<string | null>(null);
 
-  useEffect(() => { fetchDetail(); }, [id]);
-
-  async function fetchDetail() {
+  const fetchDetail = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/orgs/${id}`);
@@ -149,7 +141,9 @@ export default function OrgDetailPage({ params }: { params: Promise<{ id: string
     } finally {
       setLoading(false);
     }
-  }
+  }, [id, router]);
+
+  useEffect(() => { fetchDetail(); }, [fetchDetail]);
 
   function showToast(message: string, type: 'success' | 'error') {
     setToast({ message, type });

@@ -96,7 +96,7 @@ export default function AddCareerRoleModal({
         return;
       }
       setFormData(EMPTY_FORM);
-      onCreated ? onCreated() : onClose();
+      if (onCreated) { onCreated(); } else { onClose(); }
     } catch {
       setError("An unexpected error occurred.");
     } finally {

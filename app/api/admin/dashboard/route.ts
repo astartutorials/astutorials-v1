@@ -20,28 +20,30 @@ export async function GET() {
 
   const visibleOrgIds = ctx.role === 'super_admin' ? null : (ctx.orgId ? [ctx.orgId] : []);
 
-  let upcomingQuery = serviceSupabase
+  const upcomingBase = serviceSupabase
     .from('tutorials')
     .select('id, code, title, date, time, org_id, organisations(name)')
     .gte('date', new Date().toISOString().split('T')[0])
     .neq('status', 'draft')
-    .order('date', { ascending: true })
-    .limit(5);
-  if (visibleOrgIds) upcomingQuery = (upcomingQuery as any).in('org_id', visibleOrgIds);
+    .order('date', { ascending: true });
+  const upcomingQuery = visibleOrgIds
+    ? upcomingBase.in('org_id', visibleOrgIds).limit(5)
+    : upcomingBase.limit(5);
 
-  let feedbackQuery = serviceSupabase
+  const feedbackQuery = serviceSupabase
     .from('feedback')
     .select('full_name, rating, created_at, tutorials(title, org_id, organisations(name))')
     .order('created_at', { ascending: false })
     .limit(visibleOrgIds ? 100 : 5);
 
-  let recentPaymentsQuery = serviceSupabase
+  const recentPaymentsBase = serviceSupabase
     .from('bookings')
     .select('id, full_name, email, amount_paid, payment_reference, created_at, org_id, tutorials(title)')
     .eq('payment_status', 'paid')
-    .order('created_at', { ascending: false })
-    .limit(8);
-  if (visibleOrgIds) recentPaymentsQuery = (recentPaymentsQuery as any).in('org_id', visibleOrgIds);
+    .order('created_at', { ascending: false });
+  const recentPaymentsQuery = visibleOrgIds
+    ? recentPaymentsBase.in('org_id', visibleOrgIds).limit(8)
+    : recentPaymentsBase.limit(8);
 
   const [
     { data: orgs },
@@ -64,7 +66,7 @@ export async function GET() {
   ]);
 
   const recentFeedback = visibleOrgIds
-    ? (recentFeedbackRaw ?? []).filter((f: any) => visibleOrgIds.includes(f.tutorials?.org_id)).slice(0, 5)
+    ? (recentFeedbackRaw ?? []).filter((f) => visibleOrgIds.includes(f.tutorials?.org_id)).slice(0, 5)
     : recentFeedbackRaw;
 
   const filteredOrgs = visibleOrgIds
@@ -105,7 +107,7 @@ export async function GET() {
     : byOrg.reduce((s, o) => s + o.students, 0);
   const totalActiveTutorials = byOrg.reduce((s, o) => s + o.activeTutorials, 0);
   const filteredFeedbackRows = visibleOrgIds
-    ? (feedbackRows ?? []).filter((f: any) => visibleOrgIds.includes(f.tutorials?.org_id))
+    ? (feedbackRows ?? []).filter((f) => visibleOrgIds.includes(f.tutorials?.org_id))
     : (feedbackRows ?? []);
   const avgRating = filteredFeedbackRows.length
     ? filteredFeedbackRows.reduce((s, f) => s + f.rating, 0) / filteredFeedbackRows.length

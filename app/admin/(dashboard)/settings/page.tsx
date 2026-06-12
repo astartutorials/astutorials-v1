@@ -45,7 +45,7 @@ function Toast({ message, type }: { message: string; type: "success" | "error" }
 }
 
 export default function AdminSettingsPage() {
-  const { name, email, phone, role, loading: roleLoading, refresh: refreshAdmin } = useAdminUser();
+  const { name, email, phone, role, loading: roleLoading } = useAdminUser();
   const isSuperAdmin = role === 'super_admin';
 
   const [activeTab, setActiveTab] = useState<TabId>("profile");

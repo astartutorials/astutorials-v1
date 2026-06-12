@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Lock, Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
@@ -9,7 +9,6 @@ import { createBrowserClient } from '@supabase/ssr';
 
 function ResetForm() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const code = searchParams.get('code');
 
   const [password, setPassword] = useState('');

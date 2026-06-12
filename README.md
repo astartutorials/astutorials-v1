@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react" />
   <img src="https://img.shields.io/badge/Supabase-postgres-3ECF8E?logo=supabase" />
   <img src="https://img.shields.io/badge/Paystack-payments-00C3F7" />
-  <img src="https://img.shields.io/badge/tests-296%20passing-brightgreen" />
+  <img src="https://img.shields.io/badge/tests-303%20passing-brightgreen" />
 </p>
 
 ---
@@ -379,7 +379,7 @@ npm test -- --ci      # CI mode (used in GitHub Actions)
 
 Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All external calls (Supabase, Paystack, Notion, Resend) are mocked — no real credentials needed.
 
-**Coverage (296 tests, 28 suites):**
+**Coverage (303 tests, 29 suites):**
 
 | File | What's tested |
 |---|---|

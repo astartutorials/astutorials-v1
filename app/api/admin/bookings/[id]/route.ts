@@ -29,14 +29,13 @@ export async function PATCH(
 
   // ── Attendance toggle ────────────────────────────────────────────────────
   if (typeof body.attended === "boolean") {
-    let updateQuery = serviceSupabase
+    const baseQuery = serviceSupabase
       .from("bookings")
       .update({ attended: body.attended })
       .eq("id", id);
-
-    if (ctx.role !== 'super_admin' && ctx.orgId) {
-      updateQuery = (updateQuery as any).eq('org_id', ctx.orgId);
-    }
+    const updateQuery = ctx.role !== 'super_admin' && ctx.orgId
+      ? baseQuery.eq('org_id', ctx.orgId)
+      : baseQuery;
 
     const { error } = await updateQuery;
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

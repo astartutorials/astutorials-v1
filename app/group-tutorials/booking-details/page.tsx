@@ -15,7 +15,7 @@ function BookingDetailsForm() {
   const ref = searchParams.get('ref') ?? '';
 
   const [booking, setBooking] = useState<{ full_name: string } | null>(null);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState(!ref);
 
   const [form, setForm] = useState({
     courseOfStudy: '',
@@ -25,7 +25,7 @@ function BookingDetailsForm() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!ref) { setLoadError(true); return; }
+    if (!ref) return;
     fetch(`/api/bookings/${ref}`)
       .then((r) => r.json())
       .then((d) => {
@@ -66,7 +66,7 @@ function BookingDetailsForm() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-[var(--astar-bg)]">
         <div className="text-center">
-          <p className="text-gray-500 mb-2">We couldn't find your booking.</p>
+          <p className="text-gray-500 mb-2">We couldn&apos;t find your booking.</p>
           <a href="/tutorials" className="text-[var(--astar-red)] font-semibold underline text-sm">
             Back to tutorials
           </a>
