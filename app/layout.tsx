@@ -40,9 +40,9 @@ export const metadata: Metadata = {
       "Personalized one-on-one and group tutoring for tertiary institution students. Book expert tutors and unlock your academic potential.",
     images: [
       {
-        url: "/tutor-hero.png",
-        width: 1200,
-        height: 630,
+        url: "/logo.png",
+        width: 840,
+        height: 840,
         alt: "A-Star Tutorials – Academic Excellence for Tertiary Students",
       },
     ],
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: "A-Star Tutorials | Academic Excellence for Tertiary Students",
     description:
       "Personalized one-on-one and group tutoring for tertiary institution students.",
-    images: ["/tutor-hero.png"],
+    images: ["/logo.png"],
   },
   robots: {
     index: true,
