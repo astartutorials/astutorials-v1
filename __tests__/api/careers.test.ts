@@ -67,7 +67,7 @@ describe('GET /api/careers', () => {
       }),
     }));
 
-    const res = await getPublicCareers(new NextRequest('http://localhost:3000/api/careers'));
+    const res = await getPublicCareers();
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.jobs).toHaveLength(1);
@@ -85,7 +85,7 @@ describe('GET /api/careers', () => {
       }),
     }));
 
-    const res = await getPublicCareers(new NextRequest('http://localhost:3000/api/careers'));
+    const res = await getPublicCareers();
     expect(res.status).toBe(500);
   });
 });

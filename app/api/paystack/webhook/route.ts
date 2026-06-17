@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   const reference = tx.reference as string;
   const email = tx.customer?.email ?? "";
   const fullName = meta.full_name ?? tx.customer?.first_name ?? "Student";
-  const amountPaid = Math.round(tx.amount / 100);
+  const amountPaid = Math.round((tx.amount ?? 0) / 100);
 
   let tutorialForEmail: { title: string; date: string | null; time: string } | null = null;
   let bookingOrgId: string | null = meta.org_id ?? null;

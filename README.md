@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react" />
   <img src="https://img.shields.io/badge/Supabase-postgres-3ECF8E?logo=supabase" />
   <img src="https://img.shields.io/badge/Paystack-payments-00C3F7" />
-  <img src="https://img.shields.io/badge/tests-313%20passing-brightgreen" />
+  <img src="https://img.shields.io/badge/tests-315%20passing-brightgreen" />
 </p>
 
 ---
@@ -379,7 +379,7 @@ npm test -- --ci      # CI mode (used in GitHub Actions)
 
 Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All external calls (Supabase, Paystack, Notion, Resend) are mocked — no real credentials needed.
 
-**Coverage (313 tests, 30 suites):**
+**Coverage (315 tests, 30 suites):**
 
 | File | What's tested |
 |---|---|
@@ -391,7 +391,7 @@ Tests live in `__tests__/` and mirror the `app/api/` and `lib/` structure. All e
 | `api/admin-me.test.ts` | GET: auth guard, returns name/email/phone from metadata, email-prefix fallback, empty phone fallback; PATCH: auth guard, calls updateUser with correct fields, 500 on failure |
 | `api/admin-update-password.test.ts` | Auth guard, missing fields → 400, too-short password → 400, wrong current password → 400, updateUser failure → 500, success → 200, verifies signInWithPassword called before updateUser |
 | `api/admin-register.test.ts` | Auth guard, missing name/email/password → 400, too-short password → 400, missing orgId → 400, createUser failure → 500, success → 201 with userId, email_confirm: true + full_name metadata |
-| `api/admin-tutorials.test.ts` | Auth guard on GET/POST/PUT/DELETE, validation, draft vs active, DB errors; GET [id] returns a tutorial in any status (404 when missing/out-of-org); DELETE refused with 409 when paid bookings exist |
+| `api/admin-tutorials.test.ts` | Auth guard on GET/POST/PUT/DELETE, validation, draft vs active, DB errors; GET/PUT/DELETE [id] return 404 when the tutorial is missing or out of org scope; GET [id] returns a tutorial in any status; DELETE refused with 409 when paid bookings exist |
 | `api/admin-tutorials-status.test.ts` | `effectiveStatus()` — past-dated active → completed, future/today/undated stay active, drafts not auto-completed, completed unchanged |
 | `api/cron-expire-tutorials.test.ts` | Missing/wrong auth → 401, no expired tutorials → 0, DB fetch error → 500, DB update error → 500, correct count returned, logAuditEvent called per tutorial, skipped when none expire |
 | `api/admin-tutorial-bookings.test.ts` | Auth guard, returns bookings for tutorial, filters by correct `tutorial_id`, DB error |

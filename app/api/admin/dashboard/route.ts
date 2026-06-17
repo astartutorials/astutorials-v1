@@ -8,6 +8,13 @@ const serviceSupabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Without generated DB types, supabase-js infers embedded to-one relations
+// (e.g. feedback → tutorials) as arrays. Normalise to the single related row.
+function relOrgId(tutorials: unknown): string | null {
+  const rel = Array.isArray(tutorials) ? tutorials[0] : tutorials;
+  return (rel as { org_id?: string | null } | null | undefined)?.org_id ?? null;
+}
+
 export async function GET() {
   const authClient = await createSupabaseServerClient();
   const { data: { user }, error: authError } = await authClient.auth.getUser();
@@ -66,7 +73,7 @@ export async function GET() {
   ]);
 
   const recentFeedback = visibleOrgIds
-    ? (recentFeedbackRaw ?? []).filter((f) => visibleOrgIds.includes(f.tutorials?.org_id)).slice(0, 5)
+    ? (recentFeedbackRaw ?? []).filter((f) => { const oid = relOrgId(f.tutorials); return oid !== null && visibleOrgIds.includes(oid); }).slice(0, 5)
     : recentFeedbackRaw;
 
   const filteredOrgs = visibleOrgIds
@@ -107,7 +114,7 @@ export async function GET() {
     : byOrg.reduce((s, o) => s + o.students, 0);
   const totalActiveTutorials = byOrg.reduce((s, o) => s + o.activeTutorials, 0);
   const filteredFeedbackRows = visibleOrgIds
-    ? (feedbackRows ?? []).filter((f) => visibleOrgIds.includes(f.tutorials?.org_id))
+    ? (feedbackRows ?? []).filter((f) => { const oid = relOrgId(f.tutorials); return oid !== null && visibleOrgIds.includes(oid); })
     : (feedbackRows ?? []);
   const avgRating = filteredFeedbackRows.length
     ? filteredFeedbackRows.reduce((s, f) => s + f.rating, 0) / filteredFeedbackRows.length
