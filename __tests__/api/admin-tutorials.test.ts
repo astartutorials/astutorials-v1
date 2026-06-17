@@ -19,13 +19,19 @@ process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test_anon_key';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { GET, POST } from '@/app/api/admin/tutorials/route';
-import { PUT, DELETE } from '@/app/api/admin/tutorials/[id]/route';
+import { GET as getTutorial, PUT, DELETE } from '@/app/api/admin/tutorials/[id]/route';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 const ADMIN_USER = { id: 'admin-id', user_metadata: { role: 'admin' } };
 
 function getServiceFrom() {
   return (createClient as jest.Mock).mock.results[0].value.from as jest.Mock;
+}
+
+// The [id] route creates its own service-role client (the 2nd createClient
+// call, after the list route's at module load).
+function getIdServiceFrom() {
+  return (createClient as jest.Mock).mock.results[1].value.from as jest.Mock;
 }
 
 function mockAuthClient(user: object | null, fromFn = jest.fn()) {
@@ -183,6 +189,42 @@ describe('PUT /api/admin/tutorials/[id]', () => {
   });
 });
 
+describe('GET /api/admin/tutorials/[id]', () => {
+  beforeEach(() => mockServerClient.mockReset());
+
+  function mockTutorialFetch(data: object | null) {
+    getIdServiceFrom().mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          maybeSingle: jest.fn().mockResolvedValue({ data, error: null }),
+        }),
+      }),
+    });
+  }
+
+  it('returns 401 when not authenticated', async () => {
+    mockAuthClient(null);
+    const res = await getTutorial(makeRequest('GET', undefined, 'tut-1'), makeParams('tut-1'));
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 404 when the tutorial does not exist (or is out of org scope)', async () => {
+    mockAuthClient(ADMIN_USER, jest.fn());
+    mockTutorialFetch(null);
+    const res = await getTutorial(makeRequest('GET', undefined, 'tut-1'), makeParams('tut-1'));
+    expect(res.status).toBe(404);
+  });
+
+  it('returns the tutorial in any status (e.g. completed)', async () => {
+    mockAuthClient(ADMIN_USER, jest.fn());
+    mockTutorialFetch({ id: 'tut-1', code: 'CS101', title: 'Done', status: 'completed' });
+    const res = await getTutorial(makeRequest('GET', undefined, 'tut-1'), makeParams('tut-1'));
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.status).toBe('completed');
+  });
+});
+
 describe('DELETE /api/admin/tutorials/[id]', () => {
   beforeEach(() => mockServerClient.mockReset());
 
@@ -192,7 +234,19 @@ describe('DELETE /api/admin/tutorials/[id]', () => {
     expect(res.status).toBe(401);
   });
 
+  // Mock the service-role paid-booking count check that runs before deletion.
+  function mockPaidBookingCount(count: number) {
+    getIdServiceFrom().mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          eq: jest.fn().mockResolvedValue({ count }),
+        }),
+      }),
+    });
+  }
+
   it('deletes a tutorial and returns 200', async () => {
+    mockPaidBookingCount(0);
     const mockFrom = jest.fn().mockReturnValue({
       select: jest.fn().mockReturnValue({
         eq: jest.fn().mockReturnValue({
@@ -207,5 +261,15 @@ describe('DELETE /api/admin/tutorials/[id]', () => {
 
     const res = await DELETE(makeRequest('DELETE', undefined, 'tut-1'), makeParams('tut-1'));
     expect(res.status).toBe(200);
+  });
+
+  it('refuses to delete a tutorial with paid bookings (409)', async () => {
+    mockPaidBookingCount(2);
+    mockAuthClient(ADMIN_USER, jest.fn());
+
+    const res = await DELETE(makeRequest('DELETE', undefined, 'tut-1'), makeParams('tut-1'));
+    expect(res.status).toBe(409);
+    const data = await res.json();
+    expect(data.error).toContain('paid booking');
   });
 });

@@ -64,7 +64,7 @@ export default function AdminLoginForm() {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="email"
-                placeholder="admin@astartutorials.ng"
+                placeholder="admin@astartutorials.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
