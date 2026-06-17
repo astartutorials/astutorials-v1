@@ -86,10 +86,13 @@ export async function PUT(
       query = query.eq('org_id', ctx.orgId);
     }
 
-    const { data, error } = await query.select().single();
+    const { data, error } = await query.select().maybeSingle();
 
     if (error) {
       return NextResponse.json({ error: 'Database Error', message: error.message }, { status: 500 });
+    }
+    if (!data) {
+      return NextResponse.json({ error: 'Tutorial not found' }, { status: 404 });
     }
 
     const changedFields = Object.keys(updateData).filter(k => k !== 'updated_at');
@@ -129,6 +132,22 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // Fetch the tutorial first — establishes existence and ownership, and
+    // provides the title for the audit label.
+    const { data: tutorialData } = await supabase
+      .from('tutorials')
+      .select('code, title, org_id')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (!tutorialData) {
+      return NextResponse.json({ error: 'Tutorial not found' }, { status: 404 });
+    }
+    // Non-super_admin users can only delete tutorials in their org
+    if (ctx.role !== 'super_admin' && ctx.orgId && tutorialData.org_id !== ctx.orgId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     // Block deletion when paid bookings exist — bookings.tutorial_id is
     // ON DELETE CASCADE, so deleting would permanently destroy payment records.
     const { count: paidCount } = await serviceSupabase
@@ -146,21 +165,7 @@ export async function DELETE(
       );
     }
 
-    // Fetch title before deleting for the audit label
-    const { data: tutorialData } = await supabase
-      .from('tutorials')
-      .select('code, title, org_id')
-      .eq('id', id)
-      .single();
-
-    let query = supabase.from('tutorials').delete().eq('id', id);
-
-    // Non-super_admin users can only delete tutorials in their org
-    if (ctx.role !== 'super_admin' && ctx.orgId) {
-      query = query.eq('org_id', ctx.orgId);
-    }
-
-    const { error } = await query;
+    const { error } = await supabase.from('tutorials').delete().eq('id', id);
     if (error) {
       return NextResponse.json({ error: 'Database Error', message: error.message }, { status: 500 });
     }

@@ -169,23 +169,32 @@ describe('PUT /api/admin/tutorials/[id]', () => {
     expect(res.status).toBe(401);
   });
 
-  it('updates a tutorial and returns 200', async () => {
-    const updated = { id: 'tut-1', title: 'New Title' };
-    const mockFrom = jest.fn().mockReturnValue({
+  function mockUpdateResult(data: object | null) {
+    return jest.fn().mockReturnValue({
       update: jest.fn().mockReturnValue({
         eq: jest.fn().mockReturnValue({
           select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({ data: updated, error: null }),
+            maybeSingle: jest.fn().mockResolvedValue({ data, error: null }),
           }),
         }),
       }),
     });
-    mockAuthClient(ADMIN_USER, mockFrom);
+  }
+
+  it('updates a tutorial and returns 200', async () => {
+    mockAuthClient(ADMIN_USER, mockUpdateResult({ id: 'tut-1', title: 'New Title' }));
 
     const res = await PUT(makeRequest('PUT', { title: 'New Title' }, 'tut-1'), makeParams('tut-1'));
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.tutorial.title).toBe('New Title');
+  });
+
+  it('returns 404 when the tutorial does not exist (or is out of org scope)', async () => {
+    mockAuthClient(ADMIN_USER, mockUpdateResult(null));
+
+    const res = await PUT(makeRequest('PUT', { title: 'New Title' }, 'tut-1'), makeParams('tut-1'));
+    expect(res.status).toBe(404);
   });
 });
 
@@ -245,27 +254,39 @@ describe('DELETE /api/admin/tutorials/[id]', () => {
     });
   }
 
-  it('deletes a tutorial and returns 200', async () => {
-    mockPaidBookingCount(0);
-    const mockFrom = jest.fn().mockReturnValue({
+  // Auth client whose existence/ownership fetch returns the given row, and
+  // whose delete resolves successfully.
+  function mockAuthForDelete(tutorialRow: object | null) {
+    mockAuthClient(ADMIN_USER, jest.fn().mockReturnValue({
       select: jest.fn().mockReturnValue({
         eq: jest.fn().mockReturnValue({
-          single: jest.fn().mockResolvedValue({ data: { code: 'CS101', title: 'Test Tutorial', org_id: null } }),
+          maybeSingle: jest.fn().mockResolvedValue({ data: tutorialRow, error: null }),
         }),
       }),
       delete: jest.fn().mockReturnValue({
         eq: jest.fn().mockResolvedValue({ error: null }),
       }),
-    });
-    mockAuthClient(ADMIN_USER, mockFrom);
+    }));
+  }
+
+  it('deletes a tutorial and returns 200', async () => {
+    mockAuthForDelete({ code: 'CS101', title: 'Test Tutorial', org_id: null });
+    mockPaidBookingCount(0);
 
     const res = await DELETE(makeRequest('DELETE', undefined, 'tut-1'), makeParams('tut-1'));
     expect(res.status).toBe(200);
   });
 
+  it('returns 404 when the tutorial does not exist (or is out of org scope)', async () => {
+    mockAuthForDelete(null);
+
+    const res = await DELETE(makeRequest('DELETE', undefined, 'tut-1'), makeParams('tut-1'));
+    expect(res.status).toBe(404);
+  });
+
   it('refuses to delete a tutorial with paid bookings (409)', async () => {
+    mockAuthForDelete({ code: 'CS101', title: 'Test Tutorial', org_id: null });
     mockPaidBookingCount(2);
-    mockAuthClient(ADMIN_USER, jest.fn());
 
     const res = await DELETE(makeRequest('DELETE', undefined, 'tut-1'), makeParams('tut-1'));
     expect(res.status).toBe(409);
