@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Calendar, Clock, MapPin, ChevronLeft, Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 
 const inputClass =
   "w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm";
@@ -32,12 +31,9 @@ export default function EditTutorialPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
 
   useEffect(() => {
-    supabase
-      .from("tutorials")
-      .select("code, title, teacher, description, date, time, location, seats_total, price, status")
-      .eq("id", id)
-      .single()
-      .then(({ data }) => {
+    fetch(`/api/admin/tutorials/${id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
         if (data) {
           setForm({
             code: data.code ?? "",
@@ -53,7 +49,8 @@ export default function EditTutorialPage() {
           });
         }
         setLoadingData(false);
-      });
+      })
+      .catch(() => setLoadingData(false));
   }, [id]);
 
   async function handleSubmit(status: "active" | "draft") {

@@ -1,7 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getUserRole, can } from '@/lib/rbac';
 import { logAuditEvent } from '@/lib/audit';
+
+const serviceSupabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const authClient = await createSupabaseServerClient();
+
+  const { data: { user }, error: authError } = await authClient.auth.getUser();
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const ctx = await getUserRole(authClient, user.id, user.user_metadata as Record<string, unknown>);
+  if (!ctx || !can(ctx.role, 'tutorials:read')) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  let query = serviceSupabase.from('tutorials').select('*').eq('id', id);
+
+  // Non-super_admin users only see their org's tutorials
+  if (ctx.role !== 'super_admin' && ctx.orgId) {
+    query = query.eq('org_id', ctx.orgId);
+  }
+
+  const { data, error } = await query.maybeSingle();
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  if (!data) {
+    return NextResponse.json({ error: 'Tutorial not found' }, { status: 404 });
+  }
+
+  return NextResponse.json(data);
+}
 
 export async function PUT(
   request: NextRequest,
@@ -86,6 +127,23 @@ export async function DELETE(
     const ctx = await getUserRole(supabase, user.id, user.user_metadata as Record<string, unknown>);
     if (!ctx || !can(ctx.role, 'tutorials:delete')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Block deletion when paid bookings exist — bookings.tutorial_id is
+    // ON DELETE CASCADE, so deleting would permanently destroy payment records.
+    const { count: paidCount } = await serviceSupabase
+      .from('bookings')
+      .select('id', { count: 'exact', head: true })
+      .eq('tutorial_id', id)
+      .eq('payment_status', 'paid');
+
+    if (paidCount && paidCount > 0) {
+      return NextResponse.json(
+        {
+          error: `Cannot delete: this tutorial has ${paidCount} paid booking${paidCount === 1 ? '' : 's'}. Cancel those bookings first.`,
+        },
+        { status: 409 }
+      );
     }
 
     // Fetch title before deleting for the audit label

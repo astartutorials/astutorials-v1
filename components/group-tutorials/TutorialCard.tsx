@@ -92,7 +92,7 @@ const TutorialCard = ({
             <p className="text-gray-400 text-xs md:text-sm mb-3 md:mb-4">with {teacher}</p>
 
             {/* Description */}
-            <p className="text-gray-500 text-xs md:text-sm mb-4 md:mb-6 flex-grow leading-relaxed">
+            <p className="text-gray-500 text-xs md:text-sm mb-4 md:mb-6 flex-grow leading-relaxed whitespace-pre-line">
                 {description}
             </p>
 

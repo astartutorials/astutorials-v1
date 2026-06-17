@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Search, Download, ChevronLeft, Clock, Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 
 type Tutorial = {
   id: string;
   code: string;
   title: string;
+  description: string | null;
   date: string | null;
   time: string;
   seats_total: number;
@@ -62,15 +62,11 @@ export default function TutorialAttendancePage() {
 
   useEffect(() => {
     async function load() {
-      const [{ data: tut }, bksRes] = await Promise.all([
-        supabase
-          .from("tutorials")
-          .select("id, code, title, date, time, seats_total")
-          .eq("id", id)
-          .single(),
+      const [tutRes, bksRes] = await Promise.all([
+        fetch(`/api/admin/tutorials/${id}`).then((r) => (r.ok ? r.json() : null)),
         fetch(`/api/admin/tutorials/${id}/bookings`).then((r) => r.json()),
       ]);
-      setTutorial(tut);
+      setTutorial(tutRes);
       setBookings(Array.isArray(bksRes) ? bksRes : []);
       setLoading(false);
     }
@@ -171,6 +167,12 @@ export default function TutorialAttendancePage() {
           Export CSV
         </button>
       </div>
+
+      {tutorial.description && (
+        <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line mb-6 max-w-3xl">
+          {tutorial.description}
+        </p>
+      )}
 
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

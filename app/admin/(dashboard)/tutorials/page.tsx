@@ -17,7 +17,7 @@ type Tutorial = {
   status: string;
   org_id: string | null;
   organisations: { name: string } | null;
-  bookings: { id: string }[];
+  bookings: { id: string; payment_status: string }[];
 };
 
 function statusPill(status: string) {
@@ -25,6 +25,15 @@ function statusPill(status: string) {
   if (status === "draft") return "bg-amber-50 text-amber-700";
   if (status === "completed") return "bg-gray-100 text-gray-600";
   return "bg-gray-100 text-gray-500";
+}
+
+const TODAY = new Date().toISOString().split("T")[0];
+
+// A tutorial whose date has already passed is effectively completed, even if
+// the nightly expire-tutorials cron hasn't flipped its stored status yet.
+export function effectiveStatus(t: { status: string; date: string | null }): string {
+  if (t.status === "active" && t.date && t.date < TODAY) return "completed";
+  return t.status;
 }
 
 function seatBarColor(booked: number, total: number) {
@@ -99,11 +108,38 @@ export default function AdminTutorialsPage() {
   }
 
   async function deleteTutorial(id: string) {
-    if (!confirm("Delete this tutorial? This cannot be undone.")) return;
+    const target = tutorials.find((t) => t.id === id);
+    const bookings = target?.bookings ?? [];
+    const paidCount = bookings.filter((b) => b.payment_status === "paid").length;
+
+    if (paidCount > 0) {
+      alert(
+        `This tutorial has ${paidCount} paid booking${paidCount === 1 ? "" : "s"} and cannot be deleted. ` +
+        `Cancel those bookings first if you need to remove it.`
+      );
+      return;
+    }
+
+    const otherCount = bookings.length;
+    const message = otherCount > 0
+      ? `Delete this tutorial? This will also remove ${otherCount} booking${otherCount === 1 ? "" : "s"}. This cannot be undone.`
+      : "Delete this tutorial? This cannot be undone.";
+    if (!confirm(message)) return;
+
     setDeletingId(id);
-    await fetch(`/api/admin/tutorials/${id}`, { method: "DELETE" });
-    setTutorials((prev) => prev.filter((t) => t.id !== id));
-    setDeletingId(null);
+    try {
+      const res = await fetch(`/api/admin/tutorials/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        alert(data?.error ?? "Failed to delete tutorial. Please try again.");
+        return;
+      }
+      setTutorials((prev) => prev.filter((t) => t.id !== id));
+    } catch {
+      alert("Failed to delete tutorial. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   const orgOptions = Array.from(
@@ -116,7 +152,7 @@ export default function AdminTutorialsPage() {
       t.code.toLowerCase().includes(q) ||
       t.title.toLowerCase().includes(q) ||
       (t.teacher ?? '').toLowerCase().includes(q);
-    const matchStatus = statusFilter === "all" || t.status === statusFilter;
+    const matchStatus = statusFilter === "all" || effectiveStatus(t) === statusFilter;
     const matchOrg = orgFilter === "all" || t.org_id === orgFilter;
     return matchSearch && matchStatus && matchOrg;
   });
@@ -134,9 +170,9 @@ export default function AdminTutorialsPage() {
     return av.localeCompare(bv) * dir;
   });
 
-  const scheduled = tutorials.filter((t) => t.status === "active").length;
+  const scheduled = tutorials.filter((t) => effectiveStatus(t) === "active").length;
   const drafts = tutorials.filter((t) => t.status === "draft").length;
-  const completed = tutorials.filter((t) => t.status === "completed").length;
+  const completed = tutorials.filter((t) => effectiveStatus(t) === "completed").length;
 
   return (
     <div>
@@ -259,6 +295,7 @@ export default function AdminTutorialsPage() {
                 {sorted.map((item) => {
                   const booked = item.bookings?.length ?? 0;
                   const pct = Math.round((booked / item.seats_total) * 100);
+                  const eff = effectiveStatus(item);
                   return (
                     <div
                       key={item.id}
@@ -296,8 +333,8 @@ export default function AdminTutorialsPage() {
                       </div>
 
                       <div className="col-span-1">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide whitespace-nowrap ${statusPill(item.status)}`}>
-                          {item.status}
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide whitespace-nowrap ${statusPill(eff)}`}>
+                          {eff}
                         </span>
                       </div>
 

@@ -42,7 +42,7 @@ export default function AdminLoginLeft() {
         </div>
 
         <p className="text-white/25 text-xs uppercase tracking-widest">
-          astartutorials.ng
+          astartutorials.com
         </p>
       </div>
     </div>
