@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendNewBookingNotification } from "@/lib/email";
+import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendPreClinicalsReceipt, sendNewBookingNotification } from "@/lib/email";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 const supabase = createClient(
@@ -121,8 +121,10 @@ export async function GET(req: NextRequest) {
   await posthog.shutdown();
 
   // Admin notification for all verified bookings
+  const bookingType =
+    meta.type === "private" ? "private" : meta.type === "preclinicals" ? "preclinicals" : "group";
   await sendNewBookingNotification({
-    bookingType: meta.type === "private" ? "private" : "group",
+    bookingType,
     fullName,
     email,
     phone: meta.phone ?? null,
@@ -131,6 +133,12 @@ export async function GET(req: NextRequest) {
     tutorialTitle: tutorialForEmail?.title,
     course: meta.course ?? undefined,
   });
+
+  // Pre-Clinicals registration → send receipt, then confirmation + WhatsApp handoff
+  if (meta.type === "preclinicals") {
+    await sendPreClinicalsReceipt({ to: email, fullName, amountPaid, reference });
+    return NextResponse.redirect(`${BASE_URL}/preclinicals/success?ref=${reference}`);
+  }
 
   // Private tutorial → send receipt, then collect extra details before WhatsApp
   if (meta.type === "private") {
