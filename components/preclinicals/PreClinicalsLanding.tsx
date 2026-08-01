@@ -204,14 +204,14 @@ export default function PreClinicalsLanding() {
               {SPEAKERS.map((s) => (
                 <div
                   key={s.name}
-                  className="rounded-3xl bg-white p-3 sm:p-4 shadow-lg text-center"
+                  className="rounded-3xl bg-white p-4 sm:p-5 shadow-lg text-center"
                 >
-                  <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-[var(--astar-red)]">
+                  <div className="relative mx-auto h-16 w-16 sm:h-20 sm:w-20 overflow-hidden rounded-2xl bg-[var(--astar-red)]">
                     <Image
                       src={s.img}
                       alt={s.name}
                       fill
-                      sizes="(max-width: 640px) 45vw, 240px"
+                      sizes="80px"
                       className="object-cover object-top"
                     />
                   </div>
