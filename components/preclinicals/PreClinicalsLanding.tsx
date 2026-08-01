@@ -200,27 +200,29 @@ export default function PreClinicalsLanding() {
                 Speakers
               </p>
             </div>
-            <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6">
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {SPEAKERS.map((s) => (
                 <div
                   key={s.name}
-                  className="rounded-3xl bg-white p-4 sm:p-5 shadow-lg text-center"
+                  className="flex items-center gap-4 rounded-2xl bg-white p-3 shadow-lg"
                 >
-                  <div className="relative mx-auto h-16 w-16 sm:h-20 sm:w-20 overflow-hidden rounded-2xl bg-[var(--astar-red)]">
+                  <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-[var(--astar-red)]">
                     <Image
                       src={s.img}
                       alt={s.name}
                       fill
-                      sizes="80px"
+                      sizes="64px"
                       className="object-cover object-top"
                     />
                   </div>
-                  <p className="mt-3 text-base sm:text-lg font-extrabold text-[var(--astar-navy)]">
-                    {s.name}
-                  </p>
-                  <p className="mt-0.5 text-[11px] sm:text-xs font-semibold text-[var(--astar-red)] leading-snug px-1">
-                    {s.credential}
-                  </p>
+                  <div className="min-w-0">
+                    <p className="text-base font-extrabold text-[var(--astar-navy)] leading-tight">
+                      {s.name}
+                    </p>
+                    <p className="mt-0.5 text-[11px] font-semibold text-[var(--astar-red)] leading-snug">
+                      {s.credential}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
