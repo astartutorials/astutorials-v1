@@ -97,6 +97,45 @@ export async function sendPrivateBookingReceipt(opts: {
   await send(to, "Private Tutorial Booking — Payment Received", html);
 }
 
+export async function sendPreClinicalsReceipt(opts: {
+  to: string;
+  fullName: string;
+  amountPaid: number;
+  reference: string;
+}) {
+  const { to, fullName, amountPaid, reference } = opts;
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">You're in! 🎉</h2>
+      <p style="margin-top:0;color:#666">Hi ${fullName}, your spot in the Pre-Clinicals Introductory Online Classes is confirmed.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:24px 0;font-size:14px">
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888;width:40%">Program</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">Pre-Clinicals Introductory Classes</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Dates</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">3rd – 30th August 2026</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Amount paid</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">₦${amountPaid.toLocaleString()}</td></tr>
+        <tr><td style="padding:10px 0;color:#888">Reference</td>
+            <td style="padding:10px 0;font-family:monospace;font-size:12px">${reference}</td></tr>
+      </table>
+
+      <p style="font-size:13px;color:#666;line-height:1.6">
+        Please join our WhatsApp so we can add you to the class community and share the schedule, quizzes and resources.
+      </p>
+
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        Please do not reply to this email.<br/>
+        For help, WhatsApp us on <strong>0916 046 5678</strong> or email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+
+  await send(to, "Pre-Clinicals Classes — Payment Received", html);
+}
+
 export async function sendPrivateBookingDetails(opts: {
   to: string;
   fullName: string;
@@ -142,7 +181,7 @@ export async function sendPrivateBookingDetails(opts: {
 }
 
 export async function sendNewBookingNotification(opts: {
-  bookingType: 'group' | 'private';
+  bookingType: 'group' | 'private' | 'preclinicals';
   fullName: string;
   email: string;
   phone: string | null;
@@ -157,10 +196,18 @@ export async function sendNewBookingNotification(opts: {
   const { bookingType, fullName, email, phone, amountPaid, reference, tutorialTitle, course } = opts;
   const subject = bookingType === 'group'
     ? `New Group Booking — ${tutorialTitle ?? 'Tutorial'}`
+    : bookingType === 'preclinicals'
+    ? `New Pre-Clinicals Registration — ${fullName}`
     : `New Private Booking — ${fullName}`;
 
+  const typeLabel = bookingType === 'group'
+    ? 'Group Tutorial'
+    : bookingType === 'preclinicals'
+    ? 'Pre-Clinicals Classes'
+    : 'Private Tutorial';
+
   const rows = [
-    ['Type', bookingType === 'group' ? 'Group Tutorial' : 'Private Tutorial'],
+    ['Type', typeLabel],
     ['Student', fullName],
     ['Email', email],
     ...(phone ? [['Phone', phone]] : []),
