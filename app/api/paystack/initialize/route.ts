@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { upsertPaystackCustomer } from "@/lib/paystack-customer";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,6 +36,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "This tutorial is fully booked." }, { status: 409 });
     }
   }
+
+  // Attach name and phone to the Paystack customer record before charging.
+  // transaction/initialize ignores these fields, so without this the dashboard
+  // shows an email and nothing else.
+  await upsertPaystackCustomer({
+    secret,
+    email,
+    fullName: metadata?.full_name,
+    phone: metadata?.phone,
+  });
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
 
