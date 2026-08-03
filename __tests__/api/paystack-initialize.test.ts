@@ -112,6 +112,54 @@ describe('POST /api/paystack/initialize', () => {
     process.env.PAYSTACK_SECRET_KEY = saved;
   });
 
+  it('registers the customer name and phone with Paystack before charging', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({ ok: true }) // customer upsert
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: true, data: { authorization_url: 'https://paystack.com/pay/x' } }),
+      });
+
+    const res = await POST(makeRequest({
+      email: 'ada@example.com',
+      amount: 5000,
+      metadata: { type: 'private', full_name: 'Ada Obi', phone: '+2348012345678' },
+    }));
+    expect(res.status).toBe(200);
+
+    const [customerUrl, customerInit] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(customerUrl).toBe('https://api.paystack.co/customer');
+    expect(JSON.parse(customerInit.body)).toMatchObject({
+      email: 'ada@example.com',
+      first_name: 'Ada',
+      last_name: 'Obi',
+      phone: '+2348012345678',
+    });
+
+    expect((global.fetch as jest.Mock).mock.calls[1][0]).toBe(
+      'https://api.paystack.co/transaction/initialize'
+    );
+  });
+
+  it('still initialises the payment when the customer upsert fails', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    (global.fetch as jest.Mock)
+      .mockRejectedValueOnce(new TypeError('fetch failed')) // customer upsert dies
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: true, data: { authorization_url: 'https://paystack.com/pay/x' } }),
+      });
+
+    const res = await POST(makeRequest({
+      email: 'ada@example.com',
+      amount: 5000,
+      metadata: { type: 'private', full_name: 'Ada Obi' },
+    }));
+
+    expect(res.status).toBe(200);
+    expect((await res.json()).authorization_url).toBe('https://paystack.com/pay/x');
+  });
+
   it('allows a private booking through even when the tutorial is fully booked', async () => {
     mockSingle.mockResolvedValueOnce({ data: { seats_total: 30, seats_booked: 30 } });
 
