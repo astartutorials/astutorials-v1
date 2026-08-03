@@ -15,7 +15,8 @@ export async function POST() {
     }
 
     return NextResponse.json({ message: 'Logged out successfully.' });
-  } catch {
+  } catch (err) {
+    console.error('[admin logout] unexpected error', err);
     return NextResponse.json(
       { error: 'An unexpected error occurred.' },
       { status: 500 }
