@@ -106,7 +106,8 @@ export async function POST(request: NextRequest) {
         orgId: roleCtx.orgId,
       },
     });
-  } catch {
+  } catch (err) {
+    console.error('[admin login] unexpected error', err);
     return NextResponse.json(
       { error: 'An unexpected error occurred. Please try again.' },
       { status: 500 }
