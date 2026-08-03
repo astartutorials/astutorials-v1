@@ -67,7 +67,11 @@ export async function PATCH(
           reference: ref,
         });
       }
-    } catch {}
+    } catch (err) {
+      // Non-fatal: the details are already saved, so the booking stands even if
+      // the confirmation email fails. Logged so it is not lost entirely.
+      console.error(`[bookings] confirmation email failed for ${ref}`, err);
+    }
   }
 
   return NextResponse.json({ ok: true });

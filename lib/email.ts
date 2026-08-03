@@ -2,18 +2,38 @@ const FROM = "Juyi at A-Star Tutorials <bookings@astartutorials.com>";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://astartutorials.com";
 const RESEND_URL = "https://api.resend.com/emails";
 
-async function send(to: string, subject: string, html: string) {
+// Never throws — a failed receipt must not roll back a paid booking. But every
+// failure is logged: silent email loss is undiagnosable, and these carry booking
+// confirmations. Returns whether the message was accepted by Resend.
+async function send(to: string, subject: string, html: string): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
-  if (!key) return; // email is optional — never block the booking flow
+  if (!key) return false; // email is optional — never block the booking flow
 
-  await fetch(RESEND_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from: FROM, to: [to], subject, html }),
-  }).catch(() => {}); // swallow network errors silently
+  try {
+    const res = await fetch(RESEND_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from: FROM, to: [to], subject, html }),
+    });
+
+    if (!res.ok) {
+      // A non-2xx resolves normally, so without this check an expired API key,
+      // an unverified domain, or a 429 would look identical to a successful send.
+      const body = await res.text().catch(() => "<unreadable>");
+      console.error(
+        `[email] Resend rejected "${subject}" for ${to}: ${res.status} ${res.statusText} ${body}`
+      );
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error(`[email] Network error sending "${subject}" to ${to}`, err);
+    return false;
+  }
 }
 
 export async function sendGroupBookingConfirmation(opts: {
