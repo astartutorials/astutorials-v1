@@ -16,9 +16,13 @@ export function splitFullName(fullName: string): { firstName: string; lastName: 
  * more than an email address. transaction/initialize silently ignores these
  * fields, so they have to be sent to the customer endpoint separately.
  *
- * Never throws — a failed customer record must not block a payment. Note that
- * Paystack does not overwrite an existing customer, so this only fills in
- * details the first time an email is seen.
+ * Two calls are needed. POST creates the customer, and on one that already
+ * exists it updates the name but silently drops the phone — verified against
+ * the API, and the reason the dashboard showed names with blank phone columns.
+ * Only PUT /customer/:code sets the phone, so we follow up with one whenever we
+ * have a number to store.
+ *
+ * Never throws — a failed customer record must not block a payment.
  */
 export async function upsertPaystackCustomer(opts: {
   secret: string;
@@ -33,26 +37,49 @@ export async function upsertPaystackCustomer(opts: {
   if (!fullName && !phone) return; // nothing to add beyond the email
 
   const { firstName, lastName } = splitFullName(fullName);
+  const names = {
+    ...(firstName ? { first_name: firstName } : {}),
+    ...(lastName ? { last_name: lastName } : {}),
+  };
+
+  const headers = {
+    Authorization: `Bearer ${secret}`,
+    "Content-Type": "application/json",
+  };
 
   try {
     const res = await fetch(PAYSTACK_CUSTOMER_URL, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${secret}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        ...(firstName ? { first_name: firstName } : {}),
-        ...(lastName ? { last_name: lastName } : {}),
-        ...(phone ? { phone } : {}),
-      }),
+      headers,
+      body: JSON.stringify({ email, ...names, ...(phone ? { phone } : {}) }),
     });
 
     if (!res.ok) {
       const body = await res.text().catch(() => "<unreadable>");
       console.error(
         `[paystack] customer upsert failed for ${email}: ${res.status} ${res.statusText} ${body}`
+      );
+      return;
+    }
+
+    if (!phone) return; // POST already handled the name
+
+    const customerCode = (await res.json().catch(() => null))?.data?.customer_code;
+    if (!customerCode) {
+      console.error(`[paystack] no customer_code returned for ${email}; phone not set`);
+      return;
+    }
+
+    const updateRes = await fetch(`${PAYSTACK_CUSTOMER_URL}/${encodeURIComponent(customerCode)}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ ...names, phone }),
+    });
+
+    if (!updateRes.ok) {
+      const body = await updateRes.text().catch(() => "<unreadable>");
+      console.error(
+        `[paystack] customer phone update failed for ${email}: ${updateRes.status} ${updateRes.statusText} ${body}`
       );
     }
   } catch (err) {
