@@ -6,9 +6,11 @@ import { validateBookingForm } from "@/lib/validate";
 import posthog from "posthog-js";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
-const PRICE = 60000;
-const OLD_PRICE = 100000;
-const COURSE_LABEL = "Pre-Clinicals Introductory Classes (Aug 2026)";
+import {
+  PRECLINICALS_PRICE as PRICE,
+  PRECLINICALS_OLD_PRICE as OLD_PRICE,
+  PRECLINICALS_COURSE_LABEL as COURSE_LABEL,
+} from "@/lib/preclinicals";
 
 const LEVELS = ["100 Level", "200 Level", "300 Level", "Other / Direct Entry"];
 
