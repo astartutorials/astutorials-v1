@@ -3,10 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { usePreClinicalsOpen } from "@/components/shared/usePreClinicalsOpen";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // Retires itself when the cohort ends, without needing a redeploy.
+  const preClinicalsOpen = usePreClinicalsOpen();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,7 +68,9 @@ export default function Navbar() {
         </Link>
 
         {/* --- DESKTOP MENU --- */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* Tight gaps between md and lg — the row carries five links, the promo
+            pill and the CTA button, and wraps without them. */}
+        <div className="hidden md:flex items-center gap-4 lg:gap-8">
           {navItems.map((item) => (
             <Link 
               key={item.name} 
@@ -75,17 +80,32 @@ export default function Navbar() {
                   scrollToSection(e, item.href.substring(2));
                 }
               }}
-              className="nav-link text-sm font-medium text-gray-600 hover:text-black transition-colors relative group"
+              className="nav-link text-sm font-medium text-gray-600 hover:text-black transition-colors relative group whitespace-nowrap"
             >
               {item.name}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[var(--astar-red)] transition-all duration-300 group-hover:w-full"></span>
             </Link>
           ))}
+
+          {/* Time-boxed cohort — styled apart from the standing nav items so it
+              reads as an announcement rather than another section. */}
+          {preClinicalsOpen && (
+            <Link
+              href="/preclinicals"
+              className="flex items-center gap-2 whitespace-nowrap rounded-full border border-red-200 bg-red-50/80 px-3.5 py-1.5 text-sm font-semibold text-[var(--astar-red)] hover:bg-red-100 transition-colors"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--astar-red)]" />
+              </span>
+              Pre-Clinicals
+            </Link>
+          )}
         </div>
 
         {/* --- ACTIONS & MOBILE TOGGLE --- */}
         <div className="flex items-center gap-4">
-          <Link href="/tutorials" className="hidden md:block btn-primary px-6 py-2.5 rounded-full text-sm font-medium hover:shadow-lg hover:shadow-red-500/20 transform hover:-translate-y-0.5 transition-all">
+          <Link href="/tutorials" className="hidden md:block btn-primary px-5 lg:px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:shadow-lg hover:shadow-red-500/20 transform hover:-translate-y-0.5 transition-all">
             Book a Tutorial
           </Link>
 
@@ -116,6 +136,19 @@ export default function Navbar() {
         `}
       >
         <div className="p-6 flex flex-col gap-2">
+          {preClinicalsOpen && (
+            <Link
+              href="/preclinicals"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-between gap-3 p-4 rounded-xl border border-red-200 bg-red-50 active:bg-red-100 transition-colors"
+            >
+              <span className="text-lg font-semibold text-[var(--astar-red)]">Pre-Clinicals Classes</span>
+              <span className="rounded-full bg-[var(--astar-red)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                Now running
+              </span>
+            </Link>
+          )}
+
           {navItems.map((item, idx) => (
             <Link
               key={item.name}
