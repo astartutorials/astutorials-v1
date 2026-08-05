@@ -13,6 +13,10 @@ jest.mock('@/lib/record-booking', () => ({
   fetchSuccessfulTransactions: (...args: unknown[]) => mockFetchTx(...args),
 }));
 
+// Heartbeats write audit entries; mocked so they don't skew assertions here.
+jest.mock('@/lib/health', () => ({ recordHeartbeat: jest.fn().mockResolvedValue(undefined) }));
+
+
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 process.env.CRON_SECRET = 'test-cron-secret';

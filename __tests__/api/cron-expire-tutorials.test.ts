@@ -4,6 +4,10 @@ jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({ from: jest.fn() })),
 }));
 
+// Heartbeats write audit entries; mocked so they don't skew assertions here.
+jest.mock('@/lib/health', () => ({ recordHeartbeat: jest.fn().mockResolvedValue(undefined) }));
+
+
 jest.mock('@/lib/audit', () => ({ logAuditEvent: jest.fn() }));
 
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
