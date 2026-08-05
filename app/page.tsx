@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HeroSection from "@/components/home/HeroSection";
+import PreClinicalsCTA from "@/components/home/PreClinicalsCTA";
 import WhoWeAre from "@/components/home/WhoWeAre";
 import Services from "@/components/home/Services";
 import Testimonials from "@/components/home/Testimonials";
@@ -22,6 +23,8 @@ export default function Home() {
       <section className="flex-grow flex flex-col items-center pt-24 md:pt-32 overflow-hidden">
 
         <HeroSection />
+
+        <PreClinicalsCTA />
 
         <WhoWeAre />
 
