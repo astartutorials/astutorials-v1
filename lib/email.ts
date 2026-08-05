@@ -357,3 +357,49 @@ export async function sendApplicationAccepted(opts: { to: string; fullName: stri
   `;
   await send(to, 'Your A-Star Tutorials application — accepted!', html);
 }
+
+/**
+ * Operational alert to whoever runs the site. Returns whether it was sent, so
+ * the health check can report a silent alerting channel rather than assuming
+ * no news is good news — the failure mode this whole check exists to catch.
+ */
+export async function sendSystemAlert(opts: {
+  issues: { severity: string; title: string; detail: string }[];
+}): Promise<{ sent: boolean; reason?: string }> {
+  const notifyEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
+  if (!notifyEmail) return { sent: false, reason: 'ADMIN_NOTIFICATION_EMAIL is not set' };
+
+  const { issues } = opts;
+  if (issues.length === 0) return { sent: false, reason: 'nothing to report' };
+
+  const critical = issues.filter((i) => i.severity === 'critical').length;
+
+  const rows = issues
+    .map(
+      (i) => `
+        <tr>
+          <td style="padding:12px 0;border-bottom:1px solid #eee;vertical-align:top">
+            <span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;
+              background:${i.severity === 'critical' ? '#FDECEA' : '#FFF4E5'};
+              color:${i.severity === 'critical' ? '#D93025' : '#B26A00'}">${i.severity}</span>
+            <p style="margin:8px 0 4px;font-weight:600;color:#0B1120">${i.title}</p>
+            <p style="margin:0;font-size:13px;color:#666;line-height:1.6">${i.detail}</p>
+          </td>
+        </tr>`
+    )
+    .join('');
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">Site health check</h2>
+      <p style="margin-top:0;color:#666">${issues.length} issue${issues.length === 1 ? '' : 's'} found${critical > 0 ? `, ${critical} critical` : ''}.</p>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0">${rows}</table>
+      <p style="font-size:12px;color:#999;line-height:1.8">
+        Sent by the daily health check. If this is unexpected, check the Vercel logs first.
+      </p>
+    </div>
+  `;
+
+  const ok = await send(notifyEmail, `[A-Star] ${critical > 0 ? 'Critical: ' : ''}${issues.length} health issue${issues.length === 1 ? '' : 's'}`, html);
+  return ok ? { sent: true } : { sent: false, reason: 'Resend rejected or network error — see logs' };
+}
