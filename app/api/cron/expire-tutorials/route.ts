@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { logAuditEvent } from '@/lib/audit';
+import { recordHeartbeat } from '@/lib/health';
 
 const serviceSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (!expired || expired.length === 0) {
+    await recordHeartbeat('expire-tutorials', { updated: 0 });
     return NextResponse.json({ updated: 0 });
   }
 
@@ -52,6 +54,8 @@ export async function GET(request: NextRequest) {
       details: { reason: 'auto-expired by nightly cron' },
     });
   }
+
+  await recordHeartbeat('expire-tutorials', { updated: ids.length });
 
   return NextResponse.json({ updated: ids.length });
 }

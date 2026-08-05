@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { verifyPaystackSignature } from "@/lib/paystack-signature";
 import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendNewBookingNotification } from "@/lib/email";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { recordHeartbeat } from "@/lib/health";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,6 +26,11 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
+
+  // Recorded for every authentic delivery, not just charges — the point is to
+  // prove Paystack can still reach us. This webhook was misconfigured and
+  // silently absent for over 90 days before anyone noticed.
+  await recordHeartbeat("paystack-webhook", { event: event.event });
 
   if (event.event !== "charge.success") {
     return NextResponse.json({ received: true });

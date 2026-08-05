@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { logAuditEvent } from '@/lib/audit';
 import { fetchSuccessfulTransactions, recordBookingFromTransaction } from '@/lib/record-booking';
+import { recordHeartbeat } from '@/lib/health';
 
 const serviceSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -94,6 +95,15 @@ export async function GET(request: NextRequest) {
     console.error(
       `[reconcile] recovered ${recovered.length} unrecorded payment(s): ${recovered.join(', ')}`
     );
+  }
+
+  // Only a real run counts as a check-in; a dry run proves nothing about
+  // whether reconciliation is actually happening.
+  if (!dryRun) {
+    await recordHeartbeat('reconcile-payments', {
+      scanned: transactions.length,
+      recovered: recovered.length,
+    });
   }
 
   return NextResponse.json({
