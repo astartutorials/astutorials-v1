@@ -20,8 +20,14 @@ import { NextRequest } from 'next/server';
 
 const mockSupabase = jest.mocked(createSupabaseServerClient);
 
-function mockClient(auth: object) {
-  mockSupabase.mockResolvedValue({ auth } as any);
+function mockClient(auth: object, roleRows: { role: string; org_id: string | null }[] = []) {
+  mockSupabase.mockResolvedValue({
+    auth,
+    // getUserRole reads user_roles; pass rows to resolve a real, org-scoped role.
+    from: jest.fn(() => ({
+      select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: roleRows }) }) }) }),
+    })),
+  } as any);
 }
 
 function makeLoginRequest(body: object) {
@@ -95,26 +101,49 @@ describe('POST /api/auth/admin/login', () => {
     expect(res.status).toBe(403);
   });
 
-  it('returns 200 with admin profile for a valid admin', async () => {
-    mockClient({
-      signInWithPassword: jest.fn().mockResolvedValue({
-        data: {
-          user: {
-            id: 'admin-uuid',
-            email: 'admin@astar.com',
-            user_metadata: { role: 'admin', full_name: 'Admin User' },
+  it('returns 200 with admin profile for an org-scoped org_admin', async () => {
+    mockClient(
+      {
+        signInWithPassword: jest.fn().mockResolvedValue({
+          data: {
+            user: {
+              id: 'admin-uuid',
+              email: 'admin@astar.com',
+              user_metadata: { full_name: 'Admin User' },
+            },
           },
-        },
-        error: null,
-      }),
-    });
+          error: null,
+        }),
+      },
+      [{ role: 'org_admin', org_id: 'org-1' }]
+    );
 
     const res = await login(makeLoginRequest({ email: 'admin@astar.com', password: 'correct' }));
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.admin.email).toBe('admin@astar.com');
     expect(data.admin.role).toBe('org_admin');
+    expect(data.admin.orgId).toBe('org-1');
     expect(data.admin.name).toBe('Admin User');
+  });
+
+  // An org_admin with no org would skip every org filter downstream, so the
+  // metadata-only path that produced one is now rejected at login.
+  it('denies an admin whose role comes only from user_metadata, with no org', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockClient({
+      signInWithPassword: jest.fn().mockResolvedValue({
+        data: {
+          user: { id: 'legacy-uuid', email: 'legacy@astar.com', user_metadata: { role: 'admin' } },
+        },
+        error: null,
+      }),
+      signOut: jest.fn().mockResolvedValue({}),
+    });
+
+    const res = await login(makeLoginRequest({ email: 'legacy@astar.com', password: 'correct' }));
+    expect(res.status).toBe(403);
+    jest.restoreAllMocks();
   });
 
   it('accepts the super_admin role', async () => {
