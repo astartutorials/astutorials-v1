@@ -22,7 +22,7 @@ import { GET, POST } from '@/app/api/admin/tutorials/route';
 import { GET as getTutorial, PUT, DELETE } from '@/app/api/admin/tutorials/[id]/route';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
-const ADMIN_USER = { id: 'admin-id', user_metadata: { role: 'admin' } };
+const ADMIN_USER = { id: 'admin-id', user_metadata: { role: 'super_admin' } };
 
 function getServiceFrom() {
   return (createClient as jest.Mock).mock.results[0].value.from as jest.Mock;

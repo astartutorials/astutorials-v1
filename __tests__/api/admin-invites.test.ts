@@ -22,7 +22,7 @@ import { GET, POST, DELETE } from '@/app/api/admin/invites/route';
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 
 // org_admin via metadata fallback — orgId will be null
-const ADMIN_USER = { id: 'admin-id', user_metadata: { role: 'admin' } };
+const ADMIN_USER = { id: 'admin-id', user_metadata: { role: 'super_admin' } };
 // viewer metadata doesn't map to any valid role → getUserRole returns null → 403
 const NO_ROLE_USER = { id: 'no-role-id', user_metadata: {} };
 

@@ -120,13 +120,17 @@ describe('getUserRole()', () => {
     expect(result?.role).toBe('super_admin');
   });
 
-  it('maps metadata role "admin" to org_admin', async () => {
+  // Previously this mapped to org_admin with a null orgId. Callers filter with
+  // `ctx.role !== 'super_admin' && ctx.orgId`, so that combination skipped the
+  // org filter entirely and read every organisation's data. It is now denied.
+  it('denies metadata role "admin" because it carries no org scope', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     const supabase = {
       from: jest.fn().mockImplementation(() => { throw new Error(); }),
     } as any;
     const result = await getUserRole(supabase, 'user-1', { role: 'admin' });
-    expect(result?.role).toBe('org_admin');
-    expect(result?.orgId).toBeNull();
+    expect(result).toBeNull();
+    jest.restoreAllMocks();
   });
 
   it('returns null when DB has no row and metadata has no recognized role', async () => {
