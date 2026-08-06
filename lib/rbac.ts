@@ -63,18 +63,27 @@ export async function getUserRole(
   userMetadata?: Record<string, unknown>
 ): Promise<UserRoleContext | null> {
   try {
-    // Prefer the platform-wide row (org_id IS NULL) — super_admin has no org scope.
-    // Fall back to the most-recent org-scoped row if no platform-wide role exists.
     const { data: rows } = await supabase
       .from('user_roles')
       .select('role, org_id')
       .eq('user_id', userId)
       .order('org_id', { ascending: true, nullsFirst: true })
-      .limit(2);
+      .limit(10);
 
-    const row = rows?.[0];
-    if (row) {
-      return { userId, role: row.role as AppRole, orgId: row.org_id ?? null };
+    if (rows && rows.length > 0) {
+      // super_admin is platform-wide and has no org scope, so it wins outright.
+      const superRow = rows.find((r) => r.role === 'super_admin');
+      if (superRow) return { userId, role: 'super_admin', orgId: null };
+
+      // Everyone else must resolve to a real org. Picking the first row blindly
+      // would select an org_id IS NULL row (they sort first), which then skips
+      // every org filter downstream — see withSafeScope.
+      const scoped = rows.find((r) => r.org_id);
+      if (scoped) {
+        return withSafeScope({ userId, role: scoped.role as AppRole, orgId: scoped.org_id });
+      }
+
+      return withSafeScope({ userId, role: rows[0].role as AppRole, orgId: null });
     }
   } catch {
     // DB unavailable — fall through to metadata
@@ -83,7 +92,29 @@ export async function getUserRole(
   // Fallback to user_metadata during migration period
   const metaRole = userMetadata?.role as string | undefined;
   if (metaRole === 'super_admin') return { userId, role: 'super_admin', orgId: null };
-  if (metaRole === 'admin') return { userId, role: 'org_admin', orgId: null };
+  if (metaRole === 'admin') {
+    // Carries no org, so it cannot be scoped safely. Denied rather than granted
+    // unscoped access to every organisation.
+    return withSafeScope({ userId, role: 'org_admin', orgId: null });
+  }
 
   return null;
+}
+
+/**
+ * Fails closed on an unscopable role.
+ *
+ * Callers filter with `ctx.role !== 'super_admin' && ctx.orgId`, so a
+ * non-super_admin carrying a null orgId silently skips the org filter and reads
+ * every organisation's data. Denying here closes that at the source rather than
+ * relying on eleven separate call sites getting the condition right.
+ */
+function withSafeScope(ctx: UserRoleContext): UserRoleContext | null {
+  if (ctx.role !== 'super_admin' && !ctx.orgId) {
+    console.error(
+      `[rbac] denying ${ctx.role} ${ctx.userId}: role has no org scope, which would bypass org filtering`
+    );
+    return null;
+  }
+  return ctx;
 }

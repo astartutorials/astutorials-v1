@@ -22,7 +22,7 @@ import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { PATCH } from '@/app/api/admin/bookings/[id]/route';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
-const ADMIN_USER = { id: 'admin-id', email: 'admin@test.com', user_metadata: { role: 'admin' } };
+const ADMIN_USER = { id: 'admin-id', email: 'admin@test.com', user_metadata: { role: 'super_admin' } };
 
 function mockAuth(user: object | null) {
   mockServerClient.mockResolvedValue({
