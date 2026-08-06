@@ -18,7 +18,7 @@ import { GET as getAdminCareers, POST as createCareer } from '@/app/api/admin/ca
 import { PUT as updateCareer, DELETE as deleteCareer } from '@/app/api/admin/careers/[id]/route';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
-const ADMIN_USER = { id: 'admin-id', user_metadata: { role: 'admin' } };
+const ADMIN_USER = { id: 'admin-id', user_metadata: { role: 'super_admin' } };
 
 function mockClient(user: object | null, fromFn = jest.fn()) {
   mockServerClient.mockResolvedValue({

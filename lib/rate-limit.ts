@@ -17,16 +17,36 @@ function getLimiter(): Ratelimit | null {
   return limiter;
 }
 
-export async function checkLoginRateLimit(ip: string): Promise<{ allowed: boolean }> {
+/**
+ * Each key gets its own 5-per-10-minutes budget. Never throws: Redis being
+ * down must not lock people out of their own account.
+ */
+async function check(keys: string[]): Promise<{ allowed: boolean }> {
   const rl = getLimiter();
   if (!rl) return { allowed: true }; // Upstash not configured — skip (dev/test)
   try {
-    const { success } = await rl.limit(`login:${ip}`);
-    return { allowed: success };
+    const results = await Promise.all(keys.map((k) => rl.limit(k)));
+    return { allowed: results.every((r) => r.success) };
   } catch (err) {
     // Redis unreachable — fail open. Losing rate limiting is bad; locking every
     // admin out of the dashboard because Redis is down is worse.
     console.error('[rate-limit] Redis unavailable, allowing request', err);
     return { allowed: true };
   }
+}
+
+export async function checkLoginRateLimit(ip: string): Promise<{ allowed: boolean }> {
+  return check([`login:${ip}`]);
+}
+
+/**
+ * Throttles password-reset requests on the IP *and* the target address.
+ * Without the email key, an attacker spread across addresses could still flood
+ * one victim's inbox; without the IP key, one host could hit many victims.
+ */
+export async function checkPasswordResetRateLimit(
+  ip: string,
+  email: string
+): Promise<{ allowed: boolean }> {
+  return check([`pwreset:ip:${ip}`, `pwreset:email:${email.trim().toLowerCase()}`]);
 }

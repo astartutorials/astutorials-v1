@@ -18,10 +18,16 @@ import { PATCH, DELETE } from '@/app/api/admin/orgs/[id]/members/route';
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 
 const SUPER_ADMIN = { id: 'super-id', user_metadata: { role: 'super_admin' } };
-const ORG_ADMIN = { id: 'admin-id', user_metadata: { role: 'admin' } };
+const ORG_ADMIN = { id: 'admin-id', user_metadata: {} };
 
 function mockAuth(user: object | null) {
+  // getUserRole reads user_roles; ORG_ADMIN must resolve to a real org so it is
+  // scoped rather than denied for having no org.
+  const rows = user && (user as { id?: string }).id?.startsWith('super') === false && !(user as { user_metadata?: { role?: string } }).user_metadata?.role
+    ? [{ role: 'org_admin', org_id: 'org-1' }]
+    : [{ role: 'super_admin', org_id: null }];
   mockServerClient.mockResolvedValue({
+    from: jest.fn(() => ({ select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: user ? rows : [] }) }) }) }) })),
     auth: {
       getUser: jest.fn().mockResolvedValue({
         data: { user },
