@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePreClinicalsOpen } from "@/components/shared/usePreClinicalsOpen";
+import ThemeToggle from "@/components/shared/ThemeToggle";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -41,8 +42,8 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${scrolled || isMobileMenuOpen
-        ? 'bg-[#FDFAF6]/95 backdrop-blur-md border-b border-amber-100/60 shadow-sm'
-        : 'bg-[#FDFAF6]/70 backdrop-blur-sm border-transparent'
+        ? 'bg-[var(--nav-bg-scrolled)] backdrop-blur-md border-b border-[var(--nav-border)] shadow-sm'
+        : 'bg-[var(--nav-bg)] backdrop-blur-sm border-transparent'
         }`}
     >
       <div className="max-w-[1440px] mx-auto px-6 py-2 flex items-center justify-between relative">
@@ -80,7 +81,7 @@ export default function Navbar() {
                   scrollToSection(e, item.href.substring(2));
                 }
               }}
-              className="nav-link text-sm font-medium text-gray-600 hover:text-black transition-colors relative group whitespace-nowrap"
+              className="nav-link text-sm font-medium text-fg-muted hover:text-fg-strong transition-colors relative group whitespace-nowrap"
             >
               {item.name}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[var(--astar-red)] transition-all duration-300 group-hover:w-full"></span>
@@ -92,10 +93,10 @@ export default function Navbar() {
           {preClinicalsOpen && (
             <Link
               href="/preclinicals"
-              className="flex items-center gap-2 whitespace-nowrap rounded-full border border-red-200 bg-red-50/80 px-3.5 py-1.5 text-sm font-semibold text-[var(--astar-red)] hover:bg-red-100 transition-colors"
+              className="flex items-center gap-2 whitespace-nowrap rounded-full border border-brand-soft-border bg-brand-soft px-3.5 py-1.5 text-sm font-semibold text-brand-ink hover:bg-brand-soft-border transition-colors"
             >
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-ink opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--astar-red)]" />
               </span>
               Pre-Clinicals
@@ -104,7 +105,9 @@ export default function Navbar() {
         </div>
 
         {/* --- ACTIONS & MOBILE TOGGLE --- */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-3">
+          <ThemeToggle />
+
           <Link href="/tutorials" className="hidden md:block btn-primary px-5 lg:px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:shadow-lg hover:shadow-red-500/20 transform hover:-translate-y-0.5 transition-all">
             Book a Tutorial
           </Link>
@@ -119,11 +122,11 @@ export default function Navbar() {
             aria-label="Toggle Menu"
           >
             {/* Top Line */}
-            <span className={`block w-6 h-[2px] bg-gray-900 rounded-full transition-all duration-300 ease-out origin-center ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+            <span className={`block w-6 h-[2px] bg-fg rounded-full transition-all duration-300 ease-out origin-center ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
             {/* Middle Line */}
-            <span className={`block w-6 h-[2px] bg-gray-900 rounded-full transition-all duration-300 ease-out ${isMobileMenuOpen ? 'opacity-0 -translate-x-2' : 'opacity-100'}`} />
+            <span className={`block w-6 h-[2px] bg-fg rounded-full transition-all duration-300 ease-out ${isMobileMenuOpen ? 'opacity-0 -translate-x-2' : 'opacity-100'}`} />
             {/* Bottom Line */}
-            <span className={`block w-6 h-[2px] bg-gray-900 rounded-full transition-all duration-300 ease-out origin-center ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+            <span className={`block w-6 h-[2px] bg-fg rounded-full transition-all duration-300 ease-out origin-center ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
           </button>
         </div>
       </div>
@@ -131,7 +134,7 @@ export default function Navbar() {
       {/* --- MOBILE DROPDOWN MENU (Slide-Down) --- */}
       <div
         className={`
-          md:hidden absolute top-[100%] left-0 w-full bg-[#FDFAF6]/95 backdrop-blur-xl shadow-xl overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.33,1,0.68,1)]
+          md:hidden absolute top-[100%] left-0 w-full bg-[var(--nav-bg-scrolled)] backdrop-blur-xl shadow-xl overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.33,1,0.68,1)]
           ${isMobileMenuOpen ? 'max-h-[600px] opacity-100 visible' : 'max-h-0 opacity-0 invisible'}
         `}
       >
@@ -140,9 +143,9 @@ export default function Navbar() {
             <Link
               href="/preclinicals"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between gap-3 p-4 rounded-xl border border-red-200 bg-red-50 active:bg-red-100 transition-colors"
+              className="flex items-center justify-between gap-3 p-4 rounded-xl border border-brand-soft-border bg-brand-soft active:bg-brand-soft transition-colors"
             >
-              <span className="text-lg font-semibold text-[var(--astar-red)]">Pre-Clinicals Classes</span>
+              <span className="text-lg font-semibold text-brand-ink">Pre-Clinicals Classes</span>
               <span className="rounded-full bg-[var(--astar-red)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
                 Now running
               </span>
@@ -153,7 +156,7 @@ export default function Navbar() {
             <Link
               key={item.name}
               href={item.href}
-              className="flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors group"
+              className="flex items-center justify-between p-4 rounded-xl hover:bg-surface-sunken active:bg-surface-inset transition-colors group"
               onClick={(e) => {
                 if (window.location.pathname === '/' && item.href.startsWith('/#')) {
                   scrollToSection(e, item.href.substring(2));
@@ -162,9 +165,13 @@ export default function Navbar() {
               }}
               style={{ transitionDelay: `${idx * 50}ms` }}
             >
-              <span className="text-lg font-semibold text-gray-800 group-hover:text-[var(--astar-red)] transition-colors">{item.name}</span>
+              <span className="text-lg font-semibold text-fg group-hover:text-brand-ink transition-colors">{item.name}</span>
             </Link>
           ))}
+
+          <div className="px-1 pt-2">
+            <ThemeToggle variant="segmented" />
+          </div>
 
           <div className="pt-2 pb-2">
             <Link

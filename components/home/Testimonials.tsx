@@ -11,7 +11,7 @@ const testimonials = [
     detail: "100L Accounting · Babcock University",
     badge: "88/100 in GEDS 126",
     initials: "CN",
-    color: "bg-emerald-50 text-emerald-700",
+    color: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   },
   {
     quote: "IFT 212 with Dr Eweoya was where I almost lost my GPA. My tutor had done the course and knew the exact topics he tests. We drilled those for two sessions and I passed. Simple.",
@@ -19,7 +19,7 @@ const testimonials = [
     detail: "200L Software Engineering · Babcock University",
     badge: "Passed IFT 212",
     initials: "VA",
-    color: "bg-blue-50 text-blue-700",
+    color: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
   },
   {
     quote: "I was running BIO 108 and CHM 108 at the same time. Both had practicals in the same week. I did one session per course and walked into both labs knowing what I was doing.",
@@ -27,7 +27,7 @@ const testimonials = [
     detail: "100L Biochemistry · Babcock University",
     badge: "Passed both practicals same week",
     initials: "KE",
-    color: "bg-pink-50 text-pink-700",
+    color: "bg-pink-500/10 text-pink-700 dark:text-pink-300",
   },
   {
     quote: "PHY 102 pulled my CGPA down in 100L. I retook it with a tutor from week one. Not week twelve. Finished with an A.",
@@ -43,7 +43,7 @@ const testimonials = [
     detail: "400L Computer Technology · Babcock University",
     badge: "Passed ELCT 401",
     initials: "FM",
-    color: "bg-amber-50 text-amber-700",
+    color: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
   },
   {
     quote: "I missed three weeks of CSC 301 due to health issues. By the time I was back, the class had moved on. Four sessions with my A-Star tutor and I learnt Data Structures and Algorithms on time with an A.",
@@ -51,7 +51,7 @@ const testimonials = [
     detail: "300L Computer Science · Babcock University",
     badge: "Caught up, A in DSA",
     initials: "OJ",
-    color: "bg-emerald-50 text-emerald-700",
+    color: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   },
 ];
 
@@ -76,23 +76,23 @@ export default function Testimonials() {
     <ScrollReveal id="stories" className="w-full px-6 py-10 md:py-16 max-w-[1440px] mx-auto">
       <div className="flex items-end justify-between mb-7">
         <div>
-          <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--astar-red)] mb-2 block">
+          <span className="text-[10px] font-bold tracking-widest uppercase text-brand-ink mb-2 block">
             Student Success Stories
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-fg">
             Real students. Real results.
           </h2>
         </div>
         <div className="hidden md:flex gap-2 shrink-0">
           <button
             onClick={() => scroll("left")}
-            className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[var(--astar-red)] hover:text-[var(--astar-red)] transition-all active:scale-95 cursor-pointer"
+            className="w-9 h-9 rounded-full border border-line flex items-center justify-center text-fg-subtle hover:border-[var(--astar-red)] hover:text-brand-ink transition-all active:scale-95 cursor-pointer"
           >
             <ArrowLeft size={15} />
           </button>
           <button
             onClick={() => scroll("right")}
-            className="w-9 h-9 rounded-full bg-[var(--astar-red)] text-white flex items-center justify-center hover:bg-red-700 transition-all active:scale-95 cursor-pointer"
+            className="w-9 h-9 rounded-full bg-[var(--astar-red)] text-white flex items-center justify-center hover:bg-brand-hover transition-all active:scale-95 cursor-pointer"
           >
             <ArrowRight size={15} />
           </button>
@@ -106,23 +106,23 @@ export default function Testimonials() {
       >
         {testimonials.map((t, i) => (
           <div key={i} className="flex-none w-[88vw] md:w-96 snap-start">
-            <div className="h-full bg-white border border-gray-100 rounded-2xl shadow-sm p-6 flex flex-col justify-between">
+            <div className="h-full bg-surface-raised border border-line-subtle rounded-2xl shadow-sm p-6 flex flex-col justify-between">
               <div>
-                <p className="font-serif text-4xl leading-none text-[var(--astar-red)] opacity-15 select-none mb-1">&ldquo;</p>
-                <p className="text-gray-600 italic text-sm leading-relaxed">{t.quote}</p>
+                <p className="font-serif text-4xl leading-none text-brand-ink opacity-15 select-none mb-1">&ldquo;</p>
+                <p className="text-fg-muted italic text-sm leading-relaxed">{t.quote}</p>
               </div>
               <div>
-                <div className="h-px bg-gray-100 my-4" />
+                <div className="h-px bg-surface-inset my-4" />
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${t.color}`}>
                     {t.initials}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900 leading-tight">{t.name}</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">{t.detail}</p>
+                    <p className="text-sm font-bold text-fg leading-tight">{t.name}</p>
+                    <p className="text-[11px] text-fg-faint mt-0.5">{t.detail}</p>
                   </div>
                 </div>
-                <span className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 text-[var(--astar-red)] border border-red-100">
+                <span className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full bg-brand-soft text-brand-ink border border-brand-soft-border">
                   {t.badge}
                 </span>
               </div>

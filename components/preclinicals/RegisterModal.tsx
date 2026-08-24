@@ -24,7 +24,7 @@ const HEARD_OPTIONS = [
 ];
 
 const inputClass =
-  "w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-300 text-gray-800 text-base bg-white";
+  "w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg text-base bg-surface-raised";
 
 export default function RegisterModal({ onClose }: { onClose: () => void }) {
   const [form, setForm] = useState({
@@ -116,37 +116,37 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto relative"
+        className="bg-surface-raised rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white rounded-t-2xl px-8 pt-8 pb-4 border-b border-gray-100 z-10">
+        <div className="sticky top-0 bg-surface-raised rounded-t-2xl px-8 pt-8 pb-4 border-b border-line-subtle z-10">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-4 right-4 text-fg-faint hover:text-fg-muted transition-colors"
             aria-label="Close"
           >
             <X size={20} />
           </button>
           <div className="flex items-center gap-2 mb-1">
-            <GraduationCap className="text-[var(--astar-red)]" size={22} />
-            <h2 className="text-2xl font-bold text-[var(--astar-navy)]">Reserve Your Spot</h2>
+            <GraduationCap className="text-brand-ink" size={22} />
+            <h2 className="text-2xl font-bold text-fg">Reserve Your Spot</h2>
           </div>
-          <p className="text-gray-500 text-sm">
+          <p className="text-fg-subtle text-sm">
             Pre-Clinicals Introductory Online Classes · 3rd – 30th August 2026
           </p>
         </div>
 
         <div className="px-8 py-6 space-y-5">
           {/* Order summary */}
-          <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+          <div className="rounded-xl border border-line-subtle bg-surface-sunken p-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Registration Fee</span>
+              <span className="text-sm text-fg-muted">Registration Fee</span>
               <span className="flex items-baseline gap-2">
-                <span className="text-sm text-gray-400 line-through">
+                <span className="text-sm text-fg-faint line-through">
                   ₦{OLD_PRICE.toLocaleString()}
                 </span>
-                <span className="text-lg font-extrabold text-[var(--astar-red)]">
+                <span className="text-lg font-extrabold text-brand-ink">
                   ₦{PRICE.toLocaleString()}
                 </span>
               </span>
@@ -156,8 +156,8 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
             <div>
-              <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                Full Name <span className="text-[var(--astar-red)]">*</span>
+              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                Full Name <span className="text-brand-ink">*</span>
               </label>
               <input
                 type="text"
@@ -172,8 +172,8 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
             {/* Email + Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                  Email <span className="text-[var(--astar-red)]">*</span>
+                <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                  Email <span className="text-brand-ink">*</span>
                 </label>
                 <input
                   type="email"
@@ -185,8 +185,8 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
                 {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
               </div>
               <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                  Phone (WhatsApp) <span className="text-[var(--astar-red)]">*</span>
+                <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                  Phone (WhatsApp) <span className="text-brand-ink">*</span>
                 </label>
                 <input
                   type="tel"
@@ -202,8 +202,8 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
             {/* School + Level */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                  University / School <span className="text-[var(--astar-red)]">*</span>
+                <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                  University / School <span className="text-brand-ink">*</span>
                 </label>
                 <input
                   type="text"
@@ -215,8 +215,8 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
                 {errors.school && <p className="mt-1 text-xs text-red-500">{errors.school}</p>}
               </div>
               <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                  Level / Year <span className="text-[var(--astar-red)]">*</span>
+                <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                  Level / Year <span className="text-brand-ink">*</span>
                 </label>
                 <select
                   value={form.level}
@@ -236,8 +236,8 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
 
             {/* How they heard */}
             <div>
-              <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                How did you hear about us? <span className="text-gray-400 font-normal">(optional)</span>
+              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                How did you hear about us? <span className="text-fg-faint font-normal">(optional)</span>
               </label>
               <select
                 value={form.heard}
@@ -255,8 +255,8 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
 
             {/* Notes */}
             <div>
-              <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                Anything else? <span className="text-gray-400 font-normal">(optional)</span>
+              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                Anything else? <span className="text-fg-faint font-normal">(optional)</span>
               </label>
               <textarea
                 rows={2}
@@ -275,12 +275,12 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
               options={{ appearance: "interaction-only" }}
             />
 
-            {apiError && <p className="text-sm text-red-600 font-medium">{apiError}</p>}
+            {apiError && <p className="text-sm text-red-600 dark:text-red-400 font-medium">{apiError}</p>}
 
             <button
               type="submit"
               disabled={loading || !turnstileToken}
-              className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-red-700 transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-brand-hover transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -293,7 +293,7 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
               )}
             </button>
 
-            <p className="text-center text-[11px] text-gray-400 pb-2">Payment secured by Paystack.</p>
+            <p className="text-center text-[11px] text-fg-faint pb-2">Payment secured by Paystack.</p>
           </form>
         </div>
       </div>

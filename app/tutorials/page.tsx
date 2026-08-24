@@ -89,7 +89,7 @@ function TutorialsContent() {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-8 md:mb-10"
                 >
-                    <h1 className="text-4xl md:text-6xl font-bold text-[var(--astar-navy)] mb-6 md:mb-8 tracking-tight">
+                    <h1 className="text-4xl md:text-6xl font-bold text-fg mb-6 md:mb-8 tracking-tight">
                         Tutorials
                     </h1>
                     <div className="mb-6">
@@ -108,7 +108,7 @@ function TutorialsContent() {
                             className="w-full"
                         >
                             {loading ? (
-                                <div className="flex items-center justify-center py-24 gap-2 text-gray-400">
+                                <div className="flex items-center justify-center py-24 gap-2 text-fg-faint">
                                     <Loader2 className="animate-spin" size={20} />
                                     <span className="text-sm">Loading tutorials...</span>
                                 </div>
@@ -148,13 +148,13 @@ function TutorialsContent() {
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    className="flex flex-col items-center justify-center text-center py-20 px-4 bg-white rounded-3xl border border-gray-100/50 shadow-sm"
+                                    className="flex flex-col items-center justify-center text-center py-20 px-4 bg-surface-raised rounded-3xl border border-line-subtle/50 shadow-sm"
                                 >
-                                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-6">
-                                        <Info className="w-8 h-8 text-[var(--astar-red)]" />
+                                    <div className="w-16 h-16 bg-brand-soft rounded-full flex items-center justify-center mb-6">
+                                        <Info className="w-8 h-8 text-brand-ink" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-2">No Active Tutorials</h3>
-                                    <p className="text-gray-500 max-w-md">
+                                    <h3 className="text-2xl font-bold text-fg mb-2">No Active Tutorials</h3>
+                                    <p className="text-fg-subtle max-w-md">
                                         There are currently no group tutorials scheduled. Check back soon or book a private session.
                                     </p>
                                 </motion.div>

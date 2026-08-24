@@ -36,10 +36,10 @@ export default function Services() {
   ];
 
   return (
-    <ScrollReveal id="services" className="w-full px-6 py-10 md:py-16 max-w-[1440px] mx-auto bg-white/55 rounded-[3rem] my-8">
+    <ScrollReveal id="services" className="w-full px-6 py-10 md:py-16 max-w-[1440px] mx-auto bg-surface-raised/55 rounded-[3rem] my-8">
       <div className="text-center max-w-3xl mx-auto mb-10">
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">Our Academic Services</h2>
-        <p className="text-gray-500 text-lg font-light">Comprehensive tutorial programs designed to fit your learning style and schedule.</p>
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-fg mb-6">Our Academic Services</h2>
+        <p className="text-fg-subtle text-lg font-light">Comprehensive tutorial programs designed to fit your learning style and schedule.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -47,15 +47,15 @@ export default function Services() {
           <Link
             key={index}
             href={service.href}
-            className={`group relative p-8 rounded-3xl transition-all duration-300 hover:-translate-y-2 cursor-pointer ${service.highlight ? 'bg-[#355EA9] text-white shadow-xl shadow-blue-900/20' : 'bg-white border border-gray-100 text-gray-900 shadow-sm hover:shadow-xl hover:shadow-gray-200/40'}`}
+            className={`group relative p-8 rounded-3xl transition-all duration-300 hover:-translate-y-2 cursor-pointer ${service.highlight ? 'bg-[#355EA9] text-white shadow-xl shadow-blue-900/20' : 'bg-surface-raised border border-line-subtle text-fg shadow-sm hover:shadow-xl hover:shadow-gray-200/40'}`}
           >
             {service.highlight && <service.icon className="absolute top-8 right-8 w-32 h-32 text-white/5 -rotate-12 pointer-events-none transition-transform duration-500 group-hover:scale-110" />}
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-xl transition-colors duration-300 ${service.highlight ? 'bg-white/10 text-white' : 'bg-red-50 text-[var(--astar-red)]'}`}>
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-xl transition-colors duration-300 ${service.highlight ? 'bg-white/10 text-white' : 'bg-brand-soft text-brand-ink'}`}>
               <service.icon size={28} />
             </div>
             <h3 className="text-xl font-bold mb-4">{service.title}</h3>
-            <p className={`text-sm leading-relaxed mb-8 ${service.highlight ? 'text-white/80' : 'text-gray-500'}`}>{service.desc}</p>
-            <div className={`flex items-center text-xs font-bold tracking-widest uppercase transition-all duration-300 ${service.highlight ? 'text-white' : 'text-[var(--astar-red)]'}`}>
+            <p className={`text-sm leading-relaxed mb-8 ${service.highlight ? 'text-white/80' : 'text-fg-subtle'}`}>{service.desc}</p>
+            <div className={`flex items-center text-xs font-bold tracking-widest uppercase transition-all duration-300 ${service.highlight ? 'text-white' : 'text-brand-ink'}`}>
               {service.action} <ArrowRight className="w-3 h-3 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
             </div>
           </Link>

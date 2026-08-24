@@ -46,10 +46,10 @@ export default function PreClinicalsCTA() {
 
             <h2 className="mt-5 text-3xl md:text-5xl font-bold tracking-tight">
               Pre-Clinicals{" "}
-              <span className="text-[var(--astar-red)]">Introductory</span> Classes
+              <span className="text-brand-on-dark">Introductory</span> Classes
             </h2>
 
-            <p className="mt-4 text-gray-300 text-base md:text-lg leading-relaxed max-w-xl">
+            <p className="mt-4 text-on-dark-muted text-base md:text-lg leading-relaxed max-w-xl">
               Maximise your break and resume pre-clinicals with confidence. Join the
               cohort mid-stream — recordings of every class so far are included.
             </p>
@@ -67,8 +67,8 @@ export default function PreClinicalsCTA() {
 
             <ul className="mt-8 grid sm:grid-cols-2 gap-x-8 gap-y-3">
               {highlights.map(({ Icon, label }) => (
-                <li key={label} className="flex items-center gap-3 text-sm text-gray-300">
-                  <Icon className="w-4 h-4 text-[var(--astar-red)] shrink-0" />
+                <li key={label} className="flex items-center gap-3 text-sm text-on-dark-muted">
+                  <Icon className="w-4 h-4 text-brand-on-dark shrink-0" />
                   <span>{label}</span>
                 </li>
               ))}
@@ -77,14 +77,14 @@ export default function PreClinicalsCTA() {
 
           <div className="lg:col-span-5 lg:pl-8 lg:border-l lg:border-white/10">
             <div className="flex items-baseline gap-3">
-              <span className="text-gray-500 line-through text-lg">
+              <span className="text-on-dark-subtle line-through text-lg">
                 ₦{PRECLINICALS_OLD_PRICE.toLocaleString()}
               </span>
               <span className="text-4xl md:text-5xl font-bold">
                 ₦{PRECLINICALS_PRICE.toLocaleString()}
               </span>
             </div>
-            <p className="mt-2 text-sm text-gray-400">
+            <p className="mt-2 text-sm text-on-dark-muted">
               One payment. Covers all five courses for the full month.
             </p>
 
@@ -96,7 +96,7 @@ export default function PreClinicalsCTA() {
               <ArrowRight size={18} />
             </Link>
 
-            <p className="mt-4 text-xs text-gray-500">
+            <p className="mt-4 text-xs text-on-dark-subtle">
               Registration closes when the cohort ends on 30th August.
             </p>
           </div>

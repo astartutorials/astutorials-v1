@@ -22,7 +22,7 @@ interface GroupBookingModalProps {
 }
 
 const inputClass =
-  "w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-300 text-gray-800 text-base";
+  "w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg text-base";
 
 function formatTime(time: string) {
   const [h, m] = time.split(":").map(Number);
@@ -107,50 +107,50 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto relative"
+        className="bg-surface-raised rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-white rounded-t-2xl px-8 pt-8 pb-4 border-b border-gray-100 z-10">
+        <div className="sticky top-0 bg-surface-raised rounded-t-2xl px-8 pt-8 pb-4 border-b border-line-subtle z-10">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-4 right-4 text-fg-faint hover:text-fg-muted transition-colors"
             aria-label="Close"
           >
             <X size={20} />
           </button>
-          <h2 className="text-2xl font-bold text-[var(--astar-navy)]">Reserve Your Spot</h2>
-          <p className="text-gray-500 text-sm mt-1">Complete your details to pay and secure your SPOT.</p>
+          <h2 className="text-2xl font-bold text-fg">Reserve Your Spot</h2>
+          <p className="text-fg-subtle text-sm mt-1">Complete your details to pay and secure your SPOT.</p>
         </div>
 
         <div className="px-8 py-6 space-y-5">
           {/* Order summary */}
-          <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 space-y-2.5">
-            <p className="font-bold text-[var(--astar-navy)] text-sm">{tutorial.code} — {tutorial.title}</p>
-            <p className="text-xs text-gray-500">with {tutorial.teacher}</p>
-            <div className="border-t border-gray-200 pt-2.5 space-y-1.5">
-              <div className="flex items-center gap-2 text-xs text-gray-600">
-                <Calendar size={13} className="text-blue-900 flex-shrink-0" />
+          <div className="rounded-xl border border-line-subtle bg-surface-sunken p-4 space-y-2.5">
+            <p className="font-bold text-fg text-sm">{tutorial.code} — {tutorial.title}</p>
+            <p className="text-xs text-fg-subtle">with {tutorial.teacher}</p>
+            <div className="border-t border-line pt-2.5 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs text-fg-muted">
+                <Calendar size={13} className="text-accent-ink flex-shrink-0" />
                 <span>{tutorial.day}</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-600">
-                <Clock size={13} className="text-blue-900 flex-shrink-0" />
+              <div className="flex items-center gap-2 text-xs text-fg-muted">
+                <Clock size={13} className="text-accent-ink flex-shrink-0" />
                 <span>{formatTime(tutorial.time)}</span>
               </div>
               {tutorial.location && (
-                <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <MapPin size={13} className="text-blue-900 flex-shrink-0" />
+                <div className="flex items-center gap-2 text-xs text-fg-muted">
+                  <MapPin size={13} className="text-accent-ink flex-shrink-0" />
                   <span>{tutorial.location}</span>
                 </div>
               )}
-              <div className="flex items-center gap-2 text-xs text-gray-600">
-                <Users size={13} className="text-blue-900 flex-shrink-0" />
+              <div className="flex items-center gap-2 text-xs text-fg-muted">
+                <Users size={13} className="text-accent-ink flex-shrink-0" />
                 <span>{tutorial.seatsLeft} spot{tutorial.seatsLeft !== 1 ? "s" : ""} remaining</span>
               </div>
             </div>
-            <div className="flex justify-between items-center border-t border-gray-200 pt-2.5 mt-1">
-              <span className="text-sm text-gray-600">Total</span>
-              <span className="text-base font-extrabold text-[var(--astar-red)]">
+            <div className="flex justify-between items-center border-t border-line pt-2.5 mt-1">
+              <span className="text-sm text-fg-muted">Total</span>
+              <span className="text-base font-extrabold text-brand-ink">
                 ₦{tutorial.price.toLocaleString()}
               </span>
             </div>
@@ -159,8 +159,8 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
             <div>
-              <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                Full Name <span className="text-[var(--astar-red)]">*</span>
+              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                Full Name <span className="text-brand-ink">*</span>
               </label>
               <input type="text" placeholder="Enter your full name" value={form.fullName}
                 onChange={(e) => set("fullName", e.target.value)} className={inputClass} />
@@ -170,16 +170,16 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
             {/* Email + Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                  Email <span className="text-[var(--astar-red)]">*</span>
+                <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                  Email <span className="text-brand-ink">*</span>
                 </label>
                 <input type="email" placeholder="you@example.com" value={form.email}
                   onChange={(e) => set("email", e.target.value)} className={inputClass} />
                 {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
               </div>
               <div>
-                <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                  Phone <span className="text-[var(--astar-red)]">*</span>
+                <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                  Phone <span className="text-brand-ink">*</span>
                 </label>
                 <input type="tel" placeholder="08012345678" value={form.phone}
                   onChange={(e) => set("phone", e.target.value)} className={inputClass} />
@@ -189,8 +189,8 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
 
             {/* Notes */}
             <div>
-              <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                Additional Notes <span className="text-gray-400 font-normal">(optional)</span>
+              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                Additional Notes <span className="text-fg-faint font-normal">(optional)</span>
               </label>
               <textarea rows={3} placeholder="Anything you'd like us to know..."
                 value={form.notes} onChange={(e) => set("notes", e.target.value)}
@@ -205,12 +205,12 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
               options={{ appearance: 'interaction-only' }}
             />
 
-            {apiError && <p className="text-sm text-red-600 font-medium">{apiError}</p>}
+            {apiError && <p className="text-sm text-red-600 dark:text-red-400 font-medium">{apiError}</p>}
 
             <button
               type="submit"
               disabled={loading || tutorial.seatsLeft <= 0 || !turnstileToken}
-              className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-red-700 transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-brand-hover transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <><Loader2 size={18} className="animate-spin" /> Redirecting to payment…</>
@@ -219,7 +219,7 @@ export default function GroupBookingModal({ tutorial, onClose }: GroupBookingMod
               )}
             </button>
 
-            <p className="text-center text-[11px] text-gray-400 pb-2">
+            <p className="text-center text-[11px] text-fg-faint pb-2">
               Payment secured by Paystack.
             </p>
           </form>
