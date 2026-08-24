@@ -31,12 +31,12 @@ function FailedContent() {
   const { heading, body } = MESSAGES[reason] ?? DEFAULT;
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-10 max-w-md w-full text-center">
-      <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+    <div className="bg-surface-raised rounded-3xl border border-line-subtle shadow-sm p-10 max-w-md w-full text-center">
+      <div className="w-16 h-16 bg-brand-soft rounded-full flex items-center justify-center mx-auto mb-6">
         <XCircle className="w-8 h-8 text-red-500" />
       </div>
       <h1 className="text-2xl font-bold text-[#0B1120] mb-3">{heading}</h1>
-      <p className="text-gray-500 text-sm leading-relaxed mb-8">{body}</p>
+      <p className="text-fg-subtle text-sm leading-relaxed mb-8">{body}</p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Link
           href="/tutorials"
@@ -48,7 +48,7 @@ function FailedContent() {
           href="https://api.whatsapp.com/send/?phone=2349160465678&type=phone_number&app_absent=0"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-200 text-gray-700 font-semibold rounded-full hover:border-gray-300 hover:-translate-y-0.5 transition-all text-sm"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-line text-fg-muted font-semibold rounded-full hover:border-line-strong hover:-translate-y-0.5 transition-all text-sm"
         >
           Contact Us
         </a>
@@ -62,12 +62,12 @@ export default function BookingFailedPage() {
     <div className="min-h-screen bg-[var(--astar-bg)] flex items-center justify-center px-4">
       <Suspense
         fallback={
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-10 max-w-md w-full text-center">
-            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="bg-surface-raised rounded-3xl border border-line-subtle shadow-sm p-10 max-w-md w-full text-center">
+            <div className="w-16 h-16 bg-brand-soft rounded-full flex items-center justify-center mx-auto mb-6">
               <XCircle className="w-8 h-8 text-red-500" />
             </div>
             <h1 className="text-2xl font-bold text-[#0B1120] mb-3">{DEFAULT.heading}</h1>
-            <p className="text-gray-500 text-sm leading-relaxed mb-8">{DEFAULT.body}</p>
+            <p className="text-fg-subtle text-sm leading-relaxed mb-8">{DEFAULT.body}</p>
             <Link
               href="/tutorials"
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#D93025] text-white font-semibold rounded-full shadow-lg shadow-red-500/20 hover:-translate-y-0.5 transition-all text-sm"

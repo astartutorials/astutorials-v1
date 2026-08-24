@@ -215,7 +215,7 @@ function RegisterButton({
   return (
     <button
       onClick={onClick}
-      className="group inline-flex items-center gap-2 rounded-full bg-[var(--astar-red)] text-white px-8 py-4 text-base font-bold shadow-lg shadow-red-500/20 hover:bg-red-700 hover:-translate-y-0.5 transition-all"
+      className="group inline-flex items-center gap-2 rounded-full bg-[var(--astar-red)] text-white px-8 py-4 text-base font-bold shadow-lg shadow-red-500/20 hover:bg-brand-hover hover:-translate-y-0.5 transition-all"
     >
       {label}
       <ArrowRight size={19} className="group-hover:translate-x-1 transition-transform" />
@@ -235,11 +235,11 @@ function SectionHead({
   return (
     <div className={`text-center ${className}`}>
       {eyebrow && (
-        <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[var(--astar-red)]">
+        <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-brand-ink">
           {eyebrow}
         </p>
       )}
-      <h2 className="mt-2.5 text-3xl md:text-4xl font-bold tracking-tight text-[var(--astar-navy)]">
+      <h2 className="mt-2.5 text-3xl md:text-4xl font-bold tracking-tight text-fg">
         {title}
       </h2>
     </div>
@@ -275,36 +275,36 @@ export default function PreClinicalsLanding() {
         />
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 text-center">
           <motion.div initial="hidden" animate="visible" variants={fade}>
-            <span className="inline-flex items-center gap-2 rounded-full bg-blue-900/5 border border-blue-900/10 px-4 py-1.5 text-sm font-semibold text-blue-900">
+            <span className="inline-flex items-center gap-2 rounded-full bg-blue-900/5 border border-blue-900/10 px-4 py-1.5 text-sm font-semibold text-accent-ink">
               <CalendarDays size={15} /> 3rd – 30th August 2026
             </span>
 
-            <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[var(--astar-red)] leading-[1.05]">
+            <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-brand-ink leading-[1.05]">
               Resume Pre-Clinicals
               <br className="hidden sm:block" /> Ahead of Everyone Else
             </h1>
 
-            <p className="mt-5 text-lg md:text-2xl text-[var(--astar-navy)] font-semibold">
+            <p className="mt-5 text-lg md:text-2xl text-fg font-semibold">
               Build the Foundation. Gain the Confidence. Stay Ahead.
             </p>
-            <p className="mt-3 inline-flex items-center gap-2 text-base md:text-lg text-gray-500">
-              <Sparkles size={17} className="text-[var(--astar-red)]" /> Get tutored by distinction
+            <p className="mt-3 inline-flex items-center gap-2 text-base md:text-lg text-fg-subtle">
+              <Sparkles size={17} className="text-brand-ink" /> Get tutored by distinction
               students!
             </p>
 
             {/* Pricing + CTA */}
             <div className="mt-9 flex flex-col items-center gap-4">
               <div className="flex items-baseline gap-3">
-                <span className="text-gray-400 line-through text-xl">
+                <span className="text-fg-faint line-through text-xl">
                   ₦{OLD_PRICE.toLocaleString()}
                 </span>
-                <span className="text-4xl md:text-5xl font-extrabold text-[var(--astar-navy)]">
+                <span className="text-4xl md:text-5xl font-extrabold text-fg">
                   ₦{PRICE.toLocaleString()}
                 </span>
-                <span className="text-gray-500 text-lg">only</span>
+                <span className="text-fg-subtle text-lg">only</span>
               </div>
               <RegisterButton onClick={() => openModal("hero")} />
-              <p className="text-xs text-gray-400">Limited slots · Secure payment via Paystack</p>
+              <p className="text-xs text-fg-faint">Limited slots · Secure payment via Paystack</p>
             </div>
           </motion.div>
         </div>
@@ -356,12 +356,12 @@ export default function PreClinicalsLanding() {
       <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-16 md:pb-20">
         <Reveal>
           <SectionHead eyebrow="The Advantage" title="Don’t resume hoping to catch up" />
-          <div className="mt-8 space-y-5 text-center text-gray-600 md:text-lg leading-relaxed">
+          <div className="mt-8 space-y-5 text-center text-fg-muted md:text-lg leading-relaxed">
             {INTRO_PARAS.map((p) => (
               <p key={p}>{p}</p>
             ))}
           </div>
-          <p className="mt-8 text-center text-xl md:text-2xl font-bold text-[var(--astar-navy)]">
+          <p className="mt-8 text-center text-xl md:text-2xl font-bold text-fg">
             Resume already prepared.
           </p>
         </Reveal>
@@ -376,7 +376,7 @@ export default function PreClinicalsLanding() {
               title="The biggest transition in Medicine"
               className="[&_h2]:text-white [&_p]:text-red-300"
             />
-            <div className="mt-8 max-w-3xl mx-auto space-y-5 text-center text-gray-300 md:text-lg leading-relaxed">
+            <div className="mt-8 max-w-3xl mx-auto space-y-5 text-center text-on-dark-muted md:text-lg leading-relaxed">
               <p>
                 The gap between 100 Level and Pre-Clinicals is one of the biggest academic
                 transitions in Medicine. Students suddenly encounter subjects they’ve never studied
@@ -393,7 +393,7 @@ export default function PreClinicalsLanding() {
                 </span>
               ))}
             </div>
-            <p className="mt-8 max-w-3xl mx-auto text-center text-gray-300 md:text-lg leading-relaxed">
+            <p className="mt-8 max-w-3xl mx-auto text-center text-on-dark-muted md:text-lg leading-relaxed">
               Many spend the first semester simply trying to understand what lecturers are talking
               about. Our goal is simple: reduce that learning curve before school resumes. Instead of
               struggling to understand basic concepts during lectures, you’ll already possess the
@@ -407,24 +407,24 @@ export default function PreClinicalsLanding() {
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-16 md:py-20">
         <Reveal>
           <SectionHead eyebrow="Your Tutors" title="Learn from students who’ve already done it" />
-          <div className="mt-8 rounded-3xl bg-white border border-gray-100 shadow-sm p-8 md:p-10">
-            <Quote className="text-[var(--astar-red)]" size={32} />
-            <p className="mt-3 text-xl md:text-2xl font-bold text-[var(--astar-navy)] leading-snug">
+          <div className="mt-8 rounded-3xl bg-surface-raised border border-line-subtle shadow-sm p-8 md:p-10">
+            <Quote className="text-brand-ink" size={32} />
+            <p className="mt-3 text-xl md:text-2xl font-bold text-fg leading-snug">
               Anyone can teach. Not everyone can teach from experience.
             </p>
-            <p className="mt-5 text-gray-600 md:text-lg leading-relaxed">
+            <p className="mt-5 text-fg-muted md:text-lg leading-relaxed">
               Every tutor in this programme has excelled academically in these same courses, and
               understands:
             </p>
             <ul className="mt-5 grid sm:grid-cols-2 gap-3">
               {TUTOR_POINTS.map((point) => (
-                <li key={point} className="flex items-start gap-2.5 text-gray-700">
-                  <CheckCircle2 size={20} className="mt-0.5 flex-shrink-0 text-[var(--astar-red)]" />
+                <li key={point} className="flex items-start gap-2.5 text-fg-muted">
+                  <CheckCircle2 size={20} className="mt-0.5 flex-shrink-0 text-brand-ink" />
                   <span>{point}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-6 text-gray-600 md:text-lg leading-relaxed">
+            <p className="mt-6 text-fg-muted md:text-lg leading-relaxed">
               Rather than learning through trial and error, you’ll learn from students who have
               already achieved distinction.
             </p>
@@ -441,9 +441,9 @@ export default function PreClinicalsLanding() {
             </span>
             <h2 className="mt-5 text-2xl md:text-3xl font-bold">
               Pre-Clinicals Orientation Webinar{" "}
-              <span className="text-gray-400 font-semibold">(5th Edition)</span>
+              <span className="text-on-dark-muted font-semibold">(5th Edition)</span>
             </h2>
-            <p className="mt-2 text-gray-300 md:text-lg">
+            <p className="mt-2 text-on-dark-muted md:text-lg">
               Theme: Simple Strategies for Excelling in Pre-Clinicals MB Exams
             </p>
 
@@ -480,13 +480,13 @@ export default function PreClinicalsLanding() {
             {/* Meta row */}
             <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 text-sm md:text-base">
               <span className="inline-flex items-center gap-2 text-gray-200">
-                <Video size={18} className="text-[var(--astar-red)]" /> Google Meet
+                <Video size={18} className="text-brand-on-dark" /> Google Meet
               </span>
               <span className="inline-flex items-center gap-2 text-gray-200">
-                <Clock size={18} className="text-[var(--astar-red)]" /> 3:00 pm
+                <Clock size={18} className="text-brand-on-dark" /> 3:00 pm
               </span>
               <span className="inline-flex items-center gap-2 text-gray-200">
-                <CalendarDays size={18} className="text-[var(--astar-red)]" /> Saturday, 1st August
+                <CalendarDays size={18} className="text-brand-on-dark" /> Saturday, 1st August
                 2026
               </span>
             </div>
@@ -501,8 +501,8 @@ export default function PreClinicalsLanding() {
               >
                 Register for the Webinar <ArrowRight size={18} />
               </a>
-              <p className="inline-flex items-center gap-2 text-sm text-gray-300">
-                <Gift size={16} className="text-[var(--astar-red)]" /> Stand a chance to win a
+              <p className="inline-flex items-center gap-2 text-sm text-on-dark-muted">
+                <Gift size={16} className="text-brand-on-dark" /> Stand a chance to win a
                 ₦10,000 Eduhub &amp; A-Star Tutorials voucher.
               </p>
             </div>
@@ -519,13 +519,13 @@ export default function PreClinicalsLanding() {
           {STUDY.map(({ icon: Icon, name, desc }) => (
             <Reveal
               key={name}
-              className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 hover:shadow-md hover:-translate-y-0.5 transition-all"
+              className="rounded-2xl bg-surface-raised border border-line-subtle shadow-sm p-6 hover:shadow-md hover:-translate-y-0.5 transition-all"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-[var(--astar-red)]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-soft text-brand-ink">
                 <Icon size={24} />
               </div>
-              <h3 className="mt-4 text-lg font-bold text-[var(--astar-navy)]">{name}</h3>
-              <p className="mt-2 text-sm text-gray-600 leading-relaxed">{desc}</p>
+              <h3 className="mt-4 text-lg font-bold text-fg">{name}</h3>
+              <p className="mt-2 text-sm text-fg-muted leading-relaxed">{desc}</p>
             </Reveal>
           ))}
         </div>
@@ -538,7 +538,7 @@ export default function PreClinicalsLanding() {
             eyebrow="The Difference"
             title="We don’t just teach — we build learning systems"
           />
-          <p className="mt-4 text-center text-gray-500 md:text-lg max-w-2xl mx-auto">
+          <p className="mt-4 text-center text-fg-subtle md:text-lg max-w-2xl mx-auto">
             Every feature is designed to improve retention, consistency and performance.
           </p>
         </Reveal>
@@ -546,14 +546,14 @@ export default function PreClinicalsLanding() {
           {DIFFERENTIATORS.map(({ icon: Icon, title, desc }) => (
             <Reveal
               key={title}
-              className="rounded-2xl bg-white border border-gray-100 shadow-sm p-7 flex gap-4"
+              className="rounded-2xl bg-surface-raised border border-line-subtle shadow-sm p-7 flex gap-4"
             >
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--astar-navy)] text-white">
                 <Icon size={22} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-[var(--astar-navy)]">{title}</h3>
-                <p className="mt-1.5 text-sm text-gray-600 leading-relaxed">{desc}</p>
+                <h3 className="text-lg font-bold text-fg">{title}</h3>
+                <p className="mt-1.5 text-sm text-fg-muted leading-relaxed">{desc}</p>
               </div>
             </Reveal>
           ))}
@@ -591,18 +591,18 @@ export default function PreClinicalsLanding() {
           {WEEKS.map(({ week, title, desc }, i) => (
             <Reveal
               key={week}
-              className="relative rounded-2xl bg-white border border-gray-100 shadow-sm p-6"
+              className="relative rounded-2xl bg-surface-raised border border-line-subtle shadow-sm p-6"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--astar-red)] text-white font-bold">
                 {i + 1}
               </span>
-              <p className="mt-4 text-xs font-bold uppercase tracking-wider text-[var(--astar-red)]">
+              <p className="mt-4 text-xs font-bold uppercase tracking-wider text-brand-ink">
                 {week}
               </p>
-              <h3 className="mt-1 text-lg font-bold text-[var(--astar-navy)] leading-tight">
+              <h3 className="mt-1 text-lg font-bold text-fg leading-tight">
                 {title}
               </h3>
-              <p className="mt-2 text-sm text-gray-600 leading-relaxed">{desc}</p>
+              <p className="mt-2 text-sm text-fg-muted leading-relaxed">{desc}</p>
             </Reveal>
           ))}
         </div>
@@ -612,18 +612,18 @@ export default function PreClinicalsLanding() {
       <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-16 md:pb-20">
         <Reveal>
           <SectionHead eyebrow="Weekly Rhythm" title="Weekly learning structure" />
-          <div className="mt-10 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-100">
+          <div className="mt-10 overflow-hidden rounded-2xl border border-line-subtle bg-surface-raised shadow-sm divide-y divide-line-subtle">
             {TIMETABLE.map(({ day, subject, accent }) => (
               <div
                 key={day}
                 className={`flex items-center justify-between px-6 py-4 ${
-                  accent ? "bg-red-50/60" : ""
+                  accent ? "bg-brand-soft" : ""
                 }`}
               >
-                <span className="font-semibold text-[var(--astar-navy)]">{day}</span>
+                <span className="font-semibold text-fg">{day}</span>
                 <span
                   className={`text-sm font-medium ${
-                    accent ? "text-[var(--astar-red)]" : "text-gray-600"
+                    accent ? "text-brand-ink" : "text-fg-muted"
                   }`}
                 >
                   {subject}
@@ -631,7 +631,7 @@ export default function PreClinicalsLanding() {
               </div>
             ))}
           </div>
-          <p className="mt-4 text-center text-sm text-gray-400">
+          <p className="mt-4 text-center text-sm text-fg-faint">
             A detailed timetable will be provided after registration.
           </p>
         </Reveal>
@@ -649,7 +649,7 @@ export default function PreClinicalsLanding() {
             <ul className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
               {BENEFITS.map((b) => (
                 <li key={b} className="flex items-start gap-3">
-                  <CheckCircle2 size={20} className="mt-0.5 flex-shrink-0 text-[var(--astar-red)]" />
+                  <CheckCircle2 size={20} className="mt-0.5 flex-shrink-0 text-brand-on-dark" />
                   <span className="text-gray-200">{b}</span>
                 </li>
               ))}
@@ -663,16 +663,16 @@ export default function PreClinicalsLanding() {
         <Reveal>
           <SectionHead eyebrow="Is This You?" title="Who should enrol" />
           <div className="mt-8 flex justify-center">
-            <GraduationCap className="text-[var(--astar-red)]" size={40} />
+            <GraduationCap className="text-brand-ink" size={40} />
           </div>
           <ul className="mt-8 max-w-2xl mx-auto space-y-3">
             {ENROL.map((e) => (
               <li
                 key={e}
-                className="flex items-start gap-3 rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-4"
+                className="flex items-start gap-3 rounded-xl bg-surface-raised border border-line-subtle shadow-sm px-5 py-4"
               >
-                <CheckCircle2 size={20} className="mt-0.5 flex-shrink-0 text-[var(--astar-red)]" />
-                <span className="text-gray-700">{e}</span>
+                <CheckCircle2 size={20} className="mt-0.5 flex-shrink-0 text-brand-ink" />
+                <span className="text-fg-muted">{e}</span>
               </li>
             ))}
           </ul>
@@ -685,37 +685,37 @@ export default function PreClinicalsLanding() {
           <SectionHead eyebrow="Programme Details" title="Duration & investment" />
         </Reveal>
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Reveal className="rounded-3xl bg-white border border-gray-100 shadow-sm p-8">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-900">
+          <Reveal className="rounded-3xl bg-surface-raised border border-line-subtle shadow-sm p-8">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-accent-ink">
               <CalendarDays size={24} />
             </div>
-            <h3 className="mt-4 text-sm font-bold uppercase tracking-wider text-gray-400">
+            <h3 className="mt-4 text-sm font-bold uppercase tracking-wider text-fg-faint">
               Duration
             </h3>
-            <p className="mt-2 text-2xl font-extrabold text-[var(--astar-navy)]">
+            <p className="mt-2 text-2xl font-extrabold text-fg">
               3rd – 30th August 2026
             </p>
-            <p className="mt-2 text-gray-600 leading-relaxed">
+            <p className="mt-2 text-fg-muted leading-relaxed">
               Four intensive weeks · Completely online · Attend from anywhere.
             </p>
           </Reveal>
 
-          <Reveal className="rounded-3xl bg-white border border-gray-100 shadow-sm p-8">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-[var(--astar-red)]">
+          <Reveal className="rounded-3xl bg-surface-raised border border-line-subtle shadow-sm p-8">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-soft text-brand-ink">
               <Wallet size={24} />
             </div>
-            <h3 className="mt-4 text-sm font-bold uppercase tracking-wider text-gray-400">
+            <h3 className="mt-4 text-sm font-bold uppercase tracking-wider text-fg-faint">
               Investment
             </h3>
             <p className="mt-2 flex items-baseline gap-2">
-              <span className="text-lg text-gray-400 line-through">
+              <span className="text-lg text-fg-faint line-through">
                 ₦{OLD_PRICE.toLocaleString()}
               </span>
-              <span className="text-3xl font-extrabold text-[var(--astar-red)]">
+              <span className="text-3xl font-extrabold text-brand-ink">
                 ₦{PRICE.toLocaleString()}
               </span>
             </p>
-            <p className="mt-2 text-gray-600 leading-relaxed">
+            <p className="mt-2 text-fg-muted leading-relaxed">
               One decision. Four weeks. A foundation that could shape your entire pre-clinical
               journey.
             </p>
@@ -725,25 +725,25 @@ export default function PreClinicalsLanding() {
 
       {/* ── THE COST OF WAITING ────────────────────────────── */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 pb-16 md:pb-20">
-        <Reveal className="rounded-3xl border border-red-100 bg-red-50/50 p-8 md:p-12">
+        <Reveal className="rounded-3xl border border-brand-soft-border bg-brand-soft p-8 md:p-12">
           <div className="flex justify-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--astar-red)] text-white">
               <Hourglass size={26} />
             </div>
           </div>
-          <h2 className="mt-6 text-center text-2xl md:text-3xl font-bold text-[var(--astar-navy)]">
+          <h2 className="mt-6 text-center text-2xl md:text-3xl font-bold text-fg">
             The cost of waiting
           </h2>
-          <div className="mt-6 max-w-2xl mx-auto space-y-4 text-center text-gray-600 md:text-lg leading-relaxed">
+          <div className="mt-6 max-w-2xl mx-auto space-y-4 text-center text-fg-muted md:text-lg leading-relaxed">
             <p>
               Every year, students resume hoping they’ll “figure things out.” Some do. Many struggle.
               A few spend months trying to recover academically.
             </p>
           </div>
-          <p className="mt-6 text-center text-xl md:text-2xl font-bold text-[var(--astar-red)]">
+          <p className="mt-6 text-center text-xl md:text-2xl font-bold text-brand-ink">
             Preparation is always cheaper than recovery.
           </p>
-          <p className="mt-6 max-w-2xl mx-auto text-center text-gray-600 md:text-lg leading-relaxed">
+          <p className="mt-6 max-w-2xl mx-auto text-center text-fg-muted md:text-lg leading-relaxed">
             Don’t wait for lectures to begin before taking your academics seriously. Start building
             your advantage today.
           </p>
@@ -759,10 +759,10 @@ export default function PreClinicalsLanding() {
                 <Rocket size={26} />
               </div>
             </div>
-            <h2 className="mt-6 text-3xl md:text-4xl font-bold text-[var(--astar-navy)]">
+            <h2 className="mt-6 text-3xl md:text-4xl font-bold text-fg">
               Ready to begin?
             </h2>
-            <p className="mt-4 text-gray-600 md:text-lg max-w-2xl mx-auto leading-relaxed">
+            <p className="mt-4 text-fg-muted md:text-lg max-w-2xl mx-auto leading-relaxed">
               The best medical students don’t wait until resumption to prepare — they begin before
               everyone else. Join hundreds of ambitious students choosing to resume pre-clinicals
               with confidence, clarity and a competitive edge.
@@ -782,15 +782,15 @@ export default function PreClinicalsLanding() {
               ].map(([label, value]) => (
                 <span
                   key={label}
-                  className="rounded-full border border-gray-200 bg-white px-4 py-2 text-gray-600 shadow-sm"
+                  className="rounded-full border border-line bg-surface-raised px-4 py-2 text-fg-muted shadow-sm"
                 >
-                  <span className="font-semibold text-[var(--astar-navy)]">{label}:</span> {value}
+                  <span className="font-semibold text-fg">{label}:</span> {value}
                 </span>
               ))}
             </div>
 
-            <p className="mt-10 text-lg font-bold text-[var(--astar-red)]">A-Star Tutorials</p>
-            <p className="text-gray-500">Unlock your academic potential.</p>
+            <p className="mt-10 text-lg font-bold text-brand-ink">A-Star Tutorials</p>
+            <p className="text-fg-subtle">Unlock your academic potential.</p>
           </Reveal>
         </div>
       </section>

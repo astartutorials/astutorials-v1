@@ -19,11 +19,11 @@ export default function PricingSection({ orgId }: PricingSectionProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <h2 className="text-3xl md:text-4xl font-bold text-[var(--astar-navy)] mb-6">
+                <h2 className="text-3xl md:text-4xl font-bold text-fg mb-6">
                     Tailored One-on-One Excellence
                 </h2>
 
-                <p className="text-gray-600 mb-8 leading-relaxed text-lg">
+                <p className="text-fg-muted mb-8 leading-relaxed text-lg">
                     Accelerate your academic journey with a dedicated tutor. Focus on
                     specific problem areas or advance at your own speed with a
                     curriculum designed just for you.
@@ -31,12 +31,12 @@ export default function PricingSection({ orgId }: PricingSectionProps) {
 
                 <div className="flex items-baseline justify-center gap-2 mb-8">
                     <span className="text-4xl md:text-5xl font-bold text-[#335C98]">₦6,090</span>
-                    <span className="text-gray-500 text-lg">/ session</span>
+                    <span className="text-fg-subtle text-lg">/ session</span>
                 </div>
 
                 <button
                     onClick={() => setModalOpen(true)}
-                    className="bg-[var(--astar-red)] text-white px-8 py-4 rounded-full font-bold text-lg inline-flex items-center gap-2 hover:bg-red-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    className="bg-[var(--astar-red)] text-white px-8 py-4 rounded-full font-bold text-lg inline-flex items-center gap-2 hover:bg-brand-hover transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
                     Request Private Tutorial <ArrowRight size={20} />
                 </button>
