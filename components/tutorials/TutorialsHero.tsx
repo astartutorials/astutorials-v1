@@ -22,7 +22,7 @@ export default function TutorialsHero({ activeTab, onChangeTab }: TutorialsHeroP
                 <div className="bg-[#E2E8F0] p-1 rounded-full inline-flex relative">
                     {/* Moving background pill */}
                     <motion.div
-                        className="absolute top-1 bottom-1 bg-white rounded-full shadow-sm"
+                        className="absolute top-1 bottom-1 bg-surface-raised rounded-full shadow-sm"
                         initial={false}
                         animate={{
                             x: activeTab === "group" ? 0 : "100%",
@@ -33,7 +33,7 @@ export default function TutorialsHero({ activeTab, onChangeTab }: TutorialsHeroP
 
                     <button
                         onClick={() => onChangeTab("group")}
-                        className={`relative z-10 px-6 py-2 text-sm font-medium rounded-full transition-colors duration-200 ${activeTab === "group" ? "text-gray-900" : "text-gray-500 hover:text-gray-700"
+                        className={`relative z-10 px-6 py-2 text-sm font-medium rounded-full transition-colors duration-200 ${activeTab === "group" ? "text-fg" : "text-fg-subtle hover:text-fg-muted"
                             }`}
                     >
                         Group Tutorials
@@ -41,7 +41,7 @@ export default function TutorialsHero({ activeTab, onChangeTab }: TutorialsHeroP
 
                     <button
                         onClick={() => onChangeTab("private")}
-                        className={`relative z-10 px-6 py-2 text-sm font-medium rounded-full transition-colors duration-200 ${activeTab === "private" ? "text-[var(--astar-red)]" : "text-gray-500 hover:text-gray-700"
+                        className={`relative z-10 px-6 py-2 text-sm font-medium rounded-full transition-colors duration-200 ${activeTab === "private" ? "text-brand-ink" : "text-fg-subtle hover:text-fg-muted"
                             }`}
                     >
                         Private Tutorials

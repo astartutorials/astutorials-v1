@@ -6,8 +6,8 @@ export default function WhoWeAre() {
     <ScrollReveal id="about" className="w-full px-6 py-10 md:py-16 max-w-[1440px] mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
         <div className="max-w-xl">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">Who We Are</h2>
-          <p className="text-gray-600 text-lg leading-relaxed">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-fg mb-6">Who We Are</h2>
+          <p className="text-fg-muted text-lg leading-relaxed">
             A-Star Tutorials is a student-driven academic support system built to help tertiary institution students excel. We provide structured tutorials, easy-to-understand guidance, and a supportive learning community.
           </p>
         </div>
@@ -20,20 +20,20 @@ export default function WhoWeAre() {
               <p className="text-white/80 text-sm leading-relaxed">A welcoming environment where every student matters.</p>
             </div>
           </div>
-          <div className="group p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300 cursor-default">
-            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-6"><TrendingUp className="w-6 h-6 text-[var(--astar-red)]" /></div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">Growth Mindset</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">Fostering continuous learning and improvement.</p>
+          <div className="group p-8 rounded-2xl bg-surface-raised border border-line-subtle shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300 cursor-default">
+            <div className="w-12 h-12 rounded-full bg-brand-soft flex items-center justify-center mb-6"><TrendingUp className="w-6 h-6 text-brand-ink" /></div>
+            <h3 className="text-xl font-bold text-fg mb-3">Growth Mindset</h3>
+            <p className="text-fg-subtle text-sm leading-relaxed">Fostering continuous learning and improvement.</p>
           </div>
-          <div className="group p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300 cursor-default">
-            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-6"><Target className="w-6 h-6 text-[var(--astar-red)]" /></div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">Student-First Approach</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">Tailored approaches for individual success.</p>
+          <div className="group p-8 rounded-2xl bg-surface-raised border border-line-subtle shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300 cursor-default">
+            <div className="w-12 h-12 rounded-full bg-brand-soft flex items-center justify-center mb-6"><Target className="w-6 h-6 text-brand-ink" /></div>
+            <h3 className="text-xl font-bold text-fg mb-3">Student-First Approach</h3>
+            <p className="text-fg-subtle text-sm leading-relaxed">Tailored approaches for individual success.</p>
           </div>
-          <div className="group p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300 cursor-default">
-            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-6"><Award className="w-6 h-6 text-[var(--astar-red)]" /></div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">Academic Discipline</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">Building strong foundations for excellence.</p>
+          <div className="group p-8 rounded-2xl bg-surface-raised border border-line-subtle shadow-sm hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300 cursor-default">
+            <div className="w-12 h-12 rounded-full bg-brand-soft flex items-center justify-center mb-6"><Award className="w-6 h-6 text-brand-ink" /></div>
+            <h3 className="text-xl font-bold text-fg mb-3">Academic Discipline</h3>
+            <p className="text-fg-subtle text-sm leading-relaxed">Building strong foundations for excellence.</p>
           </div>
         </div>
       </div>

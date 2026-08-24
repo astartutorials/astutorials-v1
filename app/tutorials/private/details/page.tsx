@@ -15,7 +15,7 @@ const SCHEDULE_OPTIONS = [
 ];
 
 const inputClass =
-  'w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-300 text-gray-800 text-base bg-white';
+  'w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg text-base bg-surface-raised';
 
 function DetailsForm() {
   const searchParams = useSearchParams();
@@ -105,8 +105,8 @@ function DetailsForm() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-[var(--astar-bg)]">
         <div className="text-center">
-          <p className="text-gray-500 mb-2">We couldn&apos;t find your booking.</p>
-          <a href="/tutorials?type=private" className="text-[var(--astar-red)] font-semibold underline text-sm">
+          <p className="text-fg-subtle mb-2">We couldn&apos;t find your booking.</p>
+          <a href="/tutorials?type=private" className="text-brand-ink font-semibold underline text-sm">
             Back to tutorials
           </a>
         </div>
@@ -117,14 +117,14 @@ function DetailsForm() {
   if (!booking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--astar-bg)]">
-        <Loader2 className="animate-spin text-[var(--astar-red)]" size={28} />
+        <Loader2 className="animate-spin text-brand-ink" size={28} />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-[var(--astar-bg)] flex items-center justify-center px-4 py-16">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
+      <div className="bg-surface-raised rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
         {/* Header */}
         <div className="bg-[var(--astar-red)] px-8 py-6">
           <div className="flex items-center gap-3 mb-2">
@@ -141,8 +141,8 @@ function DetailsForm() {
           {/* Course of Study + Level */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                Course of Study <span className="text-[var(--astar-red)]">*</span>
+              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                Course of Study <span className="text-brand-ink">*</span>
               </label>
               <input
                 type="text"
@@ -154,8 +154,8 @@ function DetailsForm() {
               {errors.courseOfStudy && <p className="mt-1 text-xs text-red-500">{errors.courseOfStudy}</p>}
             </div>
             <div>
-              <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                Level <span className="text-[var(--astar-red)]">*</span>
+              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                Level <span className="text-brand-ink">*</span>
               </label>
               <select
                 value={form.level}
@@ -173,9 +173,9 @@ function DetailsForm() {
 
           {/* Schedule */}
           <div>
-            <label className="text-sm font-semibold text-gray-700 block mb-2">
-              Preferred Schedule <span className="text-[var(--astar-red)]">*</span>
-              <span className="ml-1.5 text-gray-400 font-normal text-xs">(select all that apply)</span>
+            <label className="text-sm font-semibold text-fg-muted block mb-2">
+              Preferred Schedule <span className="text-brand-ink">*</span>
+              <span className="ml-1.5 text-fg-faint font-normal text-xs">(select all that apply)</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {SCHEDULE_OPTIONS.map((slot) => {
@@ -188,7 +188,7 @@ function DetailsForm() {
                     className={`px-3.5 py-2 rounded-xl text-sm font-semibold border transition-all ${
                       active
                         ? 'bg-[var(--astar-red)] border-[var(--astar-red)] text-white'
-                        : 'bg-white border-gray-200 text-gray-600 hover:border-[var(--astar-red)] hover:text-[var(--astar-red)]'
+                        : 'bg-surface-raised border-line text-fg-muted hover:border-[var(--astar-red)] hover:text-brand-ink'
                     }`}
                   >
                     {slot}
@@ -201,8 +201,8 @@ function DetailsForm() {
 
           {/* Notes */}
           <div>
-            <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-              Additional Notes <span className="text-gray-400 font-normal">(optional)</span>
+            <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+              Additional Notes <span className="text-fg-faint font-normal">(optional)</span>
             </label>
             <textarea
               rows={3}
@@ -216,7 +216,7 @@ function DetailsForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-red-700 transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-brand-hover transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting ? (
               <><Loader2 size={18} className="animate-spin" /> Opening WhatsApp…</>
@@ -225,7 +225,7 @@ function DetailsForm() {
             )}
           </button>
 
-          <p className="text-center text-[11px] text-gray-400 pb-1">
+          <p className="text-center text-[11px] text-fg-faint pb-1">
             We&apos;ll use this to match you with the best tutor for your needs.
           </p>
         </form>

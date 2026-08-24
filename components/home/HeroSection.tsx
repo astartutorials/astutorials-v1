@@ -19,14 +19,14 @@ export default function HeroSection() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center mb-12 md:mb-16">
         {/* Left: text */}
         <div className="text-center lg:text-left">
-          <h1 className="text-gray-900 mb-6 font-normal tracking-tighter leading-[1.1] text-4xl md:text-6xl lg:text-7xl">
+          <h1 className="text-fg mb-6 font-normal tracking-tighter leading-[1.1] text-4xl md:text-6xl lg:text-7xl">
             Unlock your academic potential with{" "}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--astar-red)] to-red-400">
               A-Star Tutorials.
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-gray-500 font-light mb-10 leading-relaxed">
+          <p className="text-lg md:text-xl text-fg-subtle font-light mb-10 leading-relaxed">
             Expert-led group and private tutorials to help you master your courses, ace your exams, and reach your full academic potential.
           </p>
 
@@ -42,7 +42,7 @@ export default function HeroSection() {
 
         {/* Right: hero video */}
         <div className="relative flex justify-center lg:justify-end">
-          <div className="relative w-full max-w-lg aspect-square rounded-3xl overflow-hidden shadow-2xl shadow-gray-200/60 border border-gray-100">
+          <div className="relative w-full max-w-lg aspect-square rounded-3xl overflow-hidden shadow-2xl shadow-gray-200/60 border border-line-subtle">
             <video
               src="/hero.mp4"
               autoPlay
@@ -57,7 +57,7 @@ export default function HeroSection() {
 
       {/* Stats */}
       <div className="w-full max-w-5xl mx-auto mb-10 md:mb-14">
-        <p className="text-xs md:text-sm text-gray-400 mb-10 font-medium uppercase tracking-wider text-center">
+        <p className="text-xs md:text-sm text-fg-faint mb-10 font-medium uppercase tracking-wider text-center">
           Trusted by students globally
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8 items-center justify-center opacity-80">
@@ -68,10 +68,10 @@ export default function HeroSection() {
             { val: "24/7",  label: "Support", static: true },
           ].map((stat, i) => (
             <div key={i} className="flex flex-col items-center">
-              <span className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+              <span className="text-3xl md:text-4xl font-bold text-fg tracking-tight">
                 {stat.static ? stat.val : <CountUp value={stat.val} />}
               </span>
-              <span className="text-[10px] md:text-xs uppercase tracking-widest text-gray-400 mt-2 font-semibold">
+              <span className="text-[10px] md:text-xs uppercase tracking-widest text-fg-faint mt-2 font-semibold">
                 {stat.label}
               </span>
             </div>
