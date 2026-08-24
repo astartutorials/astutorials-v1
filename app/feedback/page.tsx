@@ -23,7 +23,7 @@ export default function FeedbackPage() {
       icon: <Music size={20} />,
       href: "https://tiktok.com/@astartutorialshq",
       handle: "@astartutorialshq",
-      color: "hover:text-black"
+      color: "hover:text-fg-strong"
     },
   ];
 
@@ -33,7 +33,7 @@ export default function FeedbackPage() {
       
       {/* Social Links Section */}
       <div className="mt-12 w-full max-w-xl text-center">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Connect with us</p>
+        <p className="text-xs font-bold text-fg-faint uppercase tracking-widest mb-6">Connect with us</p>
         <div className="flex justify-center gap-6">
           {socials.map((social) => (
             <Link 
@@ -41,7 +41,7 @@ export default function FeedbackPage() {
               href={social.href} 
               target="_blank"
               title={social.name}
-              className={`w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-500 transition-all duration-300 ${social.color} hover:-translate-y-1 hover:shadow-md`}
+              className={`w-12 h-12 rounded-full bg-surface-raised shadow-sm flex items-center justify-center text-fg-subtle transition-all duration-300 ${social.color} hover:-translate-y-1 hover:shadow-md`}
             >
               {social.icon}
             </Link>

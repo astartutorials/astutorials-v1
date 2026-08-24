@@ -6,12 +6,12 @@ import { CheckCircle } from "lucide-react";
 export default function BookingSuccessPage() {
   return (
     <div className="min-h-screen bg-[var(--astar-bg)] flex items-center justify-center px-4">
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-10 max-w-md w-full text-center">
-        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+      <div className="bg-surface-raised rounded-3xl border border-line-subtle shadow-sm p-10 max-w-md w-full text-center">
+        <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="w-8 h-8 text-emerald-500" />
         </div>
         <h1 className="text-2xl font-bold text-[#0B1120] mb-3">Booking Confirmed!</h1>
-        <p className="text-gray-500 text-sm leading-relaxed mb-8">
+        <p className="text-fg-subtle text-sm leading-relaxed mb-8">
           Your spot has been reserved and payment received. Keep your payment reference as proof of booking.
         </p>
         <Link

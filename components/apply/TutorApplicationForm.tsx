@@ -18,20 +18,20 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 const TIMES_OF_DAY = ["Morning", "Afternoon", "Evening", "Flexible"];
 
 const inputClass =
-  "w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-300 text-gray-800 bg-white";
+  "w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg bg-surface-raised";
 const selectClass =
-  "w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-gray-800 bg-white appearance-none cursor-pointer";
+  "w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-fg bg-surface-raised appearance-none cursor-pointer";
 const textareaClass =
-  "w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-300 text-gray-800 bg-white resize-none";
-const labelClass = "text-sm font-bold text-gray-700";
-const sectionHeadingClass = "text-xs font-bold text-gray-400 uppercase tracking-widest mb-5 pt-2";
+  "w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg bg-surface-raised resize-none";
+const labelClass = "text-sm font-bold text-fg-muted";
+const sectionHeadingClass = "text-xs font-bold text-fg-faint uppercase tracking-widest mb-5 pt-2";
 
 function SectionDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-4 pt-4">
-      <div className="flex-1 h-px bg-gray-100" />
+      <div className="flex-1 h-px bg-surface-inset" />
       <span className={sectionHeadingClass + " pt-0 mb-0"}>{label}</span>
-      <div className="flex-1 h-px bg-gray-100" />
+      <div className="flex-1 h-px bg-surface-inset" />
     </div>
   );
 }
@@ -52,7 +52,7 @@ function ToggleChip({
       className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 cursor-pointer ${
         selected
           ? "bg-[var(--astar-red)] border-[var(--astar-red)] text-white shadow-sm shadow-red-500/20"
-          : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
+          : "bg-surface-raised border-line text-fg-muted hover:border-line-strong"
       }`}
     >
       {label}
@@ -203,11 +203,11 @@ export default function TutorApplicationForm() {
   if (status === "success") {
     return (
       <div className="w-full max-w-2xl mx-auto text-center py-20 px-4">
-        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle2 className="w-10 h-10 text-green-600" />
+        <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-3">Application Submitted!</h2>
-        <p className="text-gray-500 max-w-md mx-auto leading-relaxed">
+        <h2 className="text-3xl font-bold text-fg mb-3">Application Submitted!</h2>
+        <p className="text-fg-subtle max-w-md mx-auto leading-relaxed">
           Thanks for applying to join A-Star Tutorials. We&apos;ll review your application and be
           in touch shortly.
         </p>
@@ -218,13 +218,13 @@ export default function TutorApplicationForm() {
   return (
     <div className="w-full max-w-2xl mx-auto py-8 px-4">
       <div className="mb-8">
-        <span className="text-xs font-bold tracking-widest text-[var(--astar-red)] uppercase mb-3 block">
+        <span className="text-xs font-bold tracking-widest text-brand-ink uppercase mb-3 block">
           Join our team
         </span>
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-bold text-fg mb-3 tracking-tight">
           Tutor Application
         </h1>
-        <p className="text-gray-500 leading-relaxed">
+        <p className="text-fg-subtle leading-relaxed">
           Tell us about yourself and we&apos;ll be in touch if you&apos;re a great fit.
         </p>
       </div>
@@ -279,14 +279,14 @@ export default function TutorApplicationForm() {
             <select
               value={form.educationLevel}
               onChange={(e) => set("educationLevel", e.target.value)}
-              className={selectClass + (form.educationLevel ? " text-gray-800" : " text-gray-300")}
+              className={selectClass + (form.educationLevel ? " text-fg" : " text-fg-faint")}
             >
               <option value="" disabled>Select level</option>
               {EDUCATION_LEVELS.map((l) => (
                 <option key={l} value={l}>{l}</option>
               ))}
             </select>
-            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▼</span>
+            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-fg-faint text-xs">▼</span>
           </div>
           {errors.educationLevel && <p className="text-xs text-red-500 font-medium">{errors.educationLevel}</p>}
         </div>
@@ -323,8 +323,8 @@ export default function TutorApplicationForm() {
           <div className="flex items-center gap-2">
             <label className={labelClass}>Courses you can teach</label>
             <div className="group relative flex items-center">
-              <Info size={14} className="text-gray-400 cursor-pointer" />
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center leading-relaxed">
+              <Info size={14} className="text-fg-faint cursor-pointer" />
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 bg-fg text-surface text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center leading-relaxed">
                 You must have had an A in the courses you want to teach
                 <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
               </div>
@@ -362,14 +362,14 @@ export default function TutorApplicationForm() {
               <select
                 value={form.yearsOfExperience}
                 onChange={(e) => set("yearsOfExperience", e.target.value)}
-                className={selectClass + (form.yearsOfExperience ? " text-gray-800" : " text-gray-300")}
+                className={selectClass + (form.yearsOfExperience ? " text-fg" : " text-fg-faint")}
               >
                 <option value="" disabled>Select range</option>
                 {YEARS_OPTIONS.map((y) => (
                   <option key={y} value={y}>{y}</option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▼</span>
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-fg-faint text-xs">▼</span>
             </div>
             {errors.yearsOfExperience && <p className="text-xs text-red-500 font-medium">{errors.yearsOfExperience}</p>}
           </div>
@@ -379,14 +379,14 @@ export default function TutorApplicationForm() {
               <select
                 value={form.teachingMode}
                 onChange={(e) => set("teachingMode", e.target.value)}
-                className={selectClass + (form.teachingMode ? " text-gray-800" : " text-gray-300")}
+                className={selectClass + (form.teachingMode ? " text-fg" : " text-fg-faint")}
               >
                 <option value="" disabled>Select mode</option>
                 {TEACHING_MODES.map((m) => (
                   <option key={m} value={m}>{m}</option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▼</span>
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-fg-faint text-xs">▼</span>
             </div>
             {errors.teachingMode && <p className="text-xs text-red-500 font-medium">{errors.teachingMode}</p>}
           </div>
@@ -492,7 +492,7 @@ export default function TutorApplicationForm() {
 
         <div className="space-y-2">
           <label className={labelClass}>
-            CV / Resume link <span className="text-gray-400 font-normal">(Google Drive, Dropbox, etc.)</span>
+            CV / Resume link <span className="text-fg-faint font-normal">(Google Drive, Dropbox, etc.)</span>
           </label>
           <input
             type="url"
@@ -507,7 +507,7 @@ export default function TutorApplicationForm() {
         <div className="space-y-2">
           <label className={labelClass}>
             LinkedIn or Portfolio link{" "}
-            <span className="text-gray-400 font-normal">(optional)</span>
+            <span className="text-fg-faint font-normal">(optional)</span>
           </label>
           <input
             type="url"
@@ -522,9 +522,9 @@ export default function TutorApplicationForm() {
         </div>
 
         {status === "error" && (
-          <div className="flex items-start gap-3 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+          <div className="flex items-start gap-3 bg-brand-soft border border-brand-soft-border rounded-xl px-4 py-3">
             <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-            <p className="text-sm text-red-700 font-medium">{apiError}</p>
+            <p className="text-sm text-red-700 dark:text-red-300 font-medium">{apiError}</p>
           </div>
         )}
 

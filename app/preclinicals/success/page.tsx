@@ -55,8 +55,8 @@ function SuccessContent() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-[var(--astar-bg)]">
         <div className="text-center">
-          <p className="text-gray-500 mb-2">We couldn&apos;t find your registration.</p>
-          <a href="/preclinicals" className="text-[var(--astar-red)] font-semibold underline text-sm">
+          <p className="text-fg-subtle mb-2">We couldn&apos;t find your registration.</p>
+          <a href="/preclinicals" className="text-brand-ink font-semibold underline text-sm">
             Back to Pre-Clinicals
           </a>
         </div>
@@ -67,7 +67,7 @@ function SuccessContent() {
   if (!booking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--astar-bg)]">
-        <Loader2 className="animate-spin text-[var(--astar-red)]" size={28} />
+        <Loader2 className="animate-spin text-brand-ink" size={28} />
       </div>
     );
   }
@@ -76,7 +76,7 @@ function SuccessContent() {
 
   return (
     <div className="min-h-screen bg-[var(--astar-bg)] flex items-center justify-center px-4 py-16">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
+      <div className="bg-surface-raised rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
         <div className="bg-[var(--astar-red)] px-8 py-6">
           <div className="flex items-center gap-3 mb-2">
             <CheckCircle2 className="text-white" size={22} />
@@ -93,20 +93,20 @@ function SuccessContent() {
         </div>
 
         <div className="px-8 py-7 space-y-5">
-          <p className="text-gray-600 text-sm leading-relaxed">
+          <p className="text-fg-muted text-sm leading-relaxed">
             One last step — tap below to message us on WhatsApp so we can add you to the class
             community and share your schedule, quizzes and resources. A receipt has also been sent to{" "}
-            <span className="font-semibold text-gray-800">{booking.email}</span>.
+            <span className="font-semibold text-fg">{booking.email}</span>.
           </p>
 
           <a
             href={whatsappUrl}
-            className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-red-700 transition-all shadow-lg"
+            className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-brand-hover transition-all shadow-lg"
           >
             Continue on WhatsApp <ArrowRight size={18} />
           </a>
 
-          <p className="text-center text-[11px] text-gray-400">
+          <p className="text-center text-[11px] text-fg-faint">
             Reference: <span className="font-mono">{ref}</span>
           </p>
         </div>

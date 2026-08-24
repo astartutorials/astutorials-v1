@@ -41,10 +41,10 @@ export default function FAQ() {
         }}
       />
       <div className="text-center mb-10">
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 mb-4">
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-fg mb-4">
           Frequently Asked Questions
         </h2>
-        <p className="text-gray-500">
+        <p className="text-fg-subtle">
           Common questions about our tutorials and enrollment process.
         </p>
       </div>
@@ -53,16 +53,16 @@ export default function FAQ() {
         {faqs.map((faq, index) => (
           <div 
             key={index} 
-            className="bg-white border border-gray-100 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md"
+            className="bg-surface-raised border border-line-subtle rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md"
           >
             <button 
               onClick={() => toggleFaq(index)}
               className="w-full flex items-center justify-between p-6 text-left"
             >
-              <span className="font-bold text-gray-900 text-lg">{faq.question}</span>
+              <span className="font-bold text-fg text-lg">{faq.question}</span>
               <div className={`
                 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300
-                ${activeFaqIndex === index ? 'bg-[var(--astar-red)] text-white rotate-180' : 'bg-gray-50 text-gray-400'}
+                ${activeFaqIndex === index ? 'bg-[var(--astar-red)] text-white rotate-180' : 'bg-surface-sunken text-fg-faint'}
               `}>
                 <ChevronDown size={18} />
               </div>
@@ -72,7 +72,7 @@ export default function FAQ() {
               overflow-hidden transition-all duration-500 ease-in-out
               ${activeFaqIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
             `}>
-              <p className="px-6 pb-6 text-gray-500 leading-relaxed">
+              <p className="px-6 pb-6 text-fg-subtle leading-relaxed">
                 {faq.answer}
               </p>
             </div>

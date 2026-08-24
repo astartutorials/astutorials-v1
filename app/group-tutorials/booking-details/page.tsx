@@ -7,7 +7,7 @@ import { ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 const LEVELS = ['100 Level', '200 Level', '300 Level', '400 Level', '500 Level', '600 Level', 'Postgraduate'];
 
 const inputClass =
-  'w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-gray-300 text-gray-800 text-base bg-white';
+  'w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg text-base bg-surface-raised';
 
 function BookingDetailsForm() {
   const searchParams = useSearchParams();
@@ -66,8 +66,8 @@ function BookingDetailsForm() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-[var(--astar-bg)]">
         <div className="text-center">
-          <p className="text-gray-500 mb-2">We couldn&apos;t find your booking.</p>
-          <a href="/tutorials" className="text-[var(--astar-red)] font-semibold underline text-sm">
+          <p className="text-fg-subtle mb-2">We couldn&apos;t find your booking.</p>
+          <a href="/tutorials" className="text-brand-ink font-semibold underline text-sm">
             Back to tutorials
           </a>
         </div>
@@ -78,14 +78,14 @@ function BookingDetailsForm() {
   if (!booking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--astar-bg)]">
-        <Loader2 className="animate-spin text-[var(--astar-red)]" size={28} />
+        <Loader2 className="animate-spin text-brand-ink" size={28} />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-[var(--astar-bg)] flex items-center justify-center px-4 py-16">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+      <div className="bg-surface-raised rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="bg-[var(--astar-red)] px-8 py-6">
           <div className="flex items-center gap-3 mb-2">
@@ -104,8 +104,8 @@ function BookingDetailsForm() {
           {/* Course of Study + Level */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                Course of Study <span className="text-[var(--astar-red)]">*</span>
+              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                Course of Study <span className="text-brand-ink">*</span>
               </label>
               <input
                 type="text"
@@ -117,8 +117,8 @@ function BookingDetailsForm() {
               {errors.courseOfStudy && <p className="mt-1 text-xs text-red-500">{errors.courseOfStudy}</p>}
             </div>
             <div>
-              <label className="text-sm font-semibold text-gray-700 block mb-1.5">
-                Level <span className="text-[var(--astar-red)]">*</span>
+              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                Level <span className="text-brand-ink">*</span>
               </label>
               <select
                 value={form.level}
@@ -137,7 +137,7 @@ function BookingDetailsForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-red-700 transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-brand-hover transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting ? (
               <><Loader2 size={18} className="animate-spin" /> Confirming…</>
@@ -146,7 +146,7 @@ function BookingDetailsForm() {
             )}
           </button>
 
-          <p className="text-center text-[11px] text-gray-400 pb-1">
+          <p className="text-center text-[11px] text-fg-faint pb-1">
             A confirmation email has already been sent to you.
           </p>
         </form>

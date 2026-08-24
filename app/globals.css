@@ -3,26 +3,185 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  --color-astar-red: #B53436;
-  --color-astar-navy: #0B1120;
-  --color-astar-bg: #FDFAF6;
-  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-}
-:root {
+/* ---------------------------------------------------------------------------
+   Semantic tokens.
+
+   Every colour the public site uses resolves through one of these. The dark
+   palette is a re-declaration of the same names under `.dark`, so retuning the
+   dark theme means editing hex values here — never touching a component.
+
+   The scale is deliberately small. `surface` is the page, `raised` is anything
+   sitting on top of it (cards, inputs, dropdowns), `sunken` is a well pressed
+   into it (table stripes, code blocks, hover states).
+--------------------------------------------------------------------------- */
+/* `.theme-light` re-declares the same light values further down the tree, which
+   pins a subtree to light regardless of the theme on <html>. The admin
+   dashboard is deliberately light-only and uses it. */
+:root,
+.theme-light {
+  color-scheme: light;
   --astar-red: #D93025;
   --astar-navy: #0B1120;
   --astar-bg: #FDFAF6;
+
+  /* Surfaces */
+  --surface: #FDFAF6;
+  --surface-raised: #FFFFFF;
+  --surface-sunken: #F9FAFB;
+  --surface-inset: #F3F4F6;
+
+  /* Foreground, strongest to faintest */
+  --fg: #0B1120;
+  --fg-strong: #030712;
+  --fg-muted: #4B5563;
+  --fg-subtle: #6B7280;
+  --fg-faint: #9CA3AF;
+
+  /* Lines */
+  --border: #E5E7EB;
+  --border-subtle: #F3F4F6;
+  --border-strong: #D1D5DB;
+
+  /* Brand splits in two, because one red cannot do both jobs in dark mode.
+     `--astar-red` is the FILL: it backs buttons and badges, so it must stay
+     dark enough for white text to sit on it. `--brand-ink` is the red used AS
+     text or an icon on the page surface, so it must lighten as the page
+     darkens. In light mode they coincide; in dark they diverge sharply. */
+  --astar-red-hover: #B91C1C;
+  --brand-ink: #D93025;
+  --brand-soft-bg: #FEF2F2;
+  --brand-soft-border: #FECACA;
+
+  /* The navy-blue icon accent that runs through schedule rows and info panels.
+     Same fill/ink split reasoning as the brand red. */
+  --accent-ink: #1E3A8A;
+
+  /* Fixed, theme-independent values for blocks that are dark in BOTH themes —
+     the footer, the navy CTA bands, the solid-red careers band. These are
+     declared once and never re-declared under `.dark`: text sitting on a
+     permanently dark surface must not follow the page theme, or it dims into
+     the block when the rest of the page goes dark. */
+  --on-dark-fg: #F1F5F9;
+  --on-dark-fg-muted: #C3CCDB;
+  --on-dark-fg-subtle: #94A3B8;
+  --brand-on-dark: #FF7A6E;
+
+  /* Chrome */
+  --nav-bg: rgba(253, 250, 246, 0.7);
+  --nav-bg-scrolled: rgba(253, 250, 246, 0.95);
+  --nav-border: rgba(254, 243, 199, 0.6);
+
+  /* Page atmosphere */
+  --glow-warm: rgba(185, 52, 54, 0.07);
+  --glow-cool: rgba(53, 94, 169, 0.06);
+  --noise-opacity: 0.03;
+  --shadow-color: rgba(11, 17, 32, 0.08);
+}
+
+.dark {
+  --astar-bg: #0B1120;
+
+  /* Surfaces climb toward the viewer as they lighten, the inverse of light
+     mode. Kept close together so elevation reads as a step, not a stripe. */
+  --surface: #0B1120;
+  --surface-raised: #141D31;
+  --surface-sunken: #070C17;
+  --surface-inset: #1B2540;
+
+  --fg: #E8ECF4;
+  --fg-strong: #FFFFFF;
+  --fg-muted: #A9B4C7;
+  --fg-subtle: #8492A9;
+  /* Lifted from the slate-500 the light theme uses. `text-gray-400` is the most
+     common class in the codebase, and at #64748B it lands at 3.96:1 on the page
+     — under AA. This clears 4.5:1 on both surface and raised while staying
+     visibly fainter than --fg-subtle. */
+  --fg-faint: #78859C;
+
+  /* Hairlines are lifted off the surface rather than tinted grey, which keeps
+     them from muddying as the surface beneath them changes. */
+  --border: rgba(255, 255, 255, 0.11);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  /* The fill deliberately does NOT change. Brightening it to separate it from
+     the navy page costs white-on-red contrast: #E03A2D drops the primary CTA
+     to 4.36:1, under AA for its 14px label, while the unchanged brand red
+     holds 4.77:1. A solid red button needs no help standing out on navy, so
+     the fill and its hover stay exactly as they are in light mode.
+     (`--brand-ink` below is the one that must move — see the note there.) */
+
+  /* The ink moves a lot. #D93025 as text on #0B1120 is roughly 3.3:1 and reads
+     muddy; this keeps the hue and buys the contrast back. */
+  --brand-ink: #FF7A6E;
+  --brand-soft-bg: rgba(242, 86, 74, 0.13);
+  --brand-soft-border: rgba(242, 86, 74, 0.30);
+
+  --accent-ink: #9DBAF7;
+
+  --nav-bg: rgba(11, 17, 32, 0.7);
+  --nav-bg-scrolled: rgba(11, 17, 32, 0.95);
+  --nav-border: rgba(255, 255, 255, 0.08);
+
+  --glow-warm: rgba(242, 86, 74, 0.10);
+  --glow-cool: rgba(80, 130, 220, 0.10);
+  --noise-opacity: 0.02;
+  --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+/* `inline` matters: it makes each utility compile to `var(--token)` rather than
+   baking in the value, so the utilities follow the cascade when `.dark` flips. */
+@theme inline {
+  --color-astar-red: var(--astar-red);
+  --color-astar-navy: var(--astar-navy);
+  --color-astar-bg: var(--surface);
+
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-inset: var(--surface-inset);
+
+  --color-fg: var(--fg);
+  --color-fg-strong: var(--fg-strong);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-fg-faint: var(--fg-faint);
+
+  --color-line: var(--border);
+  --color-line-subtle: var(--border-subtle);
+  --color-line-strong: var(--border-strong);
+
+  --color-brand: var(--astar-red);
+  --color-brand-hover: var(--astar-red-hover);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft-bg);
+  --color-brand-soft-border: var(--brand-soft-border);
+  --color-accent-ink: var(--accent-ink);
+  --color-on-dark: var(--on-dark-fg);
+  --color-on-dark-muted: var(--on-dark-fg-muted);
+  --color-on-dark-subtle: var(--on-dark-fg-subtle);
+  --color-brand-on-dark: var(--brand-on-dark);
+
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  color-scheme: light;
+  background-color: var(--surface);
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 html,
 body {
   font-family: var(--font-sans);
-  color: var(--astar-navy);
-  background-color: var(--astar-bg);
+  color: var(--fg);
+  background-color: var(--surface);
   background-image:
-    radial-gradient(ellipse 70% 45% at 60% -5%, rgba(185, 52, 54, 0.07) 0%, transparent 65%),
-    radial-gradient(ellipse 55% 40% at 10% 105%, rgba(53, 94, 169, 0.06) 0%, transparent 60%);
+    radial-gradient(ellipse 70% 45% at 60% -5%, var(--glow-warm) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 40% at 10% 105%, var(--glow-cool) 0%, transparent 60%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -34,19 +193,43 @@ body::after {
   pointer-events: none;
   z-index: 9999;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.03;
+  opacity: var(--noise-opacity);
+}
+
+/* Only the deliberate theme swap animates. Without the guard every hover and
+   focus transition on the page would inherit a 200ms colour fade. */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    fill 200ms ease,
+    stroke 200ms ease !important;
+  transition-delay: 0ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: none !important;
+  }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-[var(--astar-red)] text-white hover:bg-red-700 transition-all duration-300 cursor-pointer;
+    @apply bg-brand text-white hover:bg-brand-hover transition-all duration-300 cursor-pointer;
   }
-  
+
   .btn-secondary {
-    @apply bg-gray-100 text-gray-900 hover:bg-gray-200 transition-all duration-300 cursor-pointer;
+    @apply bg-surface-inset text-fg hover:bg-surface-sunken transition-all duration-300 cursor-pointer;
   }
 
   .nav-link {
-    @apply text-sm font-medium text-gray-600 hover:text-black transition-colors cursor-pointer;
+    @apply text-sm font-medium text-fg-muted hover:text-fg-strong transition-colors cursor-pointer;
   }
 }

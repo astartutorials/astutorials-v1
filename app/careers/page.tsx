@@ -36,7 +36,7 @@ export default function CareersPage() {
                 <CareersHero />
 
                 {loading ? (
-                    <div className="flex items-center justify-center py-20 gap-2 text-gray-400">
+                    <div className="flex items-center justify-center py-20 gap-2 text-fg-faint">
                         <Loader2 className="animate-spin" size={20} />
                         <span className="text-sm">Loading positions...</span>
                     </div>
@@ -53,8 +53,8 @@ export default function CareersPage() {
                                     animate={{ opacity: 1 }}
                                     className="text-center py-16 px-4"
                                 >
-                                    <p className="text-gray-500 mb-6">No open positions at the moment.</p>
-                                    <p className="text-gray-700 font-semibold mb-4">
+                                    <p className="text-fg-subtle mb-6">No open positions at the moment.</p>
+                                    <p className="text-fg-muted font-semibold mb-4">
                                         Interested in joining as a tutor?
                                     </p>
                                     <Link
