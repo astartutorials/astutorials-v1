@@ -8,6 +8,14 @@ export interface UserRoleContext {
   orgId: string | null;
 }
 
+/**
+ * Some actions are deliberately absent from every array below, which leaves them
+ * reachable only by super_admin's '*'. They cover first-party data that carries
+ * no org_id and therefore cannot be org-scoped, so granting them to a tenant
+ * role would leak across tenants rather than filter:
+ *
+ *   bucc:read — registrations for A-Star's own BUCC Advantage webinar
+ */
 const PERMISSIONS: Record<AppRole, string[]> = {
   super_admin: ['*'],
 

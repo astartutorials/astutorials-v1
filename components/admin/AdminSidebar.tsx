@@ -20,8 +20,10 @@ import {
   BarChart2,
   ExternalLink,
   ClipboardList,
+  Sparkles,
 } from "lucide-react";
 import type { AppRole } from "@/lib/rbac";
+import { ADMIN_ROUTES } from "@/lib/admin-routes";
 import { useAdminUser } from "@/lib/admin-context";
 
 interface AdminSidebarProps {
@@ -36,18 +38,29 @@ type NavItem = {
   roles: AppRole[];
 };
 
-const NAV_ITEMS: NavItem[] = [
-  { name: "Dashboard",         href: "/admin/dashboard",       icon: LayoutDashboard, roles: ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'] },
-  { name: "Organisations",     href: "/admin/orgs",            icon: Building2,       roles: ['super_admin'] },
-  { name: "Tutorials",         href: "/admin/tutorials",       icon: GraduationCap,   roles: ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'] },
-  { name: "Schedule Tutorial", href: "/admin/create-tutorial", icon: PlusCircle,      roles: ['super_admin', 'org_admin', 'tutor_manager'] },
-  { name: "Feedback",          href: "/admin/feedback",        icon: MessageSquare,   roles: ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'] },
-  { name: "Careers",           href: "/admin/careers",         icon: Briefcase,       roles: ['super_admin'] },
-  { name: "Applications",      href: "/admin/applications",    icon: Users,           roles: ['super_admin'] },
-  { name: "Payments",          href: "/admin/payments",        icon: CreditCard,      roles: ['super_admin', 'org_admin', 'tutor_manager', 'viewer'] },
-  { name: "Activity Log",      href: "/admin/audit-logs",      icon: ClipboardList,   roles: ['super_admin'] },
-  { name: "Settings",          href: "/admin/settings",        icon: Settings,        roles: ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'] },
+/**
+ * Label and icon only — who may see each entry comes from ADMIN_ROUTES, the
+ * same map the middleware gates on, so the sidebar can no longer offer a link
+ * that redirects (or hide one that is actually reachable).
+ */
+const NAV_META: { name: string; href: string; icon: typeof LayoutDashboard }[] = [
+  { name: "Dashboard",         href: "/admin/dashboard",       icon: LayoutDashboard },
+  { name: "Organisations",     href: "/admin/orgs",            icon: Building2       },
+  { name: "Tutorials",         href: "/admin/tutorials",       icon: GraduationCap   },
+  { name: "Schedule Tutorial", href: "/admin/create-tutorial", icon: PlusCircle      },
+  { name: "Feedback",          href: "/admin/feedback",        icon: MessageSquare   },
+  { name: "BUCC Advantage",    href: "/admin/bucc",            icon: Sparkles        },
+  { name: "Careers",           href: "/admin/careers",         icon: Briefcase       },
+  { name: "Applications",      href: "/admin/applications",    icon: Users           },
+  { name: "Payments",          href: "/admin/payments",        icon: CreditCard      },
+  { name: "Activity Log",      href: "/admin/audit-logs",      icon: ClipboardList   },
+  { name: "Settings",          href: "/admin/settings",        icon: Settings        },
 ];
+
+const NAV_ITEMS: NavItem[] = NAV_META.map((item) => ({
+  ...item,
+  roles: ADMIN_ROUTES.find((r) => r.href === item.href)?.roles ?? [],
+}));
 
 const ROLE_LABELS: Record<AppRole, string> = {
   super_admin: 'Super Admin',
