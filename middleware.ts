@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { getUserRole } from '@/lib/rbac';
+import { canAccessAdminPath, UNGATED_ADMIN_PATHS } from '@/lib/admin-routes';
 
 const VALID_ROLES = ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'];
-const SUPER_ADMIN_ONLY = ['/admin/settings'];
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -35,6 +35,7 @@ export async function middleware(request: NextRequest) {
   const isLoginPage = pathname === '/admin/login';
   const isInvitePage = pathname === '/admin/invite';
   const isPasswordResetPage = pathname === '/admin/forgot-password' || pathname === '/admin/reset-password';
+  const isUngated = UNGATED_ADMIN_PATHS.includes(pathname);
 
   if (!user && !isLoginPage && !isInvitePage && !isPasswordResetPage) {
     const loginUrl = request.nextUrl.clone();
@@ -62,8 +63,10 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    const isSuperAdminRoute = SUPER_ADMIN_ONLY.some(p => pathname.startsWith(p));
-    if (isSuperAdminRoute && ctx.role !== 'super_admin') {
+    // Default-deny: every dashboard page must name the roles that may open it in
+    // lib/admin-routes.ts. An unlisted path is refused rather than served, so a
+    // page added without a permission entry cannot ship publicly readable.
+    if (!isUngated && !canAccessAdminPath(ctx.role, pathname)) {
       const dashboardUrl = request.nextUrl.clone();
       dashboardUrl.pathname = '/admin/dashboard';
       return NextResponse.redirect(dashboardUrl);

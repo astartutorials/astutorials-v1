@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePreClinicalsOpen } from "@/components/shared/usePreClinicalsOpen";
+import { useBuccOpen } from "@/components/shared/useBuccOpen";
 import ThemeToggle from "@/components/shared/ThemeToggle";
 
 export default function Navbar() {
@@ -11,6 +12,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   // Retires itself when the cohort ends, without needing a redeploy.
   const preClinicalsOpen = usePreClinicalsOpen();
+  const buccOpen = useBuccOpen();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -102,6 +104,19 @@ export default function Navbar() {
               Pre-Clinicals
             </Link>
           )}
+
+          {buccOpen && (
+            <Link
+              href="/bucc"
+              className="flex items-center gap-2 whitespace-nowrap rounded-full border border-brand-soft-border bg-brand-soft px-3.5 py-1.5 text-sm font-semibold text-brand-ink hover:bg-brand-soft-border transition-colors"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-ink opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--astar-red)]" />
+              </span>
+              BUCC Advantage
+            </Link>
+          )}
         </div>
 
         {/* --- ACTIONS & MOBILE TOGGLE --- */}
@@ -148,6 +163,19 @@ export default function Navbar() {
               <span className="text-lg font-semibold text-brand-ink">Pre-Clinicals Classes</span>
               <span className="rounded-full bg-[var(--astar-red)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
                 Now running
+              </span>
+            </Link>
+          )}
+
+          {buccOpen && (
+            <Link
+              href="/bucc"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-between gap-3 p-4 rounded-xl border border-brand-soft-border bg-brand-soft active:bg-brand-soft transition-colors"
+            >
+              <span className="text-lg font-semibold text-brand-ink">The BUCC Advantage</span>
+              <span className="rounded-full bg-[var(--astar-red)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                Free
               </span>
             </Link>
           )}
