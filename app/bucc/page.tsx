@@ -11,7 +11,22 @@ export const metadata: Metadata = {
     description:
       "100 level got you into BUCC. 200 level is where you build your academic reputation. Free 90-minute webinar — Friday, 28th August 2026, 7:00 pm.",
     url: "https://astartutorials.com/bucc",
-    images: [{ url: "/logo.png", width: 840, height: 840, alt: "The BUCC Advantage" }],
+    type: "website",
+    images: [
+      {
+        url: "/bucc/og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "The BUCC Advantage — Your Blueprint for Thriving in 200 Level. 28th August 2026 on Google Meet.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The BUCC Advantage | A-Star Tutorials",
+    description:
+      "100 level got you into BUCC. 200 level is where you build your academic reputation. Free 90-minute webinar — Friday, 28th August 2026, 7:00 pm.",
+    images: ["/bucc/og.jpg"],
   },
 };
 

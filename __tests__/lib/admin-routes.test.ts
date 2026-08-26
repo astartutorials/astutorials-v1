@@ -57,6 +57,14 @@ describe('canAccessAdminPath', () => {
     }
   });
 
+  // The settings page filters its own admin-only tabs, so every role needs the
+  // page itself to manage their account — notably to change their password.
+  it('lets every role reach settings', () => {
+    for (const role of ALL_ROLES) {
+      expect(canAccessAdminPath(role, '/admin/settings')).toBe(true);
+    }
+  });
+
   it('keeps scheduling restricted to the roles that may create tutorials', () => {
     expect(canAccessAdminPath('tutor_manager', '/admin/create-tutorial')).toBe(true);
     expect(canAccessAdminPath('tutor', '/admin/create-tutorial')).toBe(false);

@@ -39,11 +39,12 @@ export const ADMIN_ROUTES: AdminRoute[] = [
   { href: '/admin/careers',         roles: ['super_admin'] },
   { href: '/admin/applications',    roles: ['super_admin'] },
   { href: '/admin/audit-logs',      roles: ['super_admin'] },
-  // NOTE: PERMISSIONS in rbac.ts grants settings:read to every role, but the
-  // middleware has always confined /admin/settings to super_admin. Kept as-is
-  // rather than silently widening access — see the sidebar, which now reflects
-  // what is actually enforced instead of showing a link that redirects.
-  { href: '/admin/settings',        roles: ['super_admin'] },
+  // Open to everyone, matching settings:read in PERMISSIONS. The page gates
+  // itself: ALL_TABS marks Tutorials/Notifications/Payments/Security
+  // superAdminOnly and filters them out, leaving other roles on Profile to
+  // manage their own account. The old super_admin-only rule here meant a tutor
+  // could not reach the page to change their own password.
+  { href: '/admin/settings',        roles: ALL_ROLES },
 ];
 
 /**
