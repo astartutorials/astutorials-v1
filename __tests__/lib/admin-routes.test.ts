@@ -36,7 +36,7 @@ describe('canAccessAdminPath', () => {
 
   // The regression this map exists to prevent: these pages were hidden from the
   // sidebar but reachable by typing the URL.
-  it.each(['/admin/bucc', '/admin/careers', '/admin/applications', '/admin/audit-logs', '/admin/orgs'])(
+  it.each(['/admin/careers', '/admin/applications', '/admin/audit-logs', '/admin/orgs'])(
     'refuses %s to every non-super_admin',
     (path) => {
       expect(canAccessAdminPath('super_admin', path)).toBe(true);
@@ -45,6 +45,16 @@ describe('canAccessAdminPath', () => {
       }
     }
   );
+
+  // BUCC Advantage is the one page on that list org_admin is let into; it stays
+  // shut to every role below.
+  it('opens /admin/bucc to super_admin and org_admin only', () => {
+    expect(canAccessAdminPath('super_admin', '/admin/bucc')).toBe(true);
+    expect(canAccessAdminPath('org_admin', '/admin/bucc')).toBe(true);
+    for (const role of ['tutor_manager', 'tutor', 'viewer'] as const) {
+      expect(canAccessAdminPath(role, '/admin/bucc')).toBe(false);
+    }
+  });
 
   it('carries the rule down to nested pages', () => {
     expect(canAccessAdminPath('org_admin', '/admin/orgs/org-1/members')).toBe(false);
