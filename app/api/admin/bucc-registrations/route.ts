@@ -19,10 +19,9 @@ export async function GET() {
   }
 
   const ctx = await getUserRole(authClient, user.id, user.user_metadata as Record<string, unknown>);
-  // bucc:read is deliberately granted to no role but super_admin (which holds
-  // '*'). bucc_registrations has no org_id, so there is nothing to scope an
-  // org_admin's read to — granting it would hand every tenant's admins the full
-  // contact list for an A-Star event. Same posture as Careers and Applications.
+  // bucc:read is held by super_admin and org_admin. bucc_registrations has no
+  // org_id, so there is nothing to scope the read to: every org_admin sees the
+  // same list for this A-Star event, which is why no org filter follows.
   if (!ctx || !can(ctx.role, "bucc:read")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

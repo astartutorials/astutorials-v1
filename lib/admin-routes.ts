@@ -35,7 +35,7 @@ export const ADMIN_ROUTES: AdminRoute[] = [
   { href: '/admin/create-tutorial', roles: ['super_admin', 'org_admin', 'tutor_manager'] },
   { href: '/admin/payments',        roles: ['super_admin', 'org_admin', 'tutor_manager', 'viewer'] },
   { href: '/admin/orgs',            roles: ['super_admin'] },
-  { href: '/admin/bucc',            roles: ['super_admin'] },
+  { href: '/admin/bucc',            roles: ['super_admin', 'org_admin'] },
   { href: '/admin/careers',         roles: ['super_admin'] },
   { href: '/admin/applications',    roles: ['super_admin'] },
   { href: '/admin/audit-logs',      roles: ['super_admin'] },
