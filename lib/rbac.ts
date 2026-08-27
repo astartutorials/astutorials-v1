@@ -14,7 +14,7 @@ export interface UserRoleContext {
  * no org_id and therefore cannot be org-scoped, so granting them to a tenant
  * role would leak across tenants rather than filter:
  *
- *   bucc:read — registrations for A-Star's own BUCC Advantage webinar
+ *   applications:read — career applications sent to A-Star itself
  */
 const PERMISSIONS: Record<AppRole, string[]> = {
   super_admin: ['*'],
@@ -27,6 +27,10 @@ const PERMISSIONS: Record<AppRole, string[]> = {
     'feedback:read',
     'invites:create',
     'careers:read', 'careers:create', 'careers:update', 'careers:delete',
+    // BUCC Advantage is A-Star's own event and its registrations carry no
+    // org_id, so this is a shared read rather than an org-scoped one: every
+    // org_admin sees the same list.
+    'bucc:read',
     'settings:read', 'settings:update',
   ],
 

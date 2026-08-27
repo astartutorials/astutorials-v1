@@ -76,10 +76,17 @@ describe('GET /api/admin/bucc-registrations', () => {
     expect(await res.json()).toEqual([ROW]);
   });
 
-  // The table carries no org_id, so an org-scoped role has nothing to filter on.
-  // Anything short of super_admin must be refused outright rather than served
-  // another tenant's view of A-Star's own registrant list.
-  it.each(['org_admin', 'tutor_manager', 'tutor', 'viewer'])(
+  // The table carries no org_id, so there is no org filter to apply: an
+  // org_admin reads the same list a super_admin does.
+  it('returns 200 for an org_admin, unfiltered', async () => {
+    mockAuth(USER, [{ role: 'org_admin', org_id: 'org-1' }]);
+    mockRows({ data: [ROW], error: null });
+    const res = await GET();
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual([ROW]);
+  });
+
+  it.each(['tutor_manager', 'tutor', 'viewer'])(
     'returns 403 for %s',
     async (role) => {
       mockAuth(USER, [{ role, org_id: 'org-1' }]);
@@ -92,8 +99,8 @@ describe('GET /api/admin/bucc-registrations', () => {
     expect((await GET()).status).toBe(403);
   });
 
-  it('never queries the registrations table for a non-super_admin', async () => {
-    mockAuth(USER, [{ role: 'org_admin', org_id: 'org-1' }]);
+  it('never queries the registrations table for an unpermitted role', async () => {
+    mockAuth(USER, [{ role: 'tutor_manager', org_id: 'org-1' }]);
     await GET();
     expect(mockFrom).not.toHaveBeenCalled();
   });
@@ -119,10 +126,12 @@ describe('GET /api/admin/bucc-registrations', () => {
 });
 
 describe('bucc:read permission', () => {
-  it('is held by super_admin only', () => {
+  it('is held by super_admin and org_admin only', () => {
     const { can } = jest.requireActual('@/lib/rbac');
-    expect(can('super_admin', 'bucc:read')).toBe(true);
-    for (const role of ['org_admin', 'tutor_manager', 'tutor', 'viewer']) {
+    for (const role of ['super_admin', 'org_admin']) {
+      expect(can(role, 'bucc:read')).toBe(true);
+    }
+    for (const role of ['tutor_manager', 'tutor', 'viewer']) {
       expect(can(role, 'bucc:read')).toBe(false);
     }
   });
