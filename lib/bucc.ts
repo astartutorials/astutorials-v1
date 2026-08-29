@@ -13,7 +13,7 @@
 export const BUCC_EVENT_NAME = "The BUCC Advantage";
 export const BUCC_TAGLINE = "Your Blueprint for Thriving in 200 Level";
 
-export const BUCC_DATE_LABEL = "Friday, 28th August 2026";
+export const BUCC_DATE_LABEL = "Sunday, 30th August 2026";
 export const BUCC_TIME_LABEL = "7:00 pm WAT";
 export const BUCC_DURATION_LABEL = "90 minutes";
 export const BUCC_PLATFORM = "Google Meet";
@@ -28,7 +28,7 @@ export const BUCC_MEETING_URL =
   process.env.NEXT_PUBLIC_BUCC_MEETING_URL ?? "https://meet.google.com/qft-fsxv-pkf";
 
 /** Registration closes when the webinar starts (19:00 WAT = 18:00 UTC). */
-const CLOSES_AT = new Date("2026-08-28T18:00:00Z");
+const CLOSES_AT = new Date("2026-08-30T18:00:00Z");
 
 export const BUCC_LEVELS = [
   "200 Level",
