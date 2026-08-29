@@ -8,6 +8,7 @@ type Registration = {
   full_name: string;
   email: string;
   phone: string;
+  parent_phone: string | null;
   level: string | null;
   programme: string | null;
   concern: string | null;
@@ -49,12 +50,12 @@ function csvCell(value: string | null) {
 
 function downloadCsv(rows: Registration[]) {
   const headers = [
-    "Full Name", "Email", "WhatsApp", "Level", "Programme",
+    "Full Name", "Email", "WhatsApp", "Parent/Guardian Phone", "Level", "Programme",
     "Biggest Concern", "Question for a Senior", "Heard Via", "Registered At",
   ];
   const body = rows.map((r) =>
     [
-      r.full_name, r.email, r.phone, r.level, r.programme,
+      r.full_name, r.email, r.phone, r.parent_phone, r.level, r.programme,
       r.concern, r.question, r.heard_via, r.created_at,
     ].map(csvCell).join(",")
   );
@@ -105,7 +106,7 @@ export default function AdminBuccPage() {
     const q = query.trim().toLowerCase();
     if (!q) return source;
     return source.filter((r) =>
-      [r.full_name, r.email, r.programme, r.level, r.concern, r.question]
+      [r.full_name, r.email, r.phone, r.parent_phone, r.programme, r.level, r.concern, r.question]
         .some((f) => (f ?? "").toLowerCase().includes(q))
     );
   }, [source, query]);
@@ -180,7 +181,7 @@ export default function AdminBuccPage() {
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
         <input
           type="text"
-          placeholder="Search name, email, programme or answer..."
+          placeholder="Search name, email, phone, programme or answer..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm"
@@ -256,6 +257,14 @@ export default function AdminBuccPage() {
                 >
                   {r.phone}
                 </a>
+                {r.parent_phone && (
+                  <a
+                    href={`tel:${r.parent_phone.replace(/[^\d+]/g, "")}`}
+                    className="hover:text-[#D93025] transition-colors"
+                  >
+                    <span className="text-gray-400">Parent:</span> {r.parent_phone}
+                  </a>
+                )}
                 {r.heard_via && <span className="text-gray-400">via {r.heard_via}</span>}
               </div>
             </div>
