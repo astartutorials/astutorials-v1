@@ -116,7 +116,7 @@ export default function AdminBuccPage() {
         <div>
           <h1 className="text-2xl font-bold text-[#0B1120]">The BUCC Advantage</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Webinar registrations — Friday, 28th August 2026, 7:00 pm.
+            Webinar registrations — Sunday, 30th August 2026, 7:00 pm.
           </p>
         </div>
         <button
