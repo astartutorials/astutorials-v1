@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
     full_name: fullName,
     email: email.toLowerCase(),
     phone,
+    parent_phone: clean(body.parentPhone, 40),
     level: clean(body.level, 60),
     programme: clean(body.programme, 120),
     concern: clean(body.concern, 1000),
@@ -88,6 +89,7 @@ export async function POST(req: NextRequest) {
         heard_via: row.heard_via,
         has_concern: !!row.concern,
         has_question: !!row.question,
+        has_parent_phone: !!row.parent_phone,
       },
     });
     await posthog.shutdown();

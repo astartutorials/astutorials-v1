@@ -23,6 +23,7 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
     fullName: "",
     email: "",
     phone: "",
+    parentPhone: "",
     level: "200 Level",
     programme: "",
     concern: "",
@@ -78,6 +79,7 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
         programme: form.programme,
         heard_via: form.heardVia || null,
         has_question: !!form.question.trim(),
+        has_parent_phone: !!form.parentPhone.trim(),
       });
 
       window.location.href = `/bucc/success?name=${encodeURIComponent(form.fullName)}`;
@@ -167,6 +169,22 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
                 />
                 {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
               </div>
+            </div>
+
+            {/* Parent or guardian. Optional — a student who doesn't want to give
+                it must still be able to finish the form. */}
+            <div>
+              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                Parent&apos;s / Guardian&apos;s Phone Number{" "}
+                <span className="text-fg-faint font-normal">(optional)</span>
+              </label>
+              <input
+                type="tel"
+                placeholder="Either parent works — e.g. 08012345678"
+                value={form.parentPhone}
+                onChange={(e) => set("parentPhone", e.target.value)}
+                className={inputClass}
+              />
             </div>
 
             {/* Level + Programme */}
