@@ -116,9 +116,25 @@ describe('POST /api/bucc-registrations', () => {
 
   it('stores null for optional fields left empty', async () => {
     const upsert = mockUpsert();
-    await POST(makeRequest({ ...VALID, concern: '   ', question: '', heardVia: undefined }));
+    await POST(
+      makeRequest({ ...VALID, concern: '   ', question: '', heardVia: undefined, parentPhone: '  ' })
+    );
     expect(upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ concern: null, question: null, heard_via: null }),
+      expect.objectContaining({
+        concern: null,
+        question: null,
+        heard_via: null,
+        parent_phone: null,
+      }),
+      { onConflict: 'email' }
+    );
+  });
+
+  it('saves the optional parent phone number when one is given', async () => {
+    const upsert = mockUpsert();
+    await POST(makeRequest({ ...VALID, parentPhone: '  08099998888 ' }));
+    expect(upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ parent_phone: '08099998888' }),
       { onConflict: 'email' }
     );
   });
