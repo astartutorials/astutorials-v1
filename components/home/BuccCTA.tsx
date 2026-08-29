@@ -75,7 +75,7 @@ export default function BuccCTA() {
             <Link href="/bucc" className="block group">
               <Image
                 src="/bucc/flyer.jpg"
-                alt="The BUCC Advantage — Your Blueprint for Thriving in 200 Level, 28th August 2026 on Google Meet"
+                alt="A-Star Tutorials × BUCC — The BUCC Advantage: Your Blueprint for Thriving in 200 Level, 30th August 2026, 7pm on Google Meet"
                 width={1080}
                 height={1255}
                 sizes="(min-width: 1024px) 420px, 100vw"
