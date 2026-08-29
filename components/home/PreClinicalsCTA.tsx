@@ -1,6 +1,7 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, CalendarDays, Trophy, Users } from "lucide-react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import { usePreClinicalsOpen } from "@/components/shared/usePreClinicalsOpen";
@@ -76,6 +77,17 @@ export default function PreClinicalsCTA() {
           </div>
 
           <div className="lg:col-span-5 lg:pl-8 lg:border-l lg:border-white/10">
+            <Link href="/preclinicals" className="block group">
+              <Image
+                src="/preclinicals/flyer.jpg"
+                alt="A-Star Tutorials — Pre-Clinicals Introductory Online Classes, 3rd–30th August 2026: Gross Anatomy, Histology, Embryology, Physiology and Biochemistry, tutored by distinction students. Registration ₦60,000."
+                width={1080}
+                height={1255}
+                sizes="(min-width: 1024px) 360px, 100vw"
+                className="w-full max-w-xs mx-auto mb-8 rounded-2xl shadow-lg group-hover:-translate-y-0.5 transition-transform duration-300"
+              />
+            </Link>
+
             <div className="flex items-baseline gap-3">
               <span className="text-on-dark-subtle line-through text-lg">
                 ₦{PRECLINICALS_OLD_PRICE.toLocaleString()}
