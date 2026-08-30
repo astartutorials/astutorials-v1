@@ -4,8 +4,9 @@ import { MapPin, Phone, Mail } from "lucide-react";
 
 const quickLinks = [
   { label: "Home", href: "/" },
+  { label: "BUCC 200L Prep Classes", href: "/bucc" },
   { label: "Pre-Clinicals Classes", href: "/preclinicals" },
-  { label: "The BUCC Advantage", href: "/bucc" },
+  { label: "The BUCC Advantage", href: "/bucc/advantage" },
   { label: "Tutorials", href: "/tutorials" },
   { label: "About", href: "/#about" },
   { label: "Careers", href: "/careers" },

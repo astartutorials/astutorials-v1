@@ -2,9 +2,12 @@
  * Single source of truth for The BUCC Advantage — the free 90-minute webinar
  * for BUCC (Babcock University Computer Club) 200-level students.
  *
- * The landing page, the registration modal, the confirmation email and the
- * site-wide promo links all read from here, so a date or link change lands
- * everywhere at once.
+ * The landing page (/bucc/advantage), the registration modal, the confirmation
+ * email and the site-wide promo links all read from here, so a date or link
+ * change lands everywhere at once.
+ *
+ * Distinct from lib/bucc-classes.ts, which drives the paid BUCC 200L
+ * Preparatory Classes cohort now living at /bucc.
  *
  * To run another edition: update the date, time and meeting link below. To pull
  * the promo down early: set BUCC_CLOSES_AT to a past date, or drop the entries
