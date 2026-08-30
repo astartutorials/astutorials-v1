@@ -9,9 +9,9 @@
  * Distinct from lib/bucc-classes.ts, which drives the paid BUCC 200L
  * Preparatory Classes cohort now living at /bucc.
  *
- * To run another edition: update the date, time and meeting link below. To pull
- * the promo down early: set BUCC_CLOSES_AT to a past date, or drop the entries
- * from Navbar/Footer.
+ * To run another edition: update the date, time and meeting link below. Once
+ * BUCC_CLOSES_AT passes the homepage band retires itself, but the programme
+ * stays listed under Programmes as past work — see components/shared/programmes.ts.
  */
 export const BUCC_EVENT_NAME = "The BUCC Advantage";
 export const BUCC_TAGLINE = "Your Blueprint for Thriving in 200 Level";
@@ -31,7 +31,7 @@ export const BUCC_MEETING_URL =
   process.env.NEXT_PUBLIC_BUCC_MEETING_URL ?? "https://meet.google.com/qft-fsxv-pkf";
 
 /** Registration closes when the webinar starts (19:00 WAT = 18:00 UTC). */
-const CLOSES_AT = new Date("2026-08-30T18:00:00Z");
+export const BUCC_CLOSES_AT = new Date("2026-08-30T18:00:00Z");
 
 export const BUCC_LEVELS = [
   "200 Level",
@@ -67,5 +67,5 @@ export const BUCC_HEARD_OPTIONS = [
  * would be frozen into the HTML until the next deploy.
  */
 export function isBuccOpen(now: Date = new Date()): boolean {
-  return now <= CLOSES_AT;
+  return now <= BUCC_CLOSES_AT;
 }

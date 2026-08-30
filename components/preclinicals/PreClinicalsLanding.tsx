@@ -34,6 +34,12 @@ import {
 } from "lucide-react";
 import posthog from "posthog-js";
 import RegisterModal from "./RegisterModal";
+import { PRECLINICALS_DATE_RANGE } from "@/lib/preclinicals";
+import { usePreClinicalsOpen } from "@/components/shared/usePreClinicalsOpen";
+import {
+  ProgrammeEndedBanner,
+  ProgrammeEndedCta,
+} from "@/components/shared/ProgrammeEnded";
 
 const PRICE = 60000;
 const OLD_PRICE = 100000;
@@ -248,6 +254,9 @@ function SectionHead({
 
 export default function PreClinicalsLanding() {
   const [open, setOpen] = useState(false);
+  // The cohort stays linked from Programmes after it finishes, so the page has
+  // to stop selling a spot once it has ended.
+  const registrationOpen = usePreClinicalsOpen();
 
   const openModal = (source: string) => {
     posthog.capture("preclinicals_register_clicked", { source });
@@ -258,8 +267,20 @@ export default function PreClinicalsLanding() {
     <div className="min-h-screen bg-[var(--astar-bg)] font-sans selection:bg-[var(--astar-red)] selection:text-white">
       {open && <RegisterModal onClose={() => setOpen(false)} />}
 
+      {!registrationOpen && (
+        <ProgrammeEndedBanner
+          name="Pre-Clinicals Introductory Classes"
+          ranLabel={PRECLINICALS_DATE_RANGE}
+          href="/preclinicals"
+        />
+      )}
+
       {/* ── HERO ───────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-28 md:pt-36 pb-16 md:pb-20">
+      <section
+        className={`relative overflow-hidden pb-16 md:pb-20 ${
+          registrationOpen ? 'pt-28 md:pt-36' : 'pt-10 md:pt-14'
+        }`}
+      >
         {/* graph-paper grid, like the flyer */}
         <div
           aria-hidden
@@ -303,8 +324,16 @@ export default function PreClinicalsLanding() {
                 </span>
                 <span className="text-fg-subtle text-lg">only</span>
               </div>
-              <RegisterButton onClick={() => openModal("hero")} />
-              <p className="text-xs text-fg-faint">Limited slots · Secure payment via Paystack</p>
+              {registrationOpen ? (
+                <>
+                  <RegisterButton onClick={() => openModal("hero")} />
+                  <p className="text-xs text-fg-faint">
+                    Limited slots · Secure payment via Paystack
+                  </p>
+                </>
+              ) : (
+                <ProgrammeEndedCta href="/preclinicals" />
+              )}
             </div>
           </motion.div>
         </div>
@@ -760,7 +789,7 @@ export default function PreClinicalsLanding() {
               </div>
             </div>
             <h2 className="mt-6 text-3xl md:text-4xl font-bold text-fg">
-              Ready to begin?
+              {registrationOpen ? "Ready to begin?" : "This cohort has finished"}
             </h2>
             <p className="mt-4 text-fg-muted md:text-lg max-w-2xl mx-auto leading-relaxed">
               The best medical students don’t wait until resumption to prepare — they begin before
@@ -769,7 +798,11 @@ export default function PreClinicalsLanding() {
             </p>
 
             <div className="mt-8">
-              <RegisterButton onClick={() => openModal("footer")} label="Register Today" />
+              {registrationOpen ? (
+                <RegisterButton onClick={() => openModal("footer")} label="Register Today" />
+              ) : (
+                <ProgrammeEndedCta href="/preclinicals" />
+              )}
             </div>
 
             {/* summary chips */}

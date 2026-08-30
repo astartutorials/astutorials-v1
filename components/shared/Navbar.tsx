@@ -4,9 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
-import { usePreClinicalsOpen } from "@/components/shared/usePreClinicalsOpen";
-import { useBuccOpen } from "@/components/shared/useBuccOpen";
-import { useBuccClassesOpen } from "@/components/shared/useBuccClassesOpen";
+import { usePrograms } from "@/components/shared/programmes";
 import ThemeToggle from "@/components/shared/ThemeToggle";
 
 export default function Navbar() {
@@ -14,32 +12,10 @@ export default function Navbar() {
   const [programmesOpen, setProgrammesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const programmesRef = useRef<HTMLDivElement>(null);
-  // Each retires itself when its window ends, without needing a redeploy.
-  const preClinicalsOpen = usePreClinicalsOpen();
-  const buccOpen = useBuccOpen();
-  const buccClassesOpen = useBuccClassesOpen();
-
-  // Ordered newest-first — the current push leads the menu.
-  const programmes = [
-    buccClassesOpen && {
-      name: "BUCC 200L Prep Classes",
-      href: "/bucc",
-      blurb: "Four weeks before resumption · ₦60,000",
-      tag: "New",
-    },
-    preClinicalsOpen && {
-      name: "Pre-Clinicals Classes",
-      href: "/preclinicals",
-      blurb: "Anatomy, Physiology, Biochemistry & more",
-      tag: "Now running",
-    },
-    buccOpen && {
-      name: "The BUCC Advantage",
-      href: "/bucc/advantage",
-      blurb: "Free 90-minute webinar for 200 level",
-      tag: "Free",
-    },
-  ].filter(Boolean) as { name: string; href: string; blurb: string; tag: string }[];
+  // Open programmes and past ones both, evaluated against the visitor's clock.
+  const programmes = usePrograms();
+  const currentProgrammes = programmes.filter((p) => p.open);
+  const pastProgrammes = programmes.filter((p) => !p.open);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -136,8 +112,8 @@ export default function Navbar() {
           ))}
 
           {/* Time-boxed cohorts and events, grouped so the nav row stays a fixed
-              width however many are running. The whole section disappears once
-              they have all closed. */}
+              width however many are running. Past programmes stay listed below
+              the current ones — the menu doubles as a track record. */}
           {programmes.length > 0 && (
             <div
               ref={programmesRef}
@@ -172,9 +148,9 @@ export default function Navbar() {
                 }`}
               >
                 <div className="rounded-2xl border border-[var(--nav-border)] bg-[var(--nav-bg-scrolled)] backdrop-blur-xl shadow-xl p-2">
-                  {programmes.map((p) => (
+                  {currentProgrammes.map((p) => (
                     <Link
-                      key={p.href}
+                      key={p.key}
                       href={p.href}
                       onClick={() => setProgrammesOpen(false)}
                       className="block rounded-xl px-3.5 py-3 hover:bg-brand-soft transition-colors group/item"
@@ -190,6 +166,34 @@ export default function Navbar() {
                       <span className="mt-0.5 block text-xs text-fg-subtle">{p.blurb}</span>
                     </Link>
                   ))}
+
+                  {/* Muted, and below a rule — a finished cohort is a credential,
+                      not something to click through and try to register for. */}
+                  {pastProgrammes.length > 0 && (
+                    <div className={currentProgrammes.length > 0 ? 'mt-2 pt-2 border-t border-[var(--nav-border)]' : ''}>
+                      <p className="px-3.5 pb-1 pt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-fg-faint">
+                        Past programmes
+                      </p>
+                      {pastProgrammes.map((p) => (
+                        <Link
+                          key={p.key}
+                          href={p.href}
+                          onClick={() => setProgrammesOpen(false)}
+                          className="block rounded-xl px-3.5 py-2.5 hover:bg-surface-sunken transition-colors group/item"
+                        >
+                          <span className="flex items-center justify-between gap-3">
+                            <span className="text-sm font-medium text-fg-muted group-hover/item:text-fg transition-colors">
+                              {p.name}
+                            </span>
+                            <span className="shrink-0 rounded-full border border-line bg-surface-sunken px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-fg-faint">
+                              Past
+                            </span>
+                          </span>
+                          <span className="mt-0.5 block text-xs text-fg-faint">{p.pastBlurb}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -239,9 +243,9 @@ export default function Navbar() {
                 Programmes
               </p>
               <div className="flex flex-col gap-2">
-                {programmes.map((p) => (
+                {currentProgrammes.map((p) => (
                   <Link
-                    key={p.href}
+                    key={p.key}
                     href={p.href}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center justify-between gap-3 p-4 rounded-xl border border-brand-soft-border bg-brand-soft active:bg-brand-soft transition-colors"
@@ -256,6 +260,34 @@ export default function Navbar() {
                   </Link>
                 ))}
               </div>
+
+              {/* Quieter styling than the live cohorts, but still tappable —
+                  these pages are the record of what we've run. */}
+              {pastProgrammes.length > 0 && (
+                <>
+                  <p className="px-1 pt-4 pb-2 text-xs font-bold uppercase tracking-[0.18em] text-fg-faint">
+                    Past programmes
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {pastProgrammes.map((p) => (
+                      <Link
+                        key={p.key}
+                        href={p.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center justify-between gap-3 p-4 rounded-xl border border-line-subtle bg-surface-sunken transition-colors"
+                      >
+                        <span className="min-w-0">
+                          <span className="block text-base font-semibold text-fg-muted">{p.name}</span>
+                          <span className="mt-0.5 block text-xs text-fg-faint">{p.pastBlurb}</span>
+                        </span>
+                        <span className="shrink-0 rounded-full border border-line bg-surface-raised px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-fg-faint">
+                          Past
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
