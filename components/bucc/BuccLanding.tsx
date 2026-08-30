@@ -29,6 +29,11 @@ import {
 } from "lucide-react";
 import posthog from "posthog-js";
 import RegisterModal from "./RegisterModal";
+import { useBuccOpen } from "@/components/shared/useBuccOpen";
+import {
+  ProgrammeEndedBanner,
+  ProgrammeEndedCta,
+} from "@/components/shared/ProgrammeEnded";
 import {
   BUCC_EVENT_NAME,
   BUCC_TAGLINE,
@@ -245,6 +250,9 @@ function SectionHead({
 
 export default function BuccLanding() {
   const [open, setOpen] = useState(false);
+  // The webinar stays linked from Programmes after it runs, so the page has to
+  // stop selling a seat once the date has passed.
+  const registrationOpen = useBuccOpen();
 
   const openModal = (source: string) => {
     posthog.capture("bucc_register_clicked", { source });
@@ -255,8 +263,20 @@ export default function BuccLanding() {
     <div className="min-h-screen bg-[var(--astar-bg)] font-sans selection:bg-[var(--astar-red)] selection:text-white">
       {open && <RegisterModal onClose={() => setOpen(false)} />}
 
+      {!registrationOpen && (
+        <ProgrammeEndedBanner
+          name={BUCC_EVENT_NAME}
+          ranLabel={`on ${BUCC_DATE_LABEL}`}
+          href="/bucc/advantage"
+        />
+      )}
+
       {/* ── HERO ───────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-28 md:pt-36 pb-16 md:pb-20">
+      <section
+        className={`relative overflow-hidden pb-16 md:pb-20 ${
+          registrationOpen ? 'pt-28 md:pt-36' : 'pt-10 md:pt-14'
+        }`}
+      >
         {/* faint terminal grid — a nod to the School of Computing */}
         <div
           aria-hidden
@@ -301,10 +321,16 @@ export default function BuccLanding() {
             </div>
 
             <div className="mt-9 flex flex-col items-center gap-4">
-              <RegisterButton onClick={() => openModal("hero")} />
-              <p className="text-xs text-fg-faint">
-                Free to attend · {BUCC_DURATION_LABEL} · Seats are limited
-              </p>
+              {registrationOpen ? (
+                <>
+                  <RegisterButton onClick={() => openModal("hero")} />
+                  <p className="text-xs text-fg-faint">
+                    Free to attend · {BUCC_DURATION_LABEL} · Seats are limited
+                  </p>
+                </>
+              ) : (
+                <ProgrammeEndedCta href="/bucc/advantage" />
+              )}
             </div>
           </motion.div>
         </div>
@@ -613,14 +639,21 @@ export default function BuccLanding() {
                 <Rocket size={26} />
               </div>
             </div>
-            <h2 className="mt-6 text-3xl md:text-4xl font-bold text-fg">Registration is open</h2>
+            <h2 className="mt-6 text-3xl md:text-4xl font-bold text-fg">
+              {registrationOpen ? "Registration is open" : "This webinar has ended"}
+            </h2>
             <p className="mt-4 text-fg-muted md:text-lg max-w-2xl mx-auto leading-relaxed">
-              Ninety minutes now, or a semester of figuring it out alone. Join the BUCC students who
-              are starting 200 level with a plan.
+              {registrationOpen
+                ? "Ninety minutes now, or a semester of figuring it out alone. Join the BUCC students who are starting 200 level with a plan."
+                : "This edition has run, but the work continues — we build these for every intake."}
             </p>
 
             <div className="mt-8">
-              <RegisterButton onClick={() => openModal("footer")} label="Reserve My Free Seat" />
+              {registrationOpen ? (
+                <RegisterButton onClick={() => openModal("footer")} label="Reserve My Free Seat" />
+              ) : (
+                <ProgrammeEndedCta href="/bucc/advantage" />
+              )}
             </div>
 
             <div className="mt-10 flex flex-wrap justify-center gap-3 text-sm">

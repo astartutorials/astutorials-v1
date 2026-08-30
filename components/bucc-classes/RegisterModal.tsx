@@ -1,19 +1,20 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { X, ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { X, ArrowRight, Loader2, GraduationCap } from "lucide-react";
 import { validateBookingForm } from "@/lib/validate";
 import posthog from "posthog-js";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 import {
-  BUCC_EVENT_NAME,
-  BUCC_DATE_LABEL,
-  BUCC_TIME_LABEL,
-  BUCC_LEVELS,
-  BUCC_PROGRAMMES,
-  BUCC_HEARD_OPTIONS,
-} from "@/lib/bucc";
+  BUCC_CLASSES_PRICE as PRICE,
+  BUCC_CLASSES_OLD_PRICE as OLD_PRICE,
+  BUCC_CLASSES_COURSE_LABEL as COURSE_LABEL,
+  BUCC_CLASSES_DATE_RANGE as DATE_RANGE,
+  BUCC_CLASSES_LEVELS as LEVELS,
+  BUCC_CLASSES_PROGRAMMES as PROGRAMMES,
+  BUCC_CLASSES_HEARD_OPTIONS as HEARD_OPTIONS,
+} from "@/lib/bucc-classes";
 
 const inputClass =
   "w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg text-base bg-surface-raised";
@@ -23,12 +24,11 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
     fullName: "",
     email: "",
     phone: "",
-    parentPhone: "",
-    level: "200 Level",
+    matric: "",
     programme: "",
-    concern: "",
-    question: "",
-    heardVia: "",
+    level: "",
+    heard: "",
+    notes: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -41,8 +41,8 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
 
   function validate() {
     const base = validateBookingForm(form) as Record<string, string>;
-    if (!form.level) base.level = "Required";
     if (!form.programme) base.programme = "Required";
+    if (!form.level) base.level = "Required";
     return base;
   }
 
@@ -55,11 +55,32 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
     setApiError("");
     setLoading(true);
 
+    const notes = [
+      `Programme: ${form.programme}`,
+      `Level: ${form.level}`,
+      form.matric ? `Matric: ${form.matric}` : "",
+      form.heard ? `Heard via: ${form.heard}` : "",
+      form.notes ? `Notes: ${form.notes}` : "",
+    ]
+      .filter(Boolean)
+      .join(" | ");
+
     try {
-      const res = await fetch("/api/bucc-registrations", {
+      const res = await fetch("/api/paystack/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, turnstileToken }),
+        body: JSON.stringify({
+          email: form.email,
+          amount: PRICE,
+          turnstileToken,
+          metadata: {
+            type: "bucc-classes",
+            full_name: form.fullName,
+            phone: form.phone,
+            course: COURSE_LABEL,
+            notes,
+          },
+        }),
       });
       turnstileRef.current?.reset();
 
@@ -68,21 +89,14 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
         setApiError(data.error ?? "Something went wrong. Please try again.");
         return;
       }
-
-      posthog.identify(form.email, {
-        name: form.fullName,
-        phone: form.phone,
-        email: form.email,
-      });
-      posthog.capture("bucc_registration_submitted", {
-        level: form.level,
+      posthog.identify(form.email, { name: form.fullName, phone: form.phone, email: form.email });
+      posthog.capture("bucc_classes_registration_initiated", {
         programme: form.programme,
-        heard_via: form.heardVia || null,
-        has_question: !!form.question.trim(),
-        has_parent_phone: !!form.parentPhone.trim(),
+        level: form.level,
+        heard: form.heard || null,
+        price: PRICE,
       });
-
-      window.location.href = `/bucc/advantage/success?name=${encodeURIComponent(form.fullName)}`;
+      window.location.href = data.authorization_url;
     } catch (err) {
       posthog.captureException(err);
       setApiError("Network error. Please check your connection and try again.");
@@ -110,19 +124,28 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
             <X size={20} />
           </button>
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="text-brand-ink" size={22} />
-            <h2 className="text-2xl font-bold text-fg">Claim Your Seat</h2>
+            <GraduationCap className="text-brand-ink" size={22} />
+            <h2 className="text-2xl font-bold text-fg">Reserve Your Spot</h2>
           </div>
           <p className="text-fg-subtle text-sm">
-            {BUCC_EVENT_NAME} · {BUCC_DATE_LABEL} · {BUCC_TIME_LABEL}
+            BUCC 200L Preparatory Online Classes · {DATE_RANGE}
           </p>
         </div>
 
         <div className="px-8 py-6 space-y-5">
-          <div className="rounded-xl border border-line-subtle bg-surface-sunken p-4 text-center">
-            <p className="text-sm text-fg-muted">
-              Free to attend — <span className="font-semibold text-fg">seats are limited</span>
-            </p>
+          {/* Order summary */}
+          <div className="rounded-xl border border-line-subtle bg-surface-sunken p-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-fg-muted">Registration Fee</span>
+              <span className="flex items-baseline gap-2">
+                <span className="text-sm text-fg-faint line-through">
+                  ₦{OLD_PRICE.toLocaleString()}
+                </span>
+                <span className="text-lg font-extrabold text-brand-ink">
+                  ₦{PRICE.toLocaleString()}
+                </span>
+              </span>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,7 +164,7 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
               {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName}</p>}
             </div>
 
-            {/* Email + WhatsApp */}
+            {/* Email + Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-semibold text-fg-muted block mb-1.5">
@@ -158,7 +181,7 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
               </div>
               <div>
                 <label className="text-sm font-semibold text-fg-muted block mb-1.5">
-                  WhatsApp Number <span className="text-brand-ink">*</span>
+                  Phone (WhatsApp) <span className="text-brand-ink">*</span>
                 </label>
                 <input
                   type="tel"
@@ -171,42 +194,8 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
 
-            {/* Parent or guardian. Optional — a student who doesn't want to give
-                it must still be able to finish the form. */}
-            <div>
-              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
-                Parent&apos;s / Guardian&apos;s Phone Number{" "}
-                <span className="text-fg-faint font-normal">(optional)</span>
-              </label>
-              <input
-                type="tel"
-                placeholder="Either parent works — e.g. 08012345678"
-                value={form.parentPhone}
-                onChange={(e) => set("parentPhone", e.target.value)}
-                className={inputClass}
-              />
-            </div>
-
-            {/* Level + Programme */}
+            {/* Programme + Level */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-semibold text-fg-muted block mb-1.5">
-                  Level <span className="text-brand-ink">*</span>
-                </label>
-                <select
-                  value={form.level}
-                  onChange={(e) => set("level", e.target.value)}
-                  className={`${inputClass} appearance-none cursor-pointer`}
-                >
-                  <option value="">Select level</option>
-                  {BUCC_LEVELS.map((l) => (
-                    <option key={l} value={l}>
-                      {l}
-                    </option>
-                  ))}
-                </select>
-                {errors.level && <p className="mt-1 text-xs text-red-500">{errors.level}</p>}
-              </div>
               <div>
                 <label className="text-sm font-semibold text-fg-muted block mb-1.5">
                   Programme <span className="text-brand-ink">*</span>
@@ -217,63 +206,81 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
                   className={`${inputClass} appearance-none cursor-pointer`}
                 >
                   <option value="">Select programme</option>
-                  {BUCC_PROGRAMMES.map((p) => (
+                  {PROGRAMMES.map((p) => (
                     <option key={p} value={p}>
                       {p}
                     </option>
                   ))}
                 </select>
-                {errors.programme && <p className="mt-1 text-xs text-red-500">{errors.programme}</p>}
+                {errors.programme && (
+                  <p className="mt-1 text-xs text-red-500">{errors.programme}</p>
+                )}
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                  Level <span className="text-brand-ink">*</span>
+                </label>
+                <select
+                  value={form.level}
+                  onChange={(e) => set("level", e.target.value)}
+                  className={`${inputClass} appearance-none cursor-pointer`}
+                >
+                  <option value="">Select level</option>
+                  {LEVELS.map((l) => (
+                    <option key={l} value={l}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+                {errors.level && <p className="mt-1 text-xs text-red-500">{errors.level}</p>}
               </div>
             </div>
 
-            {/* The two questions the whole funnel exists for. */}
+            {/* Matric number */}
             <div>
               <label className="text-sm font-semibold text-fg-muted block mb-1.5">
-                What worries you most about 200 level?{" "}
-                <span className="text-fg-faint font-normal">(optional)</span>
+                Matric Number <span className="text-fg-faint font-normal">(optional)</span>
               </label>
-              <textarea
-                rows={2}
-                placeholder="Be honest — this shapes what we cover on the night."
-                value={form.concern}
-                onChange={(e) => set("concern", e.target.value)}
-                className={`${inputClass} resize-none`}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
-                Ask a senior one question{" "}
-                <span className="text-fg-faint font-normal">(optional)</span>
-              </label>
-              <textarea
-                rows={2}
-                placeholder="The best questions get answered live during Ask the Seniors."
-                value={form.question}
-                onChange={(e) => set("question", e.target.value)}
-                className={`${inputClass} resize-none`}
+              <input
+                type="text"
+                placeholder="e.g. 21/1234"
+                value={form.matric}
+                onChange={(e) => set("matric", e.target.value)}
+                className={inputClass}
               />
             </div>
 
             {/* How they heard */}
             <div>
               <label className="text-sm font-semibold text-fg-muted block mb-1.5">
-                How did you hear about this?{" "}
-                <span className="text-fg-faint font-normal">(optional)</span>
+                How did you hear about us? <span className="text-fg-faint font-normal">(optional)</span>
               </label>
               <select
-                value={form.heardVia}
-                onChange={(e) => set("heardVia", e.target.value)}
+                value={form.heard}
+                onChange={(e) => set("heard", e.target.value)}
                 className={`${inputClass} appearance-none cursor-pointer`}
               >
                 <option value="">Select an option</option>
-                {BUCC_HEARD_OPTIONS.map((h) => (
+                {HEARD_OPTIONS.map((h) => (
                   <option key={h} value={h}>
                     {h}
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="text-sm font-semibold text-fg-muted block mb-1.5">
+                Anything else? <span className="text-fg-faint font-normal">(optional)</span>
+              </label>
+              <textarea
+                rows={2}
+                placeholder="Questions, special requests, or anything we should know..."
+                value={form.notes}
+                onChange={(e) => set("notes", e.target.value)}
+                className={`${inputClass} resize-none`}
+              />
             </div>
 
             <Turnstile
@@ -284,9 +291,7 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
               options={{ appearance: "interaction-only" }}
             />
 
-            {apiError && (
-              <p className="text-sm text-red-600 dark:text-red-400 font-medium">{apiError}</p>
-            )}
+            {apiError && <p className="text-sm text-red-600 dark:text-red-400 font-medium">{apiError}</p>}
 
             <button
               type="submit"
@@ -295,18 +300,16 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
             >
               {loading ? (
                 <>
-                  <Loader2 size={18} className="animate-spin" /> Saving your seat…
+                  <Loader2 size={18} className="animate-spin" /> Redirecting to payment…
                 </>
               ) : (
                 <>
-                  Reserve My Free Seat <ArrowRight size={18} />
+                  Pay ₦{PRICE.toLocaleString()} &amp; Register <ArrowRight size={18} />
                 </>
               )}
             </button>
 
-            <p className="text-center text-[11px] text-fg-faint pb-2">
-              We&apos;ll email you the link. No spam, ever.
-            </p>
+            <p className="text-center text-[11px] text-fg-faint pb-2">Payment secured by Paystack.</p>
           </form>
         </div>
       </div>

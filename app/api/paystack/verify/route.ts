@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendPreClinicalsReceipt, sendNewBookingNotification } from "@/lib/email";
+import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendPreClinicalsReceipt, sendBuccClassesReceipt, sendNewBookingNotification } from "@/lib/email";
 import { getPostHogClient } from "@/lib/posthog-server";
 
 const supabase = createClient(
@@ -122,7 +122,13 @@ export async function GET(req: NextRequest) {
 
   // Admin notification for all verified bookings
   const bookingType =
-    meta.type === "private" ? "private" : meta.type === "preclinicals" ? "preclinicals" : "group";
+    meta.type === "private"
+      ? "private"
+      : meta.type === "preclinicals"
+      ? "preclinicals"
+      : meta.type === "bucc-classes"
+      ? "bucc-classes"
+      : "group";
   await sendNewBookingNotification({
     bookingType,
     fullName,
@@ -133,6 +139,12 @@ export async function GET(req: NextRequest) {
     tutorialTitle: tutorialForEmail?.title,
     course: meta.course ?? undefined,
   });
+
+  // BUCC 200L Preparatory Classes → send receipt, then WhatsApp handoff
+  if (meta.type === "bucc-classes") {
+    await sendBuccClassesReceipt({ to: email, fullName, amountPaid, reference });
+    return NextResponse.redirect(`${BASE_URL}/bucc/success?ref=${reference}`);
+  }
 
   // Pre-Clinicals registration → send receipt, then confirmation + WhatsApp handoff
   if (meta.type === "preclinicals") {

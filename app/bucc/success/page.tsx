@@ -1,25 +1,33 @@
 "use client";
 
-import { Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2, ArrowRight, CalendarDays, Clock, Video } from "lucide-react";
+import { Loader2, CheckCircle2, ArrowRight } from "lucide-react";
 import {
-  BUCC_EVENT_NAME,
-  BUCC_TAGLINE,
-  BUCC_DATE_LABEL,
-  BUCC_TIME_LABEL,
-  BUCC_PLATFORM,
-  BUCC_MEETING_URL,
-} from "@/lib/bucc";
+  BUCC_CLASSES_NAME,
+  BUCC_CLASSES_DATE_RANGE,
+} from "@/lib/bucc-classes";
 
 const WHATSAPP_PHONE = "2349160465678";
 
-function whatsAppUrl(name: string) {
+type Booking = {
+  full_name: string;
+  email: string;
+  phone: string | null;
+  course: string | null;
+  notes: string | null;
+};
+
+function buildWhatsAppUrl(b: Booking, ref: string) {
   const lines = [
-    `Hello! I just registered for ${BUCC_EVENT_NAME} (${BUCC_DATE_LABEL}).`,
-    name ? `Name: ${name}` : "",
+    `Hello! I just registered for the ${BUCC_CLASSES_NAME} (${BUCC_CLASSES_DATE_RANGE}).`,
     "",
-    "Please add me to the reminder group. Thank you!",
+    `Name: ${b.full_name}`,
+    b.phone ? `Phone: ${b.phone}` : "",
+    b.notes ? b.notes.replace(/ \| /g, "\n") : "",
+    `Payment Reference: ${ref}`,
+    "",
+    "Please add me to the class community. Thank you!",
   ].filter(Boolean);
   return `https://api.whatsapp.com/send/?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(
     lines.join("\n")
@@ -27,8 +35,48 @@ function whatsAppUrl(name: string) {
 }
 
 function SuccessContent() {
-  const name = useSearchParams().get("name") ?? "";
-  const firstName = name.trim().split(" ")[0];
+  const searchParams = useSearchParams();
+  const ref = searchParams.get("ref") ?? "";
+
+  const [booking, setBooking] = useState<Booking | null>(null);
+  const [loadError, setLoadError] = useState(!ref);
+
+  useEffect(() => {
+    if (!ref) return;
+    fetch(`/api/bookings/${ref}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error) {
+          setLoadError(true);
+          return;
+        }
+        setBooking(d);
+      })
+      .catch(() => setLoadError(true));
+  }, [ref]);
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 bg-[var(--astar-bg)]">
+        <div className="text-center">
+          <p className="text-fg-subtle mb-2">We couldn&apos;t find your registration.</p>
+          <a href="/bucc" className="text-brand-ink font-semibold underline text-sm">
+            Back to BUCC 200L Classes
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--astar-bg)]">
+        <Loader2 className="animate-spin text-brand-ink" size={28} />
+      </div>
+    );
+  }
+
+  const whatsappUrl = buildWhatsAppUrl(booking, ref);
 
   return (
     <div className="min-h-screen bg-[var(--astar-bg)] flex items-center justify-center px-4 py-16">
@@ -37,64 +85,33 @@ function SuccessContent() {
           <div className="flex items-center gap-3 mb-2">
             <CheckCircle2 className="text-white" size={22} />
             <span className="text-white font-bold text-sm uppercase tracking-wide">
-              Seat Reserved
+              Registration Confirmed
             </span>
           </div>
           <h1 className="text-white text-2xl font-bold">
-            {firstName ? `You're in, ${firstName}! 🎉` : "You're in! 🎉"}
+            You&apos;re in, {booking.full_name.split(" ")[0]}! 🎉
           </h1>
           <p className="text-red-100 text-sm mt-1">
-            {BUCC_EVENT_NAME} — {BUCC_TAGLINE}
+            Your spot in the {BUCC_CLASSES_NAME} ({BUCC_CLASSES_DATE_RANGE}) is secured.
           </p>
         </div>
 
-        <div className="px-8 py-7 space-y-6">
-          <div className="rounded-xl border border-line-subtle bg-surface-sunken divide-y divide-line-subtle">
-            {[
-              [CalendarDays, "Date", BUCC_DATE_LABEL],
-              [Clock, "Time", BUCC_TIME_LABEL],
-              [Video, "Where", BUCC_PLATFORM],
-            ].map(([Icon, label, value]) => {
-              const I = Icon as typeof CalendarDays;
-              return (
-                <div key={label as string} className="flex items-center gap-3 px-5 py-3.5">
-                  <I size={17} className="text-brand-ink flex-shrink-0" />
-                  <span className="text-sm text-fg-faint w-14">{label as string}</span>
-                  <span className="text-sm font-semibold text-fg">{value as string}</span>
-                </div>
-              );
-            })}
-          </div>
-
+        <div className="px-8 py-7 space-y-5">
           <p className="text-fg-muted text-sm leading-relaxed">
-            {BUCC_MEETING_URL
-              ? "Your confirmation email has the join link — save it now so you don't hunt for it on the night."
-              : `We've emailed your confirmation. The ${BUCC_PLATFORM} link goes out a few hours before we start.`}
+            One last step — tap below to message us on WhatsApp so we can add you to the class
+            community and share your timetable, quizzes and materials. A receipt has also been sent
+            to <span className="font-semibold text-fg">{booking.email}</span>.
           </p>
 
-          {BUCC_MEETING_URL && (
-            <a
-              href={BUCC_MEETING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full bg-[var(--astar-navy)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:opacity-90 transition-all"
-            >
-              Save the join link <ArrowRight size={18} />
-            </a>
-          )}
-
           <a
-            href={whatsAppUrl(name)}
+            href={whatsappUrl}
             className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-brand-hover transition-all shadow-lg"
           >
-            Get reminders on WhatsApp <ArrowRight size={18} />
+            Continue on WhatsApp <ArrowRight size={18} />
           </a>
 
-          <p className="text-center text-xs text-fg-faint">
-            Bring a friend from your class — they can register at{" "}
-            <a href="/bucc" className="font-semibold text-brand-ink underline">
-              astartutorials.com/bucc
-            </a>
+          <p className="text-center text-[11px] text-fg-faint">
+            Reference: <span className="font-mono">{ref}</span>
           </p>
         </div>
       </div>
@@ -102,7 +119,7 @@ function SuccessContent() {
   );
 }
 
-export default function BuccSuccessPage() {
+export default function BuccClassesSuccessPage() {
   return (
     <Suspense>
       <SuccessContent />
