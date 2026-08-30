@@ -32,8 +32,14 @@ import {
 import posthog from "posthog-js";
 import RegisterModal from "./RegisterModal";
 import { useBuccOpen } from "@/components/shared/useBuccOpen";
+import { useBuccClassesOpen } from "@/components/shared/useBuccClassesOpen";
+import {
+  ProgrammeEndedBanner,
+  ProgrammeEndedCta,
+} from "@/components/shared/ProgrammeEnded";
 import { BUCC_EVENT_NAME, BUCC_DATE_LABEL, BUCC_TIME_LABEL } from "@/lib/bucc";
 import {
+  BUCC_CLASSES_NAME,
   BUCC_CLASSES_PRICE as PRICE,
   BUCC_CLASSES_OLD_PRICE as OLD_PRICE,
   BUCC_CLASSES_DATE_RANGE as DATE_RANGE,
@@ -240,6 +246,9 @@ function SectionHead({
 
 export default function BuccClassesLanding() {
   const [open, setOpen] = useState(false);
+  // The cohort stays linked from Programmes after it finishes, so the page has
+  // to stop selling a spot once it has ended.
+  const registrationOpen = useBuccClassesOpen();
   // The free webinar feeds this cohort; the cross-link retires itself when it ends.
   const advantageOpen = useBuccOpen();
 
@@ -252,8 +261,20 @@ export default function BuccClassesLanding() {
     <div className="min-h-screen bg-[var(--astar-bg)] font-sans selection:bg-[var(--astar-red)] selection:text-white">
       {open && <RegisterModal onClose={() => setOpen(false)} />}
 
+      {!registrationOpen && (
+        <ProgrammeEndedBanner
+          name={BUCC_CLASSES_NAME}
+          ranLabel={DATE_RANGE}
+          href="/bucc"
+        />
+      )}
+
       {/* ── HERO ───────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-28 md:pt-36 pb-16 md:pb-20">
+      <section
+        className={`relative overflow-hidden pb-16 md:pb-20 ${
+          registrationOpen ? 'pt-28 md:pt-36' : 'pt-10 md:pt-14'
+        }`}
+      >
         {/* graph-paper grid, like the flyer */}
         <div
           aria-hidden
@@ -297,8 +318,16 @@ export default function BuccClassesLanding() {
                 </span>
                 <span className="text-fg-subtle text-lg">only</span>
               </div>
-              <RegisterButton onClick={() => openModal("hero")} />
-              <p className="text-xs text-fg-faint">Limited slots · Secure payment via Paystack</p>
+              {registrationOpen ? (
+                <>
+                  <RegisterButton onClick={() => openModal("hero")} />
+                  <p className="text-xs text-fg-faint">
+                    Limited slots · Secure payment via Paystack
+                  </p>
+                </>
+              ) : (
+                <ProgrammeEndedCta href="/bucc" />
+              )}
             </div>
           </motion.div>
         </div>
@@ -701,7 +730,9 @@ export default function BuccClassesLanding() {
                 <Rocket size={26} />
               </div>
             </div>
-            <h2 className="mt-6 text-3xl md:text-4xl font-bold text-fg">Ready to begin?</h2>
+            <h2 className="mt-6 text-3xl md:text-4xl font-bold text-fg">
+              {registrationOpen ? "Ready to begin?" : "This cohort has finished"}
+            </h2>
             <p className="mt-4 text-fg-muted md:text-lg max-w-2xl mx-auto leading-relaxed">
               The students who finish 200 level well don’t start in September — they start now. Join
               the cohort choosing to resume with the material already familiar, the habits already
@@ -709,7 +740,11 @@ export default function BuccClassesLanding() {
             </p>
 
             <div className="mt-8">
-              <RegisterButton onClick={() => openModal("footer")} label="Register Today" />
+              {registrationOpen ? (
+                <RegisterButton onClick={() => openModal("footer")} label="Register Today" />
+              ) : (
+                <ProgrammeEndedCta href="/bucc" />
+              )}
             </div>
 
             {/* summary chips */}
