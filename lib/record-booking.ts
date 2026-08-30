@@ -3,6 +3,7 @@ import {
   sendGroupBookingConfirmation,
   sendPrivateBookingReceipt,
   sendPreClinicalsReceipt,
+  sendBuccClassesReceipt,
   sendNewBookingNotification,
 } from '@/lib/email';
 
@@ -43,6 +44,7 @@ export async function recordBookingFromTransaction(
   const amountPaid = Math.round((tx.amount ?? 0) / 100);
   const isPrivate = meta.type === 'private';
   const isPreclinicals = meta.type === 'preclinicals';
+  const isBuccClasses = meta.type === 'bucc-classes';
 
   const { data: existing } = await supabase
     .from('bookings')
@@ -92,7 +94,13 @@ export async function recordBookingFromTransaction(
 
   if (sendEmails) {
     await sendNewBookingNotification({
-      bookingType: isPrivate ? 'private' : isPreclinicals ? 'preclinicals' : 'group',
+      bookingType: isPrivate
+        ? 'private'
+        : isPreclinicals
+        ? 'preclinicals'
+        : isBuccClasses
+        ? 'bucc-classes'
+        : 'group',
       fullName,
       email,
       phone: meta.phone ?? tx.customer?.phone ?? null,
@@ -105,6 +113,8 @@ export async function recordBookingFromTransaction(
     if (email) {
       if (isPreclinicals) {
         await sendPreClinicalsReceipt({ to: email, fullName, amountPaid, reference });
+      } else if (isBuccClasses) {
+        await sendBuccClassesReceipt({ to: email, fullName, amountPaid, reference });
       } else if (isPrivate) {
         await sendPrivateBookingReceipt({ to: email, fullName, amountPaid, reference });
       } else if (tutorialForEmail) {
