@@ -24,8 +24,9 @@ export default function BuccCTA() {
 
   return (
     <ScrollReveal className="w-full px-6 my-8 max-w-[1440px] mx-auto">
-      {/* Light surface on purpose — the Pre-Clinicals band below is solid navy,
-          and two dark slabs back to back read as one heavy block. */}
+      {/* Light surface on purpose — this band sits between the BUCC 200L and
+          Pre-Clinicals bands, both solid navy, and three dark slabs in a row
+          read as one heavy block. */}
       <div className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-line-subtle bg-surface-raised shadow-sm">
         <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center p-8 md:p-12">
           <div className="lg:col-span-7">

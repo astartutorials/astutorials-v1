@@ -4,6 +4,7 @@ jest.mock('@/lib/email', () => ({
   sendGroupBookingConfirmation: jest.fn().mockResolvedValue(undefined),
   sendPrivateBookingReceipt: jest.fn().mockResolvedValue(undefined),
   sendPreClinicalsReceipt: jest.fn().mockResolvedValue(undefined),
+  sendBuccClassesReceipt: jest.fn().mockResolvedValue(undefined),
   sendNewBookingNotification: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -115,6 +116,33 @@ describe('recordBookingFromTransaction', () => {
     );
     expect(mockEmails.sendNewBookingNotification).toHaveBeenCalledWith(
       expect.objectContaining({ bookingType: 'preclinicals' })
+    );
+  });
+
+  it('sends the BUCC 200L receipt and notification for a bucc-classes registration', async () => {
+    const sb = makeSupabase();
+    const result = await recordBookingFromTransaction(sb, {
+      ...PRECLINICALS_TX,
+      reference: 'ref_bucc',
+      metadata: {
+        type: 'bucc-classes',
+        full_name: 'Ada Obi',
+        phone: '08103363907',
+        course: 'BUCC 200L Preparatory Classes (Sept 2026)',
+      },
+    });
+
+    expect(result.outcome).toBe('inserted');
+    // A cohort registration hangs off no tutorial, so no seat is consumed.
+    expect(sb.insert).toHaveBeenCalledWith(expect.objectContaining({ tutorial_id: null }));
+    expect(sb.rpc).not.toHaveBeenCalled();
+
+    expect(mockEmails.sendBuccClassesReceipt).toHaveBeenCalledWith(
+      expect.objectContaining({ to: 'ada@example.com', amountPaid: 60000 })
+    );
+    expect(mockEmails.sendPreClinicalsReceipt).not.toHaveBeenCalled();
+    expect(mockEmails.sendNewBookingNotification).toHaveBeenCalledWith(
+      expect.objectContaining({ bookingType: 'bucc-classes' })
     );
   });
 

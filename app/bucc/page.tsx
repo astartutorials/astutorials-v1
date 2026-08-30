@@ -1,35 +1,35 @@
 import type { Metadata } from "next";
-import BuccLanding from "@/components/bucc/BuccLanding";
+import BuccClassesLanding from "@/components/bucc-classes/BuccClassesLanding";
 
 export const metadata: Metadata = {
-  title: "The BUCC Advantage — Your Blueprint for Thriving in 200 Level",
+  title: "BUCC 200L Preparatory Online Classes",
   description:
-    "A free 90-minute academic & mentorship experience for BUCC 200-level students. Honest advice, real study systems and a live Q&A with high-performing Babcock School of Computing students. Sunday, 30th August 2026, 7:00 pm.",
+    "Maximise your break and resume 200 level with confidence. SEN 201, MTH 201, COS 201 & IFT 211 — tutored by distinction students. 7th September – 4th October 2026. Register for ₦60,000.",
   alternates: { canonical: "/bucc" },
   openGraph: {
-    title: "The BUCC Advantage | A-Star Tutorials",
+    title: "BUCC 200L Preparatory Online Classes | A-Star Tutorials",
     description:
-      "100 level got you into BUCC. 200 level is where you build your academic reputation. Free 90-minute webinar — Sunday, 30th August 2026, 7:00 pm.",
+      "Get tutored by distinction students in SEN 201, MTH 201, COS 201 & IFT 211. Daily & weekly quizzes, cash prizes, community. 7th September – 4th October 2026.",
     url: "https://astartutorials.com/bucc",
     type: "website",
     images: [
       {
-        url: "/bucc/og.jpg",
-        width: 1200,
-        height: 630,
-        alt: "A-Star Tutorials × BUCC — The BUCC Advantage: Your Blueprint for Thriving in 200 Level. 30th August 2026, 7pm on Google Meet.",
+        url: "/bucc-classes/flyer.jpg",
+        width: 1080,
+        height: 1255,
+        alt: "A-Star Tutorials — BUCC 200L Preparatory Online Classes, 7th September – 4th October 2026. SEN 201, MTH 201, COS 201, IFT 211. Registration ₦60,000.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "The BUCC Advantage | A-Star Tutorials",
+    title: "BUCC 200L Preparatory Online Classes | A-Star Tutorials",
     description:
-      "100 level got you into BUCC. 200 level is where you build your academic reputation. Free 90-minute webinar — Sunday, 30th August 2026, 7:00 pm.",
-    images: ["/bucc/og.jpg"],
+      "Maximise your break and resume 200 level with confidence. Tutored by distinction students. 7th September – 4th October 2026.",
+    images: ["/bucc-classes/flyer.jpg"],
   },
 };
 
-export default function BuccPage() {
-  return <BuccLanding />;
+export default function BuccClassesPage() {
+  return <BuccClassesLanding />;
 }
