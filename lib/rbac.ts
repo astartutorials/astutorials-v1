@@ -31,6 +31,9 @@ const PERMISSIONS: Record<AppRole, string[]> = {
     // org_id, so this is a shared read rather than an org-scoped one: every
     // org_admin sees the same list.
     'bucc:read',
+    // Same reasoning for the Playbook webinar series: A-Star's own events,
+    // registrations carry no org_id, so this is a shared read.
+    'playbooks:read',
     'settings:read', 'settings:update',
   ],
 

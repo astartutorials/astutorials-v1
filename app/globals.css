@@ -129,6 +129,78 @@
   --shadow-color: rgba(0, 0, 0, 0.5);
 }
 
+/* ---------------------------------------------------------------------------
+   Playbook accents.
+
+   The three Playbook webinars (Engineering, Law, Health Sciences) share one
+   landing component. Each wears its own accent so the pages read as siblings
+   rather than as the same page with the nouns swapped — and because the brand
+   red is already doing a job on every other page, an accent that competed with
+   it would make the whole site louder rather than the playbooks distinct.
+
+   The component only ever references these variables, so retuning a playbook's
+   colour is an edit here and never a component edit. The split mirrors the
+   brand tokens above:
+
+     --pb-fill     backs buttons and badges, so white text must clear AA on it.
+                   Identical in both themes, for the same reason --astar-red is.
+     --pb-ink      the accent used AS text on the page surface, so it lightens
+                   as the page darkens.
+     --pb-on-dark  the accent used on the navy bands that are dark in BOTH
+                   themes. Declared once and never re-declared under `.dark`.
+
+   Contrast of white on each fill: engineering 5.1:1, law 9.0:1,
+   health-sciences 5.5:1. Of each dark ink on the navy page: all above 7:1.
+--------------------------------------------------------------------------- */
+[data-playbook] {
+  /* Falls back to the brand red, so a playbook added without a palette here
+     still renders correctly rather than losing its accent to an empty var. */
+  --pb-fill: var(--astar-red);
+  --pb-ink: var(--brand-ink);
+  --pb-soft-bg: var(--brand-soft-bg);
+  --pb-soft-border: var(--brand-soft-border);
+  --pb-on-dark: var(--brand-on-dark);
+}
+
+[data-playbook="engineering"] {
+  --pb-fill: #0F62FE;
+  --pb-ink: #0F4FC7;
+  --pb-soft-bg: #EFF4FF;
+  --pb-soft-border: #C7D8FF;
+  --pb-on-dark: #7FA9FF;
+}
+.dark [data-playbook="engineering"] {
+  --pb-ink: #7FA9FF;
+  --pb-soft-bg: rgba(15, 98, 254, 0.15);
+  --pb-soft-border: rgba(15, 98, 254, 0.34);
+}
+
+[data-playbook="law"] {
+  --pb-fill: #5B21B6;
+  --pb-ink: #5B21B6;
+  --pb-soft-bg: #F5F0FF;
+  --pb-soft-border: #DDCCFA;
+  --pb-on-dark: #C4A6FF;
+}
+.dark [data-playbook="law"] {
+  --pb-ink: #C4A6FF;
+  --pb-soft-bg: rgba(139, 92, 246, 0.15);
+  --pb-soft-border: rgba(139, 92, 246, 0.34);
+}
+
+[data-playbook="health-sciences"] {
+  --pb-fill: #0F766E;
+  --pb-ink: #0B5F58;
+  --pb-soft-bg: #ECFBF7;
+  --pb-soft-border: #B6E7DC;
+  --pb-on-dark: #5EEAD4;
+}
+.dark [data-playbook="health-sciences"] {
+  --pb-ink: #5EEAD4;
+  --pb-soft-bg: rgba(20, 184, 166, 0.15);
+  --pb-soft-border: rgba(20, 184, 166, 0.34);
+}
+
 /* `inline` matters: it makes each utility compile to `var(--token)` rather than
    baking in the value, so the utilities follow the cascade when `.dark` flips. */
 @theme inline {
@@ -161,6 +233,15 @@
   --color-on-dark-muted: var(--on-dark-fg-muted);
   --color-on-dark-subtle: var(--on-dark-fg-subtle);
   --color-brand-on-dark: var(--brand-on-dark);
+
+  /* Playbook accents. Utilities rather than raw `[var(--pb-…)]` arbitrary
+     values, so the components read like the rest of the codebase and Tailwind
+     never has to guess whether an arbitrary var is a colour or a length. */
+  --color-pb-fill: var(--pb-fill);
+  --color-pb-ink: var(--pb-ink);
+  --color-pb-soft: var(--pb-soft-bg);
+  --color-pb-soft-border: var(--pb-soft-border);
+  --color-pb-on-dark: var(--pb-on-dark);
 
   --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
 }
