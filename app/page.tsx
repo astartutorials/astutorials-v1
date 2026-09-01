@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import HeroSection from "@/components/home/HeroSection";
 import BuccClassesCTA from "@/components/home/BuccClassesCTA";
+import PlaybookSeriesCTA from "@/components/home/PlaybookSeriesCTA";
 import BuccCTA from "@/components/home/BuccCTA";
 import PreClinicalsCTA from "@/components/home/PreClinicalsCTA";
 import WhoWeAre from "@/components/home/WhoWeAre";
@@ -27,6 +28,8 @@ export default function Home() {
         <HeroSection />
 
         <BuccClassesCTA />
+
+        <PlaybookSeriesCTA />
 
         <BuccCTA />
 

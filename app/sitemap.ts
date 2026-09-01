@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { PLAYBOOKS, playbookHref } from "@/lib/playbooks";
 
 const BASE_URL = "https://astartutorials.com";
 
@@ -29,6 +30,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.7,
     },
+    ...PLAYBOOKS.map((p) => ({
+      url: `${BASE_URL}${playbookHref(p.slug)}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
     {
       url: `${BASE_URL}/apply`,
       changeFrequency: "monthly",
