@@ -7,11 +7,13 @@ import type { Playbook } from "./types";
  * Everything on /playbooks/engineering, in the confirmation email and in the
  * admin console reads from here.
  *
- * ⚠️ Before announcing: set `dateLabel`/`closesAt` to the real date (they must
- * describe the same instant — closesAt is 19:00 WAT = 18:00 UTC) and paste the
- * Google Meet link into NEXT_PUBLIC_ENGINEERING_MEETING_URL. While the link is
- * empty the page and the email both say we'll send it nearer the time, which is
- * true and better than a dead link.
+ * ⚠️ Still outstanding: paste the Google Meet link into NEXT_PUBLIC_ENGINEERING_MEETING_URL.
+ * While it is empty the page and the confirmation email both say we'll send
+ * the link nearer the time, which is true and better than a dead link.
+ *
+ * `dateLabel` and `closesAt` must always describe the same instant — the
+ * label is what students read, and closesAt is what shuts registration. A
+ * test in __tests__/lib/playbooks.test.ts holds the two together.
  */
 export const engineering: Playbook = {
   slug: "engineering",
@@ -25,12 +27,13 @@ export const engineering: Playbook = {
   accent: "engineering",
   motif: "blueprint",
 
-  dateLabel: "Sunday, 27th September 2026",
-  timeLabel: "7:00 pm WAT",
+  dateLabel: "Sunday, 13th September 2026",
+  timeLabel: "6:00 pm WAT",
   durationLabel: "90 minutes",
   platform: "Google Meet",
   meetingUrl: process.env.NEXT_PUBLIC_ENGINEERING_MEETING_URL ?? "",
-  closesAt: new Date("2026-09-27T18:00:00Z"),
+  // 18:00 WAT = 17:00 UTC.
+  closesAt: new Date("2026-09-13T17:00:00Z"),
 
   bigLine:
     "Your degree is the foundation. It was never meant to be the whole career.",
@@ -166,6 +169,12 @@ export const engineering: Playbook = {
       "Practise what, exactly? How did you practise, and how did you know you were improving?",
   },
 
+  speakers: [
+    { name: "Ebose" },
+    { name: "Odogun Angel" },
+  ],
+  moreSpeakersToCome: true,
+
   speakerStrategy: [
     { label: "The academic", desc: "A consistently strong performer who can explain how they actually approach a course." },
     { label: "The builder", desc: "Strong technical and industry skills — projects, tools, internships, real output." },
@@ -191,6 +200,7 @@ export const engineering: Playbook = {
     ],
     positioning:
       "A-Star helps students build the academic structure required to understand their courses, practise consistently and perform when it matters.",
+    startsOn: "17th September 2026",
   },
 
   audience: [
@@ -238,7 +248,7 @@ export const engineering: Playbook = {
   },
 
   metaDescription:
-    "A free 90-minute academic and mentorship webinar for Engineering students. How to study effectively, which technical skills to build, and how to balance both — from students who are already doing it. Sunday, 27th September 2026, 7:00 pm WAT.",
+    "A free 90-minute academic and mentorship webinar for Engineering students. How to study effectively, which technical skills to build, and how to balance both — from students who are already doing it. Sunday, 13th September 2026, 6:00 pm WAT.",
   ogDescription:
-    "Your degree is the foundation, not the whole career. Free 90-minute webinar for Engineering students — Sunday, 27th September 2026, 7:00 pm.",
+    "Your degree is the foundation, not the whole career. Free 90-minute webinar for Engineering students — Sunday, 13th September 2026, 6:00 pm.",
 };

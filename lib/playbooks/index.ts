@@ -13,7 +13,7 @@ export { isPlaybookOpen, playbookHref } from "./types";
  * route, the sitemap, the nav, the homepage band, the API and the admin console
  * all iterate this array, so nothing else needs touching.
  */
-export const PLAYBOOKS: Playbook[] = [healthSciences, engineering, law];
+export const PLAYBOOKS: Playbook[] = [healthSciences, law, engineering];
 
 export const PLAYBOOK_SLUGS: PlaybookSlug[] = PLAYBOOKS.map((p) => p.slug);
 

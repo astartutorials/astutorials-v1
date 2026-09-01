@@ -93,20 +93,55 @@ describe('every playbook config', () => {
     expect(pb.form.disciplineLabel === '').toBe(pb.form.disciplines.length === 0);
   });
 
-  it.each(PLAYBOOKS)('$slug describes the date it closes on', (pb) => {
-    // A close instant that doesn't match the printed date sells a seat for a
-    // session that has already run, or shuts registration while the page still
-    // advertises it as open.
-    const day = pb.closesAt.getUTCDate();
-    const year = pb.closesAt.getUTCFullYear();
-    expect(pb.dateLabel).toContain(String(day));
-    expect(pb.dateLabel).toContain(String(year));
+  it.each(PLAYBOOKS)('$slug prints the weekday its close instant actually falls on', (pb) => {
+    // "Friday, 11th September" against a Saturday instant is the kind of typo
+    // that survives every review and is only caught by the students who turn up
+    // on the wrong day. WAT is UTC+1 and no session runs near midnight, so the
+    // UTC date and the local date are the same day.
+    const weekday = pb.closesAt.toLocaleDateString('en-GB', {
+      weekday: 'long',
+      timeZone: 'UTC',
+    });
+    const month = pb.closesAt.toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
+    expect(pb.dateLabel).toContain(weekday);
+    expect(pb.dateLabel).toContain(month);
+    expect(pb.dateLabel).toContain(String(pb.closesAt.getUTCDate()));
+    expect(pb.dateLabel).toContain(String(pb.closesAt.getUTCFullYear()));
   });
 
-  it.each(PLAYBOOKS)('$slug closes at 19:00 WAT, when the webinar starts', (pb) => {
-    expect(pb.closesAt.getUTCHours()).toBe(18);
-    expect(pb.closesAt.getUTCMinutes()).toBe(0);
-    expect(pb.timeLabel).toContain('7:00 pm');
+  it.each(PLAYBOOKS)('$slug closes exactly when its printed start time arrives', (pb) => {
+    // The three sessions do NOT share a start time — 6pm Friday, 1pm Saturday,
+    // 6pm Sunday — so this derives the expected instant from the label rather
+    // than asserting a fixed hour, and would catch a label edited without its
+    // closesAt (or the reverse).
+    const match = /^(\d{1,2}):(\d{2}) (am|pm) WAT$/.exec(pb.timeLabel);
+    expect(match).not.toBeNull();
+
+    const [, rawHour, rawMinute, meridiem] = match!;
+    const hour12 = Number(rawHour) % 12;
+    const watHour = meridiem === 'pm' ? hour12 + 12 : hour12;
+
+    // WAT is UTC+1 year-round — no daylight saving to account for.
+    expect(pb.closesAt.getUTCHours()).toBe(watHour - 1);
+    expect(pb.closesAt.getUTCMinutes()).toBe(Number(rawMinute));
+  });
+
+  it.each(PLAYBOOKS)('$slug says when the tutorials it sells actually begin', (pb) => {
+    expect(pb.advantage.startsOn.length).toBeGreaterThan(0);
+  });
+
+  // The landing page falls back to the panel-design cards when there are no
+  // names, so an empty list is valid — but a speaker with no name at all would
+  // render a blank tile with a blank avatar initial.
+  it.each(PLAYBOOKS)('$slug names every speaker it lists', (pb) => {
+    for (const speaker of pb.speakers) {
+      expect(speaker.name.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  it.each(PLAYBOOKS)('$slug lists no speaker twice', (pb) => {
+    const names = pb.speakers.map((sp) => sp.name);
+    expect(new Set(names).size).toBe(names.length);
   });
 });
 

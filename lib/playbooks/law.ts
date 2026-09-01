@@ -3,10 +3,13 @@ import type { Playbook } from "./types";
 /**
  * THE LAW PLAYBOOK — "What They Don't Teach You About Succeeding in Law."
  *
- * ⚠️ Before announcing: set `dateLabel`/`closesAt` to the real date (they must
- * describe the same instant — closesAt is 19:00 WAT = 18:00 UTC) and paste the
- * Google Meet link into NEXT_PUBLIC_LAW_MEETING_URL. While the link is empty
- * the page and the email both say we'll send it nearer the time.
+ * ⚠️ Still outstanding: paste the Google Meet link into NEXT_PUBLIC_LAW_MEETING_URL.
+ * While it is empty the page and the confirmation email both say we'll send
+ * the link nearer the time, which is true and better than a dead link.
+ *
+ * `dateLabel` and `closesAt` must always describe the same instant — the
+ * label is what students read, and closesAt is what shuts registration. A
+ * test in __tests__/lib/playbooks.test.ts holds the two together.
  */
 export const law: Playbook = {
   slug: "law",
@@ -20,12 +23,13 @@ export const law: Playbook = {
   accent: "law",
   motif: "columns",
 
-  dateLabel: "Sunday, 4th October 2026",
-  timeLabel: "7:00 pm WAT",
+  dateLabel: "Saturday, 12th September 2026",
+  timeLabel: "1:00 pm WAT",
   durationLabel: "90 minutes",
   platform: "Google Meet",
   meetingUrl: process.env.NEXT_PUBLIC_LAW_MEETING_URL ?? "",
-  closesAt: new Date("2026-10-04T18:00:00Z"),
+  // 13:00 WAT = 12:00 UTC.
+  closesAt: new Date("2026-09-12T12:00:00Z"),
 
   bigLine:
     "Law school is preparing you for a profession, not just for an examination.",
@@ -150,6 +154,13 @@ export const law: Playbook = {
     followUp: "What did that actually look like for you? Walk us through a typical week.",
   },
 
+  speakers: [
+    { name: "Standard Tobi" },
+    { name: "Munachi" },
+    { name: "Faith" },
+  ],
+  moreSpeakersToCome: false,
+
   speakerStrategy: [
     { label: "The academic", desc: "Strong results, and able to explain the method behind them rather than just the outcome." },
     { label: "The developer", desc: "Strong outside the classroom — competitions, skills, internships, a profile." },
@@ -173,6 +184,7 @@ export const law: Playbook = {
     ],
     positioning:
       "A-Star isn't simply giving students more classes. We're giving them a structured system for understanding, practising and preparing.",
+    startsOn: "17th September 2026",
   },
 
   audience: [
@@ -208,7 +220,7 @@ export const law: Playbook = {
   },
 
   metaDescription:
-    "A free 90-minute academic and mentorship webinar for Law students. How to study Law effectively, what to build outside the classroom, and how to balance both — from students who are already doing it. Sunday, 4th October 2026, 7:00 pm WAT.",
+    "A free 90-minute academic and mentorship webinar for Law students. How to study Law effectively, what to build outside the classroom, and how to balance both — from students who are already doing it. Saturday, 12th September 2026, 1:00 pm WAT.",
   ogDescription:
-    "Law school is preparing you for a profession, not just an examination. Free 90-minute webinar for Law students — Sunday, 4th October 2026, 7:00 pm.",
+    "Law school is preparing you for a profession, not just an examination. Free 90-minute webinar for Law students — Saturday, 12th September 2026, 1:00 pm.",
 };

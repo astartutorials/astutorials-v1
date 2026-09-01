@@ -100,6 +100,24 @@ export interface PlaybookAdvantage {
   intro: string;
   items: string[];
   positioning: string;
+  /** When the tutorials themselves begin, e.g. "17th September 2026". */
+  startsOn: string;
+}
+
+/**
+ * A confirmed panellist.
+ *
+ * `discipline` and `role` are both optional: some panels are announced with a
+ * department and an office, others with a name and nothing else, and inventing
+ * a title for somebody is worse than leaving it off. A speaker with neither is
+ * labelled simply "Speaker".
+ */
+export interface PlaybookSpeaker {
+  name: string;
+  /** Course or department, e.g. "Medical Laboratory Science". */
+  discipline?: string;
+  /** Office or credential, e.g. "President, MEDLAB". */
+  role?: string;
 }
 
 export interface Playbook {
@@ -148,9 +166,18 @@ export interface Playbook {
    */
   moderatorRule: { vague: string; followUp: string };
   /**
-   * Who is on the panel, described by the perspective they bring rather than by
-   * name — speakers are confirmed late, and "different paths to the same
-   * outcome" is the actual selling point.
+   * The confirmed panel. Empty until speakers are locked in, which is why
+   * `speakerStrategy` exists — the landing page falls back to describing the
+   * panel by the perspectives it is built from rather than shipping an empty
+   * section or a grid of "TBA" tiles.
+   */
+  speakers: PlaybookSpeaker[];
+  /** Shows a "more to be announced" tile beside the confirmed names. */
+  moreSpeakersToCome: boolean;
+  /**
+   * How the panel is picked: the perspective each seat brings rather than who
+   * fills it. Stands in for the names before they are confirmed, and survives
+   * afterwards as the line explaining why no two speakers repeat each other.
    */
   speakerStrategy: { label: string; desc: string }[];
   advantage: PlaybookAdvantage;
