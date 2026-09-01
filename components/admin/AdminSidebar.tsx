@@ -21,6 +21,7 @@ import {
   ExternalLink,
   ClipboardList,
   Sparkles,
+  BookOpen,
 } from "lucide-react";
 import type { AppRole } from "@/lib/rbac";
 import { ADMIN_ROUTES } from "@/lib/admin-routes";
@@ -50,6 +51,7 @@ const NAV_META: { name: string; href: string; icon: typeof LayoutDashboard }[] =
   { name: "Schedule Tutorial", href: "/admin/create-tutorial", icon: PlusCircle      },
   { name: "Feedback",          href: "/admin/feedback",        icon: MessageSquare   },
   { name: "BUCC Advantage",    href: "/admin/bucc",            icon: Sparkles        },
+  { name: "Playbook Series",   href: "/admin/playbooks",       icon: BookOpen        },
   { name: "Careers",           href: "/admin/careers",         icon: Briefcase       },
   { name: "Applications",      href: "/admin/applications",    icon: Users           },
   { name: "Payments",          href: "/admin/payments",        icon: CreditCard      },

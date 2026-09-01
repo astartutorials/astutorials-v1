@@ -1,12 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Phone, Mail } from "lucide-react";
+import { PLAYBOOKS, playbookHref } from "@/lib/playbooks";
 
 const quickLinks = [
   { label: "Home", href: "/" },
   { label: "BUCC 200L Prep Classes", href: "/bucc" },
   { label: "Pre-Clinicals Classes", href: "/preclinicals" },
   { label: "The BUCC Advantage", href: "/bucc/advantage" },
+  // Generated, so the footer keeps up with the registry rather than drifting
+  // from it. Past webinars stay listed for the same reason the Programmes menu
+  // keeps them: they are a record of what we have run.
+  ...PLAYBOOKS.map((p) => ({ label: p.name, href: playbookHref(p.slug) })),
   { label: "Tutorials", href: "/tutorials" },
   { label: "About", href: "/#about" },
   { label: "Careers", href: "/careers" },
