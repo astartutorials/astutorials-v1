@@ -12,6 +12,14 @@ export { isPlaybookOpen, playbookHref } from "./types";
  * Adding a fourth: write the config beside this file and append it here. The
  * route, the sitemap, the nav, the homepage band, the API and the admin console
  * all iterate this array, so nothing else needs touching.
+ *
+ * Anticipated but NOT scheduled: an EAH edition (Education, Arts & Humanities)
+ * covering Mass Communication, Political Science and International Law &
+ * Diplomacy. Three panellists are already identified — Michael (Political
+ * Science, President of the Premier Council), MYLA (ILD, General Secretary of
+ * BUSA) and a Mass Communication speaker still to be named. It is deliberately
+ * absent from the array rather than added disabled: an entry here is a live
+ * page, a nav item and a sitemap URL, and there is no date to put on it yet.
  */
 export const PLAYBOOKS: Playbook[] = [healthSciences, law, engineering];
 
