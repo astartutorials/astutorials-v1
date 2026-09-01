@@ -7,10 +7,13 @@ import type { Playbook } from "./types";
  * The one playbook aimed at a single year rather than a whole degree, which is
  * why its feature block is a 100 → 200 shift rather than a skills grid.
  *
- * ⚠️ Before announcing: set `dateLabel`/`closesAt` to the real date (they must
- * describe the same instant — closesAt is 19:00 WAT = 18:00 UTC) and paste the
- * Google Meet link into NEXT_PUBLIC_HEALTH_SCIENCES_MEETING_URL. While the link
- * is empty the page and the email both say we'll send it nearer the time.
+ * ⚠️ Still outstanding: paste the Google Meet link into NEXT_PUBLIC_HEALTH_SCIENCES_MEETING_URL.
+ * While it is empty the page and the confirmation email both say we'll send
+ * the link nearer the time, which is true and better than a dead link.
+ *
+ * `dateLabel` and `closesAt` must always describe the same instant — the
+ * label is what students read, and closesAt is what shuts registration. A
+ * test in __tests__/lib/playbooks.test.ts holds the two together.
  */
 export const healthSciences: Playbook = {
   slug: "health-sciences",
@@ -25,12 +28,13 @@ export const healthSciences: Playbook = {
   accent: "health-sciences",
   motif: "pulse",
 
-  dateLabel: "Sunday, 20th September 2026",
-  timeLabel: "7:00 pm WAT",
+  dateLabel: "Friday, 11th September 2026",
+  timeLabel: "6:00 pm WAT",
   durationLabel: "90 minutes",
   platform: "Google Meet",
   meetingUrl: process.env.NEXT_PUBLIC_HEALTH_SCIENCES_MEETING_URL ?? "",
-  closesAt: new Date("2026-09-20T18:00:00Z"),
+  // 18:00 WAT = 17:00 UTC.
+  closesAt: new Date("2026-09-11T17:00:00Z"),
 
   bigLine:
     "100 level introduced you to university. 200 level is where it starts asking for something back.",
@@ -165,6 +169,17 @@ export const healthSciences: Playbook = {
       "What did that actually look like for you in 200 level? Walk us through a typical week.",
   },
 
+  speakers: [
+    {
+      name: "Image Chioma",
+      discipline: "Medical Laboratory Science",
+      role: "President, MEDLAB · Gen. Sec., Premier Council",
+    },
+    { name: "Asha Feyi", discipline: "Nursing", role: "Vice President, Nursing" },
+    { name: "Ibukun Philips", discipline: "Public Health", role: "PRO, BUSA" },
+  ],
+  moreSpeakersToCome: true,
+
   speakerStrategy: [
     { label: "The academic", desc: "A strong 200-level performer who can explain the method, not just show the result." },
     { label: "The developer", desc: "Research, skills or professional development alongside a demanding course load." },
@@ -190,6 +205,7 @@ export const healthSciences: Playbook = {
     ],
     positioning:
       "A-Star helps students turn the strategies they've learnt tonight into a consistent academic system.",
+    startsOn: "17th September 2026",
   },
 
   audience: [
@@ -237,7 +253,7 @@ export const healthSciences: Playbook = {
   },
 
   metaDescription:
-    "A free 90-minute academic and mentorship webinar for 200-level Health Sciences students — Nursing, Anatomy, Physiology, Biochemistry, Public Health and related disciplines. Sunday, 20th September 2026, 7:00 pm WAT.",
+    "A free 90-minute academic and mentorship webinar for 200-level Health Sciences students — Nursing, Anatomy, Physiology, Biochemistry, Public Health and related disciplines. Friday, 11th September 2026, 6:00 pm WAT.",
   ogDescription:
-    "100 level introduced you to university. 200 level asks for something back. Free 90-minute webinar — Sunday, 20th September 2026, 7:00 pm.",
+    "100 level introduced you to university. 200 level asks for something back. Free 90-minute webinar — Friday, 11th September 2026, 6:00 pm.",
 };

@@ -419,27 +419,84 @@ export default function PlaybookLanding({ playbook }: { playbook: Playbook }) {
 
       {/* ── WHO YOU'LL HEAR FROM ───────────────────────────── */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-16 md:pb-20">
-        <Reveal>
-          <SectionHead eyebrow="Who You'll Hear From" title="Four strengths, not four biographies" />
-          <p className="mt-4 text-center text-fg-subtle md:text-lg max-w-2xl mx-auto">
-            The panel is picked so no two speakers give you the same answer. Names are announced
-            in the run-up — what matters is the perspective each one brings.
-          </p>
-        </Reveal>
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {playbook.speakerStrategy.map(({ label, desc }) => (
-            <Reveal
-              key={label}
-              className="rounded-2xl border border-line-subtle bg-surface-raised shadow-sm p-6"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--astar-navy)] text-white">
-                <Users size={19} />
-              </div>
-              <p className="mt-4 font-bold text-fg">{label}</p>
-              <p className="mt-1.5 text-sm text-fg-muted leading-relaxed">{desc}</p>
+        {/* Named speakers once they are confirmed; the panel design as a
+            stand-in before that. Never a grid of "TBA" tiles — an unfilled seat
+            is honest as a single note, not as three placeholder people. */}
+        {playbook.speakers.length > 0 ? (
+          <>
+            <Reveal>
+              <SectionHead eyebrow="Who You'll Hear From" title="Students who are already doing it" />
+              <p className="mt-4 text-center text-fg-subtle md:text-lg max-w-2xl mx-auto">
+                Not lecturers. Students a year or two ahead of you, sitting the same papers, picked
+                so no two of them give you the same answer.
+              </p>
             </Reveal>
-          ))}
-        </div>
+
+            <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {playbook.speakers.map(({ name, discipline, role }) => (
+                <Reveal
+                  key={name}
+                  className="flex flex-col rounded-2xl border border-line-subtle bg-surface-raised shadow-sm p-6 text-center"
+                >
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--astar-navy)] text-white text-lg font-extrabold">
+                    {name.charAt(0)}
+                  </div>
+                  <p className="mt-3 font-bold text-fg leading-snug">{name}</p>
+                  {discipline && (
+                    <p className="mt-1 text-xs font-semibold text-pb-ink">{discipline}</p>
+                  )}
+                  <p className="mt-1 text-[11px] leading-relaxed text-fg-faint">
+                    {role ?? "Speaker"}
+                  </p>
+                </Reveal>
+              ))}
+
+              {playbook.moreSpeakersToCome && (
+                <Reveal className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-surface-sunken p-6 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-dashed border-line-strong text-fg-faint">
+                    <Users size={20} />
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-fg-muted">One more to come</p>
+                  <p className="mt-1 text-[11px] text-fg-faint">Announced before the session</p>
+                </Reveal>
+              )}
+            </div>
+
+            {/* The panel design, kept as one line rather than four cards — it
+                explains the line-up above instead of standing in for it. */}
+            <Reveal>
+              <p className="mt-7 text-center text-sm text-fg-subtle max-w-2xl mx-auto leading-relaxed">
+                <span className="font-semibold text-fg-muted">How the panel is built:</span>{" "}
+                {playbook.speakerStrategy.map((sp) => sp.label.replace(/^The /, "")).join(" · ")} —
+                different routes to the same result.
+              </p>
+            </Reveal>
+          </>
+        ) : (
+          <>
+            <Reveal>
+              <SectionHead eyebrow="Who You'll Hear From" title="Strengths, not biographies" />
+              <p className="mt-4 text-center text-fg-subtle md:text-lg max-w-2xl mx-auto">
+                The panel is picked so no two speakers give you the same answer. Names are announced
+                in the run-up — what matters is the perspective each one brings.
+              </p>
+            </Reveal>
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {playbook.speakerStrategy.map(({ label, desc }) => (
+                <Reveal
+                  key={label}
+                  className="rounded-2xl border border-line-subtle bg-surface-raised shadow-sm p-6"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--astar-navy)] text-white">
+                    <Users size={19} />
+                  </div>
+                  <p className="mt-4 font-bold text-fg">{label}</p>
+                  <p className="mt-1.5 text-sm text-fg-muted leading-relaxed">{desc}</p>
+                </Reveal>
+              ))}
+            </div>
+          </>
+        )}
       </section>
 
       {/* ── THE A-STAR ADVANTAGE ───────────────────────────── */}
@@ -465,7 +522,15 @@ export default function PlaybookLanding({ playbook }: { playbook: Playbook }) {
             <p className="mt-10 text-center text-lg md:text-xl font-bold max-w-3xl mx-auto leading-snug">
               {playbook.advantage.positioning}
             </p>
-            <p className="mt-4 text-center text-sm text-on-dark-subtle">
+
+            <div className="mt-8 flex justify-center">
+              <span className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white">
+                <CalendarDays size={16} className="text-pb-on-dark" />
+                Tutorials begin {playbook.advantage.startsOn}
+              </span>
+            </div>
+
+            <p className="mt-5 text-center text-sm text-on-dark-subtle">
               Pricing, the registration deadline and the attendee-only bonus are announced live in
               the final segment.
             </p>
