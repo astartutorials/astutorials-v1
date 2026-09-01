@@ -1,6 +1,7 @@
 import { isBuccClassesOpen, BUCC_CLASSES_END_DATE } from '@/lib/bucc-classes';
 import { isPreClinicalsOpen, PRECLINICALS_END_DATE } from '@/lib/preclinicals';
 import { isBuccOpen, BUCC_CLOSES_AT } from '@/lib/bucc';
+import { PLAYBOOKS, isPlaybookOpen } from '@/lib/playbooks';
 
 /**
  * The Programmes menu lists past cohorts as a track record rather than dropping
@@ -13,6 +14,14 @@ describe('programme windows', () => {
     { name: 'bucc-classes', endsAt: BUCC_CLASSES_END_DATE, isOpen: isBuccClassesOpen },
     { name: 'preclinicals', endsAt: PRECLINICALS_END_DATE, isOpen: isPreClinicalsOpen },
     { name: 'bucc-advantage', endsAt: BUCC_CLOSES_AT, isOpen: isBuccOpen },
+    // The Playbook webinars join the same menu, so they are held to the same
+    // invariants — including the distinct-end-instant rule below, which now has
+    // to hold across two independently edited sets of configs.
+    ...PLAYBOOKS.map((pb) => ({
+      name: `playbook-${pb.slug}`,
+      endsAt: pb.closesAt,
+      isOpen: (now: Date) => isPlaybookOpen(pb, now),
+    })),
   ];
 
   it.each(windows)('$name is open at its end instant and closed just after', ({ endsAt, isOpen }) => {

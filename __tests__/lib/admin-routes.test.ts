@@ -46,15 +46,18 @@ describe('canAccessAdminPath', () => {
     }
   );
 
-  // BUCC Advantage is the one page on that list org_admin is let into; it stays
-  // shut to every role below.
-  it('opens /admin/bucc to super_admin and org_admin only', () => {
-    expect(canAccessAdminPath('super_admin', '/admin/bucc')).toBe(true);
-    expect(canAccessAdminPath('org_admin', '/admin/bucc')).toBe(true);
-    for (const role of ['tutor_manager', 'tutor', 'viewer'] as const) {
-      expect(canAccessAdminPath(role, '/admin/bucc')).toBe(false);
+  // The two webinar consoles are the pages on that list org_admin is let into;
+  // they stay shut to every role below.
+  it.each(['/admin/bucc', '/admin/playbooks'])(
+    'opens %s to super_admin and org_admin only',
+    (path) => {
+      expect(canAccessAdminPath('super_admin', path)).toBe(true);
+      expect(canAccessAdminPath('org_admin', path)).toBe(true);
+      for (const role of ['tutor_manager', 'tutor', 'viewer'] as const) {
+        expect(canAccessAdminPath(role, path)).toBe(false);
+      }
     }
-  });
+  );
 
   it('carries the rule down to nested pages', () => {
     expect(canAccessAdminPath('org_admin', '/admin/orgs/org-1/members')).toBe(false);

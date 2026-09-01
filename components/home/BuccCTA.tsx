@@ -60,7 +60,7 @@ export default function BuccCTA() {
             </ul>
 
             <Link
-              href="/bucc"
+              href="/bucc/advantage"
               className="mt-8 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-[var(--astar-red)] px-8 py-4 font-bold text-white shadow-lg shadow-red-500/20 hover:-translate-y-0.5 transition-all duration-300"
             >
               Reserve your free seat
@@ -73,7 +73,7 @@ export default function BuccCTA() {
           </div>
 
           <div className="lg:col-span-5">
-            <Link href="/bucc" className="block group">
+            <Link href="/bucc/advantage" className="block group">
               <Image
                 src="/bucc/flyer.jpg"
                 alt="A-Star Tutorials × BUCC — The BUCC Advantage: Your Blueprint for Thriving in 200 Level, 30th August 2026, 7pm on Google Meet"

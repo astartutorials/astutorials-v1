@@ -7,6 +7,7 @@ import {
   BUCC_PLATFORM,
   BUCC_MEETING_URL,
 } from "@/lib/bucc";
+import type { Playbook } from "@/lib/playbooks";
 
 const FROM = "Juyi at A-Star Tutorials <bookings@astartutorials.com>";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://astartutorials.com";
@@ -505,4 +506,73 @@ export async function sendBuccRegistrationConfirmation(opts: { to: string; fullN
   `;
 
   await send(to, `You're in — ${BUCC_EVENT_NAME}, ${BUCC_DATE_LABEL}`, html);
+}
+
+/**
+ * Confirmation for any of the three Playbook webinars. One function, because
+ * the three differ only in the strings the config already carries — see
+ * lib/playbooks.
+ */
+export async function sendPlaybookRegistrationConfirmation(opts: {
+  to: string;
+  fullName: string;
+  playbook: Playbook;
+}) {
+  const { to, fullName, playbook } = opts;
+  const url = `${BASE_URL}/playbooks/${playbook.slug}`;
+
+  const joinBlock = playbook.meetingUrl
+    ? `<p style="margin:24px 0">
+         <a href="${playbook.meetingUrl}" style="background:#D93025;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;display:inline-block">Join the webinar</a>
+       </p>
+       <p style="font-size:13px;color:#666;line-height:1.6">Save this email — the same link works on the night.</p>`
+    : `<p style="font-size:13px;color:#666;line-height:1.6">
+         We'll send you the ${playbook.platform} link a few hours before the session. Keep an eye on this inbox.
+       </p>`;
+
+  const topics = playbook.topics
+    .map(
+      (t) => `<li style="margin-bottom:8px"><strong>${t.title}</strong> <span style="color:#888">(${t.time} min)</span></li>`
+    )
+    .join("");
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">You're registered 🎉</h2>
+      <p style="margin-top:0;color:#666">Hi ${fullName}, your seat at ${playbook.name} is saved.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:24px 0;font-size:14px">
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888;width:40%">Event</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${playbook.name}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Theme</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee">${playbook.tagline}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Date</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${playbook.dateLabel}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Time</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${playbook.timeLabel}</td></tr>
+        <tr><td style="padding:10px 0;color:#888">Where</td>
+            <td style="padding:10px 0">${playbook.platform} · ${playbook.durationLabel}</td></tr>
+      </table>
+
+      ${joinBlock}
+
+      <p style="font-size:13px;color:#666;line-height:1.6;margin-bottom:6px">
+        Come with a pen. The 60-minute Playbook covers:
+      </p>
+      <ol style="font-size:13px;color:#666;line-height:1.6;padding-left:20px;margin-top:0">${topics}</ol>
+
+      <p style="font-size:13px;color:#666;line-height:1.6">
+        If you asked a question at registration, it goes into the pool for the live Q&A.
+        <a href="${url}" style="color:#D93025">Full run of show</a>.
+      </p>
+
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        Please do not reply to this email.<br/>
+        For help, WhatsApp us on <strong>0916 046 5678</strong> or email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+
+  await send(to, `You're in — ${playbook.name}, ${playbook.dateLabel}`, html);
 }

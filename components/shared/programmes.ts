@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import { isBuccClassesOpen, BUCC_CLASSES_END_DATE, BUCC_CLASSES_DATE_RANGE } from "@/lib/bucc-classes";
 import { isPreClinicalsOpen, PRECLINICALS_END_DATE, PRECLINICALS_DATE_RANGE } from "@/lib/preclinicals";
 import { isBuccOpen, BUCC_CLOSES_AT, BUCC_DATE_LABEL } from "@/lib/bucc";
+import { PLAYBOOKS, isPlaybookOpen, playbookHref } from "@/lib/playbooks";
 
 export type Programme = {
   key: string;
@@ -31,6 +32,19 @@ export type Programme = {
  * right group, automatically.
  */
 function buildProgrammes(now: Date): Programme[] {
+  // The Playbook webinars are generated from their registry rather than listed
+  // by hand, so a fourth one appears in the nav the moment its config exists.
+  const playbooks: Programme[] = PLAYBOOKS.map((pb) => ({
+    key: `playbook-${pb.slug}`,
+    name: pb.name,
+    href: playbookHref(pb.slug),
+    blurb: pb.navBlurb,
+    pastBlurb: `Free webinar · ${pb.dateLabel}`,
+    tag: "Free",
+    endsAt: pb.closesAt,
+    open: isPlaybookOpen(pb, now),
+  }));
+
   const all: Programme[] = [
     {
       key: "bucc-classes",
@@ -62,6 +76,7 @@ function buildProgrammes(now: Date): Programme[] {
       endsAt: BUCC_CLOSES_AT,
       open: isBuccOpen(now),
     },
+    ...playbooks,
   ];
 
   // Open programmes keep their editorial order (newest push first); past ones
