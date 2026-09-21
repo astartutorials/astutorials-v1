@@ -225,3 +225,69 @@ describe('PATCH /api/admin/applications/[id]', () => {
     expect(sendApplicationAccepted).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * The application queue was super_admin-only; org_admin now reaches it too.
+ * These go through user_roles rather than user_metadata because the metadata
+ * fallback produces an org_admin with a null orgId, which withSafeScope denies.
+ */
+describe('role gating on /api/admin/applications', () => {
+  function mockAuthAsRole(role: string, orgId: string | null) {
+    mockServerClient.mockResolvedValue({
+      auth: {
+        getUser: jest.fn().mockResolvedValue({
+          data: { user: { id: 'user-id', email: 'user@test.com', user_metadata: {} } },
+          error: null,
+        }),
+      },
+      from: jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            order: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue({ data: [{ role, org_id: orgId }] }),
+            }),
+          }),
+        }),
+      }),
+    } as unknown as Parameters<typeof mockServerClient.mockResolvedValue>[0]);
+  }
+
+  beforeEach(() => {
+    mockServerClient.mockReset();
+    mockFrom.mockReset();
+    jest.clearAllMocks();
+  });
+
+  it('lets an org_admin read the queue', async () => {
+    mockAuthAsRole('org_admin', 'org-1');
+    mockFrom.mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        order: jest.fn().mockResolvedValue({ data: [{ id: 'app-1' }], error: null }),
+      }),
+    });
+
+    const res = await GET();
+    expect(res.status).toBe(200);
+  });
+
+  it('lets an org_admin move an application forward, emails included', async () => {
+    mockAuthAsRole('org_admin', 'org-1');
+    mockSelectThenUpdate(SAMPLE_APP);
+
+    const res = await PATCH(patchReq({ status: 'shortlisted' }), makeParams('app-1'));
+    expect(res.status).toBe(200);
+    expect(sendApplicationShortlisted).toHaveBeenCalled();
+  });
+
+  it.each(['tutor_manager', 'tutor', 'viewer'])('refuses %s on read', async (role) => {
+    mockAuthAsRole(role, 'org-1');
+    const res = await GET();
+    expect(res.status).toBe(403);
+  });
+
+  it.each(['tutor_manager', 'tutor', 'viewer'])('refuses %s on update', async (role) => {
+    mockAuthAsRole(role, 'org-1');
+    const res = await PATCH(patchReq({ status: 'shortlisted' }), makeParams('app-1'));
+    expect(res.status).toBe(403);
+  });
+});

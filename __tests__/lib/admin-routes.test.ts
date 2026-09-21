@@ -36,7 +36,7 @@ describe('canAccessAdminPath', () => {
 
   // The regression this map exists to prevent: these pages were hidden from the
   // sidebar but reachable by typing the URL.
-  it.each(['/admin/careers', '/admin/applications', '/admin/audit-logs', '/admin/orgs'])(
+  it.each(['/admin/careers', '/admin/audit-logs', '/admin/orgs'])(
     'refuses %s to every non-super_admin',
     (path) => {
       expect(canAccessAdminPath('super_admin', path)).toBe(true);
@@ -46,9 +46,9 @@ describe('canAccessAdminPath', () => {
     }
   );
 
-  // The two webinar consoles are the pages on that list org_admin is let into;
-  // they stay shut to every role below.
-  it.each(['/admin/bucc', '/admin/playbooks'])(
+  // The pages on that list org_admin is let into: the two webinar consoles and
+  // the tutor application queue. All three stay shut to every role below.
+  it.each(['/admin/bucc', '/admin/playbooks', '/admin/applications'])(
     'opens %s to super_admin and org_admin only',
     (path) => {
       expect(canAccessAdminPath('super_admin', path)).toBe(true);
