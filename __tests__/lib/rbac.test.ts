@@ -63,10 +63,19 @@ describe('can()', () => {
     expect(can('tutor_manager', 'careers:delete')).toBe(false);
   });
 
-  it('applications:read is super_admin only', () => {
-    expect(can('super_admin', 'applications:read')).toBe(true);
-    expect(can('org_admin', 'applications:read')).toBe(false);
-    expect(can('tutor_manager', 'applications:read')).toBe(false);
+  it('applications are readable and updatable by org_admin, and no one below', () => {
+    for (const action of ['applications:read', 'applications:update'] as const) {
+      expect(can('super_admin', action)).toBe(true);
+      expect(can('org_admin', action)).toBe(true);
+      expect(can('tutor_manager', action)).toBe(false);
+      expect(can('tutor', action)).toBe(false);
+      expect(can('viewer', action)).toBe(false);
+    }
+  });
+
+  it('org_admin cannot delete an application', () => {
+    // read + update is the whole triage flow; removal stays with super_admin.
+    expect(can('org_admin', 'applications:delete')).toBe(false);
   });
 
   it('invites:create is available to org_admin and super_admin', () => {

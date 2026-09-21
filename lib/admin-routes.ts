@@ -38,7 +38,7 @@ export const ADMIN_ROUTES: AdminRoute[] = [
   { href: '/admin/bucc',            roles: ['super_admin', 'org_admin'] },
   { href: '/admin/playbooks',       roles: ['super_admin', 'org_admin'] },
   { href: '/admin/careers',         roles: ['super_admin'] },
-  { href: '/admin/applications',    roles: ['super_admin'] },
+  { href: '/admin/applications',    roles: ['super_admin', 'org_admin'] },
   { href: '/admin/audit-logs',      roles: ['super_admin'] },
   // Open to everyone, matching settings:read in PERMISSIONS. The page gates
   // itself: ALL_TABS marks Tutorials/Notifications/Payments/Security

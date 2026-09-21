@@ -8,14 +8,6 @@ export interface UserRoleContext {
   orgId: string | null;
 }
 
-/**
- * Some actions are deliberately absent from every array below, which leaves them
- * reachable only by super_admin's '*'. They cover first-party data that carries
- * no org_id and therefore cannot be org-scoped, so granting them to a tenant
- * role would leak across tenants rather than filter:
- *
- *   applications:read — career applications sent to A-Star itself
- */
 const PERMISSIONS: Record<AppRole, string[]> = {
   super_admin: ['*'],
 
@@ -34,6 +26,12 @@ const PERMISSIONS: Record<AppRole, string[]> = {
     // Same reasoning for the Playbook webinar series: A-Star's own events,
     // registrations carry no org_id, so this is a shared read.
     'playbooks:read',
+    // Tutor applications are sent to A-Star itself and carry no org_id, so this
+    // is a shared read too: every org_admin sees the same queue and can move an
+    // application through it. Update is granted alongside read because the
+    // triage page's only action is the status change — read without it leaves
+    // org_admin looking at a queue they cannot work.
+    'applications:read', 'applications:update',
     'settings:read', 'settings:update',
   ],
 
