@@ -4,6 +4,7 @@ import { verifyPaystackSignature } from "@/lib/paystack-signature";
 import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendNewBookingNotification } from "@/lib/email";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { recordHeartbeat } from "@/lib/health";
+import { programmeOrgId } from "@/lib/programme-org";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
   const amountPaid = Math.round((tx.amount ?? 0) / 100);
 
   let tutorialForEmail: { title: string; date: string | null; time: string } | null = null;
-  let bookingOrgId: string | null = meta.org_id ?? null;
+  let bookingOrgId: string | null = programmeOrgId(meta.type) ?? meta.org_id ?? null;
 
   if (meta.type !== "private" && meta.tutorial_id) {
     const { data: tut } = await supabase

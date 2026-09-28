@@ -257,10 +257,13 @@ export default function AdminDashboardPage() {
     }));
 
     const periodRevenue  = paidIn.reduce((s, b) => s + b.amount_paid, 0);
+    // Paid bookings with no org — counted in the total but in no org's slice,
+    // so surface them rather than let the breakdown silently not add up.
+    const unattributedRevenue = paidIn.filter(b => !b.org_id).reduce((s, b) => s + b.amount_paid, 0);
     const periodStudents = new Set(allIn.map(b => b.email)).size;
     const timeSeries = buildTimeSeries(paidIn, granularity, cutoff, allTimeByOrg);
 
-    return { filteredByOrg, timeSeries, periodRevenue, periodStudents };
+    return { filteredByOrg, timeSeries, periodRevenue, periodStudents, unattributedRevenue };
   }, [data, period]);
 
   if (loading || roleLoading) {
@@ -275,7 +278,7 @@ export default function AdminDashboardPage() {
   if (!data || !periodData) return null;
 
   const { totals, byOrg, orgNames, upcoming, recentFeedback, recentPayments } = data;
-  const { filteredByOrg, timeSeries, periodRevenue, periodStudents } = periodData;
+  const { filteredByOrg, timeSeries, periodRevenue, periodStudents, unattributedRevenue } = periodData;
 
   const revenueChartData  = filteredByOrg.map(o => ({ name: o.orgName, value: o.revenue }));
   const studentsChartData = filteredByOrg.map(o => ({ name: o.orgName, value: o.students }));
@@ -364,6 +367,22 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
                   ))}
+                  {unattributedRevenue > 0 && (
+                    <div className="flex items-center justify-between text-sm pt-2 border-t border-dashed border-gray-200">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 border border-amber-400" />
+                        <span className="text-amber-700 font-medium">Not linked to an organisation</span>
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <span className="font-bold text-amber-700">{fmtFull(unattributedRevenue)}</span>
+                        {periodRevenue > 0 && (
+                          <span className="text-xs text-gray-400 w-8 text-right">
+                            {Math.round((unattributedRevenue / periodRevenue) * 100)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

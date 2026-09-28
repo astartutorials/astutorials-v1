@@ -33,6 +33,7 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 process.env.PAYSTACK_SECRET_KEY = 'sk_test_dummy';
 
 import { POST } from '@/app/api/paystack/webhook/route';
+import { BABCOCK_ORG_ID } from '@/lib/programme-org';
 
 const SECRET = 'sk_test_dummy';
 
@@ -118,6 +119,31 @@ describe('POST /api/paystack/webhook', () => {
       payment_reference: 'REF_GROUP_001',
       amount_paid: 5075,
       payment_status: 'paid',
+    }));
+  });
+
+  it('attributes a pre-clinicals booking to Babcock', async () => {
+    const event = {
+      event: 'charge.success',
+      data: {
+        reference: 'REF_PRE_001',
+        amount: 6000000,
+        customer: { email: 'ada@test.com' },
+        metadata: { full_name: 'Ada Okonkwo', type: 'preclinicals', course: 'Pre-Clinicals' },
+      },
+    };
+    const raw = JSON.stringify(event);
+    const req = new NextRequest('http://localhost:3000/api/paystack/webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-paystack-signature': sign(raw) },
+      body: raw,
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    expect(mockInsert).toHaveBeenCalledWith(expect.objectContaining({
+      payment_reference: 'REF_PRE_001',
+      tutorial_id: null,
+      org_id: BABCOCK_ORG_ID,
     }));
   });
 

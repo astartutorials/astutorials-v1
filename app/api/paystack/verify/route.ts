@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendPreClinicalsReceipt, sendBuccClassesReceipt, sendNewBookingNotification } from "@/lib/email";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { programmeOrgId } from "@/lib/programme-org";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
   const amountPaid = Math.round(tx.amount / 100);
   // For group bookings, fetch tutorial upfront so we have org_id and can reuse data for email
   let tutorialForEmail: { title: string; date: string | null; time: string } | null = null;
-  let bookingOrgId: string | null = meta.org_id ?? null; // private bookings carry org_id in metadata when booking page has context
+  let bookingOrgId: string | null = programmeOrgId(meta.type) ?? meta.org_id ?? null; // private bookings carry org_id in metadata when booking page has context
   if (meta.type !== "private" && meta.tutorial_id) {
     const { data: tut } = await supabase
       .from("tutorials")
