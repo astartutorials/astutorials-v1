@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
   const actor = searchParams.get('actor') ?? '';
   const from = searchParams.get('from') ?? '';
   const to = searchParams.get('to') ?? '';
+  const hideSystem = searchParams.get('hideSystem') === '1';
   const limit = 50;
   const offset = (page - 1) * limit;
 
@@ -33,6 +34,7 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false });
 
   if (action) query = query.eq('action', action);
+  if (hideSystem) query = query.neq('action', 'system.heartbeat');
   if (actor) query = query.ilike('actor_email', `%${actor}%`);
   if (from) query = query.gte('created_at', from);
   if (to) query = query.lte('created_at', to + 'T23:59:59Z');

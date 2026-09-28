@@ -112,4 +112,19 @@ describe('GET /api/admin/audit-logs', () => {
     const body = await res.json();
     expect(body.page).toBe(1);
   });
+
+  it('excludes system heartbeats when hideSystem=1', async () => {
+    mockAuth(SUPER_ADMIN);
+    const neq = jest.fn();
+    const range = jest.fn().mockResolvedValue({ data: [], error: null, count: 0 });
+    const chain = { neq, range };
+    neq.mockReturnValue(chain);
+    mockFrom.mockReturnValue({
+      select: jest.fn().mockReturnValue({ order: jest.fn().mockReturnValue(chain) }),
+    });
+
+    const res = await GET(new NextRequest('http://localhost:3000/api/admin/audit-logs?hideSystem=1'));
+    expect(res.status).toBe(200);
+    expect(neq).toHaveBeenCalledWith('action', 'system.heartbeat');
+  });
 });

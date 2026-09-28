@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getUserRole, can } from '@/lib/rbac';
+import { logAuditEvent } from '@/lib/audit';
 
 export async function PUT(
   request: NextRequest,
@@ -62,6 +63,16 @@ export async function PUT(
       );
     }
 
+    await logAuditEvent({
+      actorId: user.id,
+      actorEmail: user.email ?? '',
+      action: 'career.updated',
+      targetType: 'career',
+      targetId: id,
+      targetLabel: `${data.job_id} — ${data.title}`,
+      details: { changed: Object.keys(updateData).join(', ') },
+    });
+
     const formattedJob = {
       id: data.id,
       jobId: data.job_id,
@@ -105,10 +116,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { error } = await supabase
+    const { data: deleted, error } = await supabase
       .from('careers')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select('job_id, title');
 
     if (error) {
       return NextResponse.json(
@@ -116,6 +128,16 @@ export async function DELETE(
         { status: 500 }
       );
     }
+
+    const role = deleted?.[0];
+    await logAuditEvent({
+      actorId: user.id,
+      actorEmail: user.email ?? '',
+      action: 'career.deleted',
+      targetType: 'career',
+      targetId: id,
+      targetLabel: role ? `${role.job_id} — ${role.title}` : id,
+    });
 
     return NextResponse.json({ message: 'Job role deleted successfully.' });
   } catch (error: unknown) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { ClipboardList, ChevronLeft, ChevronRight, RefreshCw, Search, X } from 'lucide-react';
+import { Activity, ClipboardList, ChevronLeft, ChevronRight, RefreshCw, Search, X } from 'lucide-react';
 
 interface AuditLog {
   id: string;
@@ -33,6 +33,10 @@ const ACTION_STYLES: Record<string, string> = {
   'member.removed':      'bg-red-100 text-red-700',
   'booking.cancelled':        'bg-red-100 text-red-700',
   'application.status_changed': 'bg-indigo-100 text-indigo-700',
+  'career.created':      'bg-teal-100 text-teal-700',
+  'career.updated':      'bg-amber-100 text-amber-700',
+  'career.deleted':      'bg-red-100 text-red-700',
+  'system.heartbeat':    'bg-gray-50 text-gray-400',
 };
 
 const ACTION_LABELS: Record<string, string> = {
@@ -51,7 +55,13 @@ const ACTION_LABELS: Record<string, string> = {
   'member.removed':      'Member removed',
   'booking.cancelled':        'Booking cancelled',
   'application.status_changed': 'Application updated',
+  'career.created':      'Career created',
+  'career.updated':      'Career updated',
+  'career.deleted':      'Career deleted',
+  'system.heartbeat':    'System heartbeat',
 };
+
+const HIDE_SYSTEM_KEY = 'audit-logs:hide-system';
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('en-GB', {
@@ -72,6 +82,20 @@ export default function AuditLogsPage() {
   const [filterActor, setFilterActor] = useState('');
   const [filterFrom, setFilterFrom] = useState('');
   const [filterTo, setFilterTo] = useState('');
+  const [hideSystem, setHideSystem] = useState(false);
+
+  // Remembered per browser so the preference survives a reload.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(HIDE_SYSTEM_KEY) === '1') setHideSystem(true);
+    } catch { /* storage unavailable */ }
+  }, []);
+
+  function toggleHideSystem() {
+    const next = !hideSystem;
+    setHideSystem(next);
+    try { localStorage.setItem(HIDE_SYSTEM_KEY, next ? '1' : '0'); } catch { /* storage unavailable */ }
+  }
 
   const hasFilters = filterAction || filterActor || filterFrom || filterTo;
 
@@ -81,8 +105,9 @@ export default function AuditLogsPage() {
     if (filterActor) params.set('actor', filterActor);
     if (filterFrom) params.set('from', filterFrom);
     if (filterTo) params.set('to', filterTo);
+    if (hideSystem) params.set('hideSystem', '1');
     return `/api/admin/audit-logs?${params}`;
-  }, [filterAction, filterActor, filterFrom, filterTo]);
+  }, [filterAction, filterActor, filterFrom, filterTo, hideSystem]);
 
   const fetchLogs = useCallback(async (p: number) => {
     setLoading(true);
@@ -123,14 +148,29 @@ export default function AuditLogsPage() {
             {total.toLocaleString()} event{total !== 1 ? 's' : ''} recorded
           </p>
         </div>
-        <button
-          onClick={() => fetchLogs(page)}
-          disabled={loading}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm transition-colors disabled:opacity-50"
-        >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleHideSystem}
+            aria-pressed={hideSystem}
+            title={hideSystem ? 'Show system heartbeats' : 'Hide system heartbeats'}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-colors ${
+              hideSystem
+                ? 'border-[#D93025] bg-red-50 text-[#D93025] hover:bg-red-100'
+                : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <Activity size={14} />
+            {hideSystem ? 'Heartbeats hidden' : 'Hide heartbeats'}
+          </button>
+          <button
+            onClick={() => fetchLogs(page)}
+            disabled={loading}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm transition-colors disabled:opacity-50"
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Filters */}

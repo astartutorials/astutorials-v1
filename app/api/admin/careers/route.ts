@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getUserRole, can } from '@/lib/rbac';
+import { logAuditEvent } from '@/lib/audit';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -93,7 +94,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-  
+    await logAuditEvent({
+      actorId: user.id,
+      actorEmail: user.email ?? '',
+      action: 'career.created',
+      targetType: 'career',
+      targetId: data.id,
+      targetLabel: `${data.job_id} — ${data.title}`,
+      details: { status: data.status },
+    });
+
     const formattedJob = {
       id: data.id,
       jobId: data.job_id,
