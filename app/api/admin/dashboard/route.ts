@@ -120,15 +120,23 @@ export async function GET() {
     ? filteredFeedbackRows.reduce((s, f) => s + f.rating, 0) / filteredFeedbackRows.length
     : null;
 
+  // Every role gets the dashboard, but money and feedback only go to roles that
+  // hold those permissions. Hiding the cards in the UI is not enough: the JSON
+  // is readable in the browser's network tab.
+  const showMoney = can(ctx.role, 'payments:read');
+  const showFeedback = can(ctx.role, 'feedback:read');
+
   return NextResponse.json({
-    totals: { revenue: totalRevenue, students: totalStudents, activeTutorials: totalActiveTutorials, avgRating, orgCount: filteredOrgs.length },
-    byOrg,
+    totals: { revenue: showMoney ? totalRevenue : 0, students: totalStudents, activeTutorials: totalActiveTutorials, avgRating: showFeedback ? avgRating : null, orgCount: filteredOrgs.length },
+    byOrg: showMoney ? byOrg : byOrg.map(o => ({ ...o, revenue: 0 })),
     orgNames: filteredOrgs.map(o => o.name),
     upcoming: upcoming ?? [],
-    recentFeedback: recentFeedback ?? [],
-    recentPayments: recentPaymentsRaw ?? [],
+    recentFeedback: showFeedback ? (recentFeedback ?? []) : [],
+    recentPayments: showMoney ? (recentPaymentsRaw ?? []) : [],
     // Raw booking streams — client aggregates these for time-period chart views
-    rawPaidBookings: filteredPaid.map(b => ({ created_at: b.created_at, amount_paid: b.amount_paid ?? 0, org_id: b.org_id })),
+    rawPaidBookings: showMoney
+      ? filteredPaid.map(b => ({ created_at: b.created_at, amount_paid: b.amount_paid ?? 0, org_id: b.org_id }))
+      : [],
     rawAllBookings: filteredAll.map(b => ({ created_at: b.created_at, email: b.email, org_id: b.org_id })),
   });
 }

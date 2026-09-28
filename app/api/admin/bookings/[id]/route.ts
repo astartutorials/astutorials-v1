@@ -20,7 +20,7 @@ export async function PATCH(
   }
 
   const ctx = await getUserRole(authClient, user.id, user.user_metadata as Record<string, unknown>);
-  if (!ctx || !can(ctx.role, 'bookings:update')) {
+  if (!ctx) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -28,7 +28,12 @@ export async function PATCH(
   const body = await req.json();
 
   // ── Attendance toggle ────────────────────────────────────────────────────
+  // Separate from cancellation: tutors take attendance, but only org_admin may
+  // cancel a paying student's booking.
   if (typeof body.attended === "boolean") {
+    if (!can(ctx.role, 'attendance:update')) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     const baseQuery = serviceSupabase
       .from("bookings")
       .update({ attended: body.attended })
@@ -44,6 +49,9 @@ export async function PATCH(
 
   // ── Cancellation ─────────────────────────────────────────────────────────
   if (body.status === 'cancelled') {
+    if (!can(ctx.role, 'bookings:cancel')) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     const { data: booking, error: fetchErr } = await serviceSupabase
       .from('bookings')
       .select('id, full_name, email, payment_status, tutorial_id, org_id')

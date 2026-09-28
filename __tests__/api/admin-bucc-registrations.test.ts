@@ -36,10 +36,14 @@ function mockAuth(user: object | null, roleRows: object[] | null = null) {
   } as any);
 }
 
+/** A select → order (→ eq) chain; awaiting it at any point yields `result`. */
 function mockRows(result: { data: any; error: any }) {
-  const order = jest.fn().mockResolvedValue(result);
+  const eq = jest.fn();
+  const chain = { eq, then: (resolve: (v: unknown) => void) => resolve(result) };
+  eq.mockReturnValue(chain);
+  const order = jest.fn().mockReturnValue(chain);
   mockFrom.mockReturnValue({ select: jest.fn().mockReturnValue({ order }) });
-  return { order };
+  return { order, eq };
 }
 
 const USER = { id: 'u1', user_metadata: {} };
@@ -77,14 +81,21 @@ describe('GET /api/admin/bucc-registrations', () => {
     expect(await res.json()).toEqual([ROW]);
   });
 
-  // The table carries no org_id, so there is no org filter to apply: an
-  // org_admin reads the same list a super_admin does.
-  it('returns 200 for an org_admin, unfiltered', async () => {
+  it('does not filter by org for super_admin', async () => {
+    mockAuth(USER, [{ role: 'super_admin', org_id: null }]);
+    const { eq } = mockRows({ data: [ROW], error: null });
+    await GET();
+    expect(eq).not.toHaveBeenCalled();
+  });
+
+  // BUCC is Babcock's club and its rows carry org_id, so an org_admin sees only
+  // their own organisation's registrants — never another university's.
+  it("scopes an org_admin to their own organisation", async () => {
     mockAuth(USER, [{ role: 'org_admin', org_id: 'org-1' }]);
-    mockRows({ data: [ROW], error: null });
+    const { eq } = mockRows({ data: [ROW], error: null });
     const res = await GET();
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual([ROW]);
+    expect(eq).toHaveBeenCalledWith('org_id', 'org-1');
   });
 
   it.each(['tutor_manager', 'tutor', 'viewer'])(

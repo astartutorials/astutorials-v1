@@ -79,7 +79,7 @@ export async function PUT(
     if (status !== undefined) updateData.status = status;
     updateData.updated_at = new Date().toISOString();
 
-    let query = supabase.from('tutorials').update(updateData).eq('id', id);
+    let query = serviceSupabase.from('tutorials').update(updateData).eq('id', id);
 
     // Non-super_admin users can only edit tutorials in their org
     if (ctx.role !== 'super_admin' && ctx.orgId) {
@@ -134,7 +134,7 @@ export async function DELETE(
 
     // Fetch the tutorial first — establishes existence and ownership, and
     // provides the title for the audit label.
-    const { data: tutorialData } = await supabase
+    const { data: tutorialData } = await serviceSupabase
       .from('tutorials')
       .select('code, title, org_id')
       .eq('id', id)
@@ -165,7 +165,7 @@ export async function DELETE(
       );
     }
 
-    const { error } = await supabase.from('tutorials').delete().eq('id', id);
+    const { error } = await serviceSupabase.from('tutorials').delete().eq('id', id);
     if (error) {
       return NextResponse.json({ error: 'Database Error', message: error.message }, { status: 500 });
     }

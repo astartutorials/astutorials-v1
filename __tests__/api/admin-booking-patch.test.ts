@@ -211,3 +211,40 @@ describe('PATCH /api/admin/bookings/[id] — cancellation', () => {
     expect(res.status).toBe(500);
   });
 });
+
+// Attendance and cancellation used to share one permission, so anyone who could
+// take attendance could also cancel a paid booking.
+describe('PATCH /api/admin/bookings/[id] — role split', () => {
+  beforeEach(() => { mockServerClient.mockReset(); mockFrom.mockReset(); mockRpc.mockReset(); });
+
+  function mockAuthAs(role: string) {
+    mockServerClient.mockResolvedValue({
+      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1', email: 'u@test.com', user_metadata: {} } }, error: null }) },
+      from: jest.fn(() => ({
+        select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: [{ role, org_id: 'org-1' }] }) }) }) }),
+      })),
+    } as any);
+  }
+
+  it('lets a tutor take attendance', async () => {
+    mockAuthAs('tutor');
+    const eq2 = jest.fn().mockResolvedValue({ error: null });
+    mockFrom.mockReturnValue({ update: jest.fn().mockReturnValue({ eq: jest.fn().mockReturnValue({ eq: eq2 }) }) });
+    const res = await PATCH(makeRequest('b1', { attended: true }), makeParams('b1'));
+    expect(res.status).toBe(200);
+  });
+
+  it.each(['tutor', 'tutor_manager', 'viewer'])('refuses a cancellation from %s before touching the booking', async (role) => {
+    mockAuthAs(role);
+    const res = await PATCH(makeRequest('b1', { status: 'cancelled' }), makeParams('b1'));
+    expect(res.status).toBe(403);
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('refuses attendance from a viewer', async () => {
+    mockAuthAs('viewer');
+    const res = await PATCH(makeRequest('b1', { attended: true }), makeParams('b1'));
+    expect(res.status).toBe(403);
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+});

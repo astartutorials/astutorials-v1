@@ -19,17 +19,20 @@ export async function GET() {
   }
 
   const ctx = await getUserRole(authClient, user.id, user.user_metadata as Record<string, unknown>);
-  // bucc:read is held by super_admin and org_admin. bucc_registrations has no
-  // org_id, so there is nothing to scope the read to: every org_admin sees the
-  // same list for this A-Star event, which is why no org filter follows.
   if (!ctx || !can(ctx.role, "bucc:read")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("bucc_registrations")
     .select("id, full_name, email, phone, parent_phone, level, programme, concern, question, heard_via, created_at")
     .order("created_at", { ascending: false });
+
+  // Registrations are Babcock's (org_id set on write, backfilled in migration
+  // 012), so an org_admin elsewhere sees none of these students' contacts.
+  if (ctx.role !== "super_admin") query = query.eq("org_id", ctx.orgId);
+
+  const { data, error } = await query;
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
