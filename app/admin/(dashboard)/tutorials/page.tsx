@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, PlusCircle, Eye, Pencil, Trash2, GraduationCap, Loader2, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { useAdminUser } from "@/lib/admin-context";
+import { can } from "@/lib/rbac";
 
 type Tutorial = {
   id: string;
@@ -79,6 +80,9 @@ export default function AdminTutorialsPage() {
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [fetchError, setFetchError] = useState(false);
   const { role } = useAdminUser();
+  const canCreate = !!role && can(role, 'tutorials:create');
+  const canEdit = !!role && can(role, 'tutorials:update');
+  const canDelete = !!role && can(role, 'tutorials:delete');
 
   function handleSort(key: TutorialSortKey) {
     if (sortKey === key) {
@@ -183,13 +187,15 @@ export default function AdminTutorialsPage() {
             Manage sessions and track student attendance.
           </p>
         </div>
-        <Link
-          href="/admin/create-tutorial"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D93025] text-white font-semibold rounded-xl shadow-sm hover:bg-red-700 transition-all text-sm self-start"
-        >
-          <PlusCircle size={16} />
-          Schedule Tutorial
-        </Link>
+        {canCreate && (
+          <Link
+            href="/admin/create-tutorial"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D93025] text-white font-semibold rounded-xl shadow-sm hover:bg-red-700 transition-all text-sm self-start"
+          >
+            <PlusCircle size={16} />
+            Schedule Tutorial
+          </Link>
+        )}
       </div>
       {fetchError && (
         <div className="mb-5 flex items-center gap-3 bg-red-50 border border-red-100 text-red-700 text-sm font-medium rounded-xl px-4 py-3">
@@ -346,23 +352,27 @@ export default function AdminTutorialsPage() {
                         >
                           <Eye size={16} />
                         </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); router.push(`/admin/tutorials/${item.id}/edit`); }}
-                          className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                          title="Edit"
-                        >
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); deleteTutorial(item.id); }}
-                          disabled={deletingId === item.id}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
-                          title="Delete"
-                        >
-                          {deletingId === item.id
-                            ? <Loader2 size={16} className="animate-spin" />
-                            : <Trash2 size={16} />}
-                        </button>
+                        {canEdit && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); router.push(`/admin/tutorials/${item.id}/edit`); }}
+                            className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                            title="Edit"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); deleteTutorial(item.id); }}
+                            disabled={deletingId === item.id}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
+                            title="Delete"
+                          >
+                            {deletingId === item.id
+                              ? <Loader2 size={16} className="animate-spin" />
+                              : <Trash2 size={16} />}
+                          </button>
+                        )}
                       </div>
                     </div>
                   );

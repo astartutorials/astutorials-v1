@@ -241,3 +241,40 @@ describe('GET /api/admin/dashboard', () => {
     expect(data.recentPayments[0].tutorials.title).toBe('Calculus');
   });
 });
+
+// The dashboard is open to every role, so it must not ship money to roles that
+// cannot see payments — hiding the cards in the UI leaves the numbers in the JSON.
+describe('GET /api/admin/dashboard — role-shaped response', () => {
+  beforeEach(() => { mockServerClient.mockReset(); mockServiceFrom.mockReset(); });
+
+  function mockAuthAs(role: string) {
+    mockServerClient.mockResolvedValue({
+      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1', user_metadata: {} } }, error: null }) },
+      from: jest.fn(() => ({
+        select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: [{ role, org_id: 'org-1' }] }) }) }) }),
+      })),
+    } as any);
+  }
+
+  it('withholds revenue and payments from a tutor', async () => {
+    mockAuthAs('tutor');
+    setupMocks();
+    const data = await (await GET()).json();
+
+    expect(data.totals.revenue).toBe(0);
+    expect(data.recentPayments).toEqual([]);
+    expect(data.rawPaidBookings).toEqual([]);
+    expect(data.byOrg.every((o: { revenue: number }) => o.revenue === 0)).toBe(true);
+    // Non-money parts of the dashboard still arrive.
+    expect(data.totals.activeTutorials).toBe(1);
+    expect(data.upcoming).toHaveLength(1);
+  });
+
+  it('still sends revenue to a viewer, who holds payments:read', async () => {
+    mockAuthAs('viewer');
+    setupMocks();
+    const data = await (await GET()).json();
+    expect(data.totals.revenue).toBe(5000);
+    expect(data.recentPayments).toHaveLength(1);
+  });
+});

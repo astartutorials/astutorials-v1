@@ -1,5 +1,5 @@
 import { ADMIN_ROUTES, ALL_ROLES, UNGATED_ADMIN_PATHS, routeForPath, canAccessAdminPath } from '@/lib/admin-routes';
-import type { AppRole } from '@/lib/rbac';
+import { can, type AppRole } from '@/lib/rbac';
 
 const NON_SUPER: AppRole[] = ['org_admin', 'tutor_manager', 'tutor', 'viewer'];
 
@@ -9,7 +9,11 @@ describe('routeForPath', () => {
   });
 
   it('matches a nested page against its parent', () => {
-    expect(routeForPath('/admin/tutorials/abc-123/edit')?.href).toBe('/admin/tutorials');
+    expect(routeForPath('/admin/tutorials/abc-123')?.href).toBe('/admin/tutorials');
+  });
+
+  it('matches a wildcard segment, preferring it over the shorter parent', () => {
+    expect(routeForPath('/admin/tutorials/abc-123/edit')?.href).toBe('/admin/tutorials/*/edit');
   });
 
   it('prefers the longest matching prefix', () => {
@@ -78,6 +82,25 @@ describe('canAccessAdminPath', () => {
     }
   });
 
+  // The edit page used to inherit /admin/tutorials and open for every role,
+  // including viewer and tutor, who could then submit a form the API refused.
+  it('opens the edit page only to roles that may update tutorials', () => {
+    for (const role of ['super_admin', 'org_admin', 'tutor_manager'] as const) {
+      expect(canAccessAdminPath(role, '/admin/tutorials/abc/edit')).toBe(true);
+    }
+    for (const role of ['tutor', 'viewer'] as const) {
+      expect(canAccessAdminPath(role, '/admin/tutorials/abc/edit')).toBe(false);
+      expect(canAccessAdminPath(role, '/admin/tutorials/abc')).toBe(true);
+    }
+  });
+
+  it('keeps payments away from tutors, who are not shown money', () => {
+    expect(canAccessAdminPath('tutor', '/admin/payments')).toBe(false);
+    for (const role of ['org_admin', 'tutor_manager', 'viewer'] as const) {
+      expect(canAccessAdminPath(role, '/admin/payments')).toBe(true);
+    }
+  });
+
   it('keeps scheduling restricted to the roles that may create tutorials', () => {
     expect(canAccessAdminPath('tutor_manager', '/admin/create-tutorial')).toBe(true);
     expect(canAccessAdminPath('tutor', '/admin/create-tutorial')).toBe(false);
@@ -95,6 +118,17 @@ describe('the map itself', () => {
   it('always admits super_admin, so the platform owner is never locked out', () => {
     for (const route of ADMIN_ROUTES) {
       expect(route.roles).toContain('super_admin');
+    }
+  });
+
+  // The drift this derivation exists to prevent: a page open to a role its API
+  // refuses (or shut to one it serves).
+  it('derives every page\'s roles from the permission it names', () => {
+    for (const route of ADMIN_ROUTES) {
+      for (const role of ALL_ROLES) {
+        const expected = route.permission === null || can(role, route.permission);
+        expect(route.roles.includes(role)).toBe(expected);
+      }
     }
   });
 

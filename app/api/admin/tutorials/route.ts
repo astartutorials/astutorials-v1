@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       ? (body.orgId ?? '00000000-0000-0000-0000-000000000001')
       : ctx.orgId;
 
-    const { data, error } = await supabase
+    const { data, error } = await serviceSupabase
       .from('tutorials')
       .insert([{
         code, title, teacher, description, date, time, location,

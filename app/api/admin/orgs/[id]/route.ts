@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
-import { getUserRole } from '@/lib/rbac';
+import { getUserRole, can } from '@/lib/rbac';
 import { logAuditEvent } from '@/lib/audit';
 
 const serviceSupabase = createClient(
@@ -16,7 +16,7 @@ async function assertSuperAdmin() {
   const { data: { user }, error } = await authClient.auth.getUser();
   if (error || !user) return { user: null, ctx: null, err: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
   const ctx = await getUserRole(authClient, user.id, user.user_metadata as Record<string, unknown>);
-  if (!ctx || ctx.role !== 'super_admin') return { user, ctx, err: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
+  if (!ctx || !can(ctx.role, 'orgs:manage')) return { user, ctx, err: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
   return { user, ctx, err: null };
 }
 

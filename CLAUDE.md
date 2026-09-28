@@ -25,6 +25,10 @@ Supabase Auth handles authentication (admin users only). The middleware (`middle
 
 Roles: `super_admin` > `org_admin` > `tutor_manager` > `tutor` > `viewer`. Role + org scope are stored in the `user_roles` table. `super_admin` has no org scope (global). All other roles are org-scoped. The `can(role, action)` function in `lib/rbac.ts` checks permissions against a static `PERMISSIONS` map.
 
+**`lib/rbac.ts` is the only source of access.** Its header states each role's purpose and the rules (org data is org-scoped; A-Star-wide data is super_admin's; money needs `payments:read`). Admin pages in `lib/admin-routes.ts` name a permission and derive their roles from it; API routes check `can()` then use the service role; the database grants signed-in users nothing (migration 012). `__tests__/lib/rbac.test.ts` holds the full role × permission matrix.
+
+**Before changing any grant, tell the user whether it's a sound decision** — check it against the role's stated purpose and the org/A-Star-wide rule, name what it would expose (e.g. another org's students, money to tutors), and suggest the better shape if there is one. Then change `PERMISSIONS` and the matrix test together; never add a role check (`role === 'super_admin'`) in a route or page instead of a permission.
+
 The `app/admin/(dashboard)/layout.tsx` wraps the entire admin area in `<AdminProvider>`, which fetches `/api/admin/me` and exposes the current user via `useAdminUser()`.
 
 ### Two Supabase Clients

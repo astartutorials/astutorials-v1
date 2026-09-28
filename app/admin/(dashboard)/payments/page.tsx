@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Search, Download, TrendingUp, Clock, XCircle, CheckCircle, Loader2, ChevronDown, ChevronUp, Ban } from "lucide-react";
+import { useAdminUser } from "@/lib/admin-context";
+import { can } from "@/lib/rbac";
 
 type Booking = {
   id: string;
@@ -54,6 +56,8 @@ const COLORS = [
 ];
 
 export default function AdminPaymentsPage() {
+  const { role } = useAdminUser();
+  const canCancel = !!role && can(role, 'bookings:cancel');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -299,7 +303,7 @@ export default function AdminPaymentsPage() {
                           </div>
                         </div>
 
-                        {b.payment_status !== 'cancelled' && b.payment_status !== 'failed' && (
+                        {canCancel && b.payment_status !== 'cancelled' && b.payment_status !== 'failed' && (
                           <div className="pt-2 border-t border-gray-100">
                             {confirmCancelId === b.id ? (
                               <div className="flex items-center gap-3">

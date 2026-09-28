@@ -1,13 +1,13 @@
 import { NextRequest } from 'next/server';
 
-// service-role client (used by GET — created at module scope)
+// service-role client: every read and write after the permission check
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({ from: jest.fn() })),
 }));
 
 jest.mock('@/lib/audit', () => ({ logAuditEvent: jest.fn() }));
 
-// auth client (used by POST / PUT / DELETE)
+// auth client: identity and role lookup only
 jest.mock('@/lib/supabase-server', () => ({
   createSupabaseServerClient: jest.fn(),
 }));
@@ -138,7 +138,8 @@ describe('POST /api/admin/tutorials', () => {
         }),
       }),
     });
-    mockAuthClient(ADMIN_USER, mockFrom);
+    mockAuthClient(ADMIN_USER);
+    getServiceFrom().mockImplementation(mockFrom);
     const res = await POST(makeRequest('POST', { code: 'MTH201', title: 'Calculus', status: 'draft' }));
     expect(res.status).toBe(201);
   });
@@ -152,7 +153,8 @@ describe('POST /api/admin/tutorials', () => {
         }),
       }),
     });
-    mockAuthClient(ADMIN_USER, mockFrom);
+    mockAuthClient(ADMIN_USER);
+    getServiceFrom().mockImplementation(mockFrom);
     const res = await POST(makeRequest('POST', {
       code: 'MTH201', title: 'Calculus', teacher: 'Dr A', capacity: 30, status: 'active',
     }));
@@ -182,7 +184,8 @@ describe('PUT /api/admin/tutorials/[id]', () => {
   }
 
   it('updates a tutorial and returns 200', async () => {
-    mockAuthClient(ADMIN_USER, mockUpdateResult({ id: 'tut-1', title: 'New Title' }));
+    mockAuthClient(ADMIN_USER);
+    getIdServiceFrom().mockImplementation(mockUpdateResult({ id: 'tut-1', title: 'New Title' }));
 
     const res = await PUT(makeRequest('PUT', { title: 'New Title' }, 'tut-1'), makeParams('tut-1'));
     expect(res.status).toBe(200);
@@ -191,7 +194,8 @@ describe('PUT /api/admin/tutorials/[id]', () => {
   });
 
   it('returns 404 when the tutorial does not exist (or is out of org scope)', async () => {
-    mockAuthClient(ADMIN_USER, mockUpdateResult(null));
+    mockAuthClient(ADMIN_USER);
+    getIdServiceFrom().mockImplementation(mockUpdateResult(null));
 
     const res = await PUT(makeRequest('PUT', { title: 'New Title' }, 'tut-1'), makeParams('tut-1'));
     expect(res.status).toBe(404);
@@ -243,50 +247,48 @@ describe('DELETE /api/admin/tutorials/[id]', () => {
     expect(res.status).toBe(401);
   });
 
-  // Mock the service-role paid-booking count check that runs before deletion.
-  function mockPaidBookingCount(count: number) {
-    getIdServiceFrom().mockReturnValue({
-      select: jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({ count }),
-        }),
-      }),
-    });
-  }
-
-  // Auth client whose existence/ownership fetch returns the given row, and
-  // whose delete resolves successfully.
-  function mockAuthForDelete(tutorialRow: object | null) {
-    mockAuthClient(ADMIN_USER, jest.fn().mockReturnValue({
-      select: jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          maybeSingle: jest.fn().mockResolvedValue({ data: tutorialRow, error: null }),
-        }),
-      }),
-      delete: jest.fn().mockReturnValue({
-        eq: jest.fn().mockResolvedValue({ error: null }),
-      }),
-    }));
+  // The route reads the tutorial (existence + ownership), counts its paid
+  // bookings, then deletes — all on the service-role client, told apart by table.
+  function mockDeleteFlow(tutorialRow: object | null, paidCount = 0) {
+    mockAuthClient(ADMIN_USER);
+    getIdServiceFrom().mockImplementation((table: string) =>
+      table === 'bookings'
+        ? {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                eq: jest.fn().mockResolvedValue({ count: paidCount }),
+              }),
+            }),
+          }
+        : {
+            select: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                maybeSingle: jest.fn().mockResolvedValue({ data: tutorialRow, error: null }),
+              }),
+            }),
+            delete: jest.fn().mockReturnValue({
+              eq: jest.fn().mockResolvedValue({ error: null }),
+            }),
+          }
+    );
   }
 
   it('deletes a tutorial and returns 200', async () => {
-    mockAuthForDelete({ code: 'CS101', title: 'Test Tutorial', org_id: null });
-    mockPaidBookingCount(0);
+    mockDeleteFlow({ code: 'CS101', title: 'Test Tutorial', org_id: null });
 
     const res = await DELETE(makeRequest('DELETE', undefined, 'tut-1'), makeParams('tut-1'));
     expect(res.status).toBe(200);
   });
 
   it('returns 404 when the tutorial does not exist (or is out of org scope)', async () => {
-    mockAuthForDelete(null);
+    mockDeleteFlow(null);
 
     const res = await DELETE(makeRequest('DELETE', undefined, 'tut-1'), makeParams('tut-1'));
     expect(res.status).toBe(404);
   });
 
   it('refuses to delete a tutorial with paid bookings (409)', async () => {
-    mockAuthForDelete({ code: 'CS101', title: 'Test Tutorial', org_id: null });
-    mockPaidBookingCount(2);
+    mockDeleteFlow({ code: 'CS101', title: 'Test Tutorial', org_id: null }, 2);
 
     const res = await DELETE(makeRequest('DELETE', undefined, 'tut-1'), makeParams('tut-1'));
     expect(res.status).toBe(409);

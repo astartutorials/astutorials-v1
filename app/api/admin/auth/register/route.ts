@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
-import { getUserRole, AppRole } from '@/lib/rbac';
+import { getUserRole, can, AppRole } from '@/lib/rbac';
 import { logAuditEvent } from '@/lib/audit';
 
 const adminSupabase = createClient(
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const ctx = await getUserRole(authClient, user.id, user.user_metadata as Record<string, unknown>);
-  if (!ctx || ctx.role !== 'super_admin') {
+  if (!ctx || !can(ctx.role, 'users:create')) {
     return NextResponse.json({ error: 'Only super admins can register new users.' }, { status: 403 });
   }
 

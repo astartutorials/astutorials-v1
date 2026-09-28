@@ -155,7 +155,7 @@ describe('PUT /api/admin/careers/[id]', () => {
   });
 
   it('updates a career and returns 200 with camelCase response', async () => {
-    const mockFrom = jest.fn().mockReturnValue({
+    mockFrom.mockReturnValue({
       update: jest.fn().mockReturnValue({
         eq: jest.fn().mockReturnValue({
           select: jest.fn().mockReturnValue({
@@ -164,7 +164,7 @@ describe('PUT /api/admin/careers/[id]', () => {
         }),
       }),
     });
-    mockClient(ADMIN_USER, mockFrom);
+    mockClient(ADMIN_USER);
 
     const res = await updateCareer(makeRequest('PUT', { status: 'inactive' }, 'c1'), makeParams('c1'));
     expect(res.status).toBe(200);
@@ -188,7 +188,7 @@ describe('DELETE /api/admin/careers/[id]', () => {
   });
 
   it('deletes a career and returns 200', async () => {
-    const deleteFrom = jest.fn().mockReturnValue({
+    mockFrom.mockReturnValue({
       delete: jest.fn().mockReturnValue({
         eq: jest.fn().mockReturnValue({
           select: jest.fn().mockResolvedValue({
@@ -198,7 +198,7 @@ describe('DELETE /api/admin/careers/[id]', () => {
         }),
       }),
     });
-    mockClient(ADMIN_USER, deleteFrom);
+    mockClient(ADMIN_USER);
 
     const res = await deleteCareer(makeRequest('DELETE', undefined, 'c1'), makeParams('c1'));
     expect(res.status).toBe(200);

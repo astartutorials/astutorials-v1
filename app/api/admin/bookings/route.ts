@@ -16,7 +16,7 @@ export async function GET() {
   }
 
   const ctx = await getUserRole(authClient, user.id, user.user_metadata as Record<string, unknown>);
-  if (!ctx || !can(ctx.role, 'bookings:read')) {
+  if (!ctx || !can(ctx.role, 'payments:read')) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

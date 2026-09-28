@@ -8,69 +8,111 @@ export interface UserRoleContext {
   orgId: string | null;
 }
 
-const PERMISSIONS: Record<AppRole, string[]> = {
+/**
+ * Every permission in the system. A typo in a `can()` call is a compile error
+ * rather than a silent deny.
+ *
+ * Two kinds of data, and the rule that follows from each:
+ *
+ *  - ORG DATA carries an org_id: tutorials, bookings, payments, feedback,
+ *    student intake, BUCC registrations, invites. Every role below super_admin
+ *    reads and writes it only for their own organisation — the API filters by
+ *    ctx.orgId, and getUserRole refuses a non-super_admin with no org.
+ *
+ *  - A-STAR-WIDE DATA has no org to scope by: careers, organisations, the
+ *    audit log, platform settings. It belongs to super_admin. The two
+ *    exceptions, playbooks:read and applications:*, were granted to org_admin
+ *    on request and are shared reads — every org_admin sees every row. That is
+ *    safe only while each org_admin works for A-Star itself; see the note on
+ *    org_admin below.
+ *
+ * Money is its own permission. bookings:read is the class roster (names,
+ * contacts, attendance); amounts, references and revenue need payments:read,
+ * and cancelling a booking — which releases a seat and marks a payment as
+ * cancelled — needs bookings:cancel.
+ */
+export type Permission =
+  | 'tutorials:read' | 'tutorials:create' | 'tutorials:update' | 'tutorials:delete'
+  | 'bookings:read' | 'bookings:cancel' | 'attendance:update'
+  | 'payments:read'
+  | 'feedback:read'
+  | 'intake:read'
+  | 'bucc:read'
+  | 'playbooks:read'
+  | 'applications:read' | 'applications:update' | 'applications:delete'
+  | 'careers:read' | 'careers:create' | 'careers:update' | 'careers:delete'
+  | 'invites:create'
+  | 'orgs:manage'
+  | 'users:create'
+  | 'audit:read';
+
+/**
+ * What each role is FOR, then exactly what it may do. Before adding a grant,
+ * check it against the role's purpose and the org/A-Star-wide rule above; a
+ * grant that doesn't fit either is a sign the role is being stretched into
+ * another one.
+ *
+ * Deliberately absent: a permission for your own profile and password. Every
+ * signed-in user may manage their own account (/api/admin/me,
+ * /api/admin/auth/update-password), which is identity, not authority.
+ */
+const PERMISSIONS: Record<AppRole, readonly (Permission | '*')[]> = {
+  // A-Star itself. Every organisation, every A-Star-wide dataset, the only role
+  // that can create organisations, create admin accounts or read the audit log.
   super_admin: ['*'],
 
-  // Runs the organisation: full tutorial control, sees all org data, can invite people
+  // Runs one university's operation end to end: the tutorials, the money, the
+  // students and the team. Nothing A-Star-wide except the two shared reads.
+  //
+  // playbooks:read and applications:* are A-Star-wide and granted on request.
+  // Today every org_admin is Babcock staff who also run A-Star's events, so
+  // this is fine; the moment an org_admin is added for a second university,
+  // they would see Babcock's playbook registrants and every tutor applicant.
+  // Revisit then — either tag those rows with an org or move the grant to a
+  // dedicated A-Star staff role.
   org_admin: [
     'tutorials:read', 'tutorials:create', 'tutorials:update', 'tutorials:delete',
-    'bookings:read', 'bookings:update',
+    'bookings:read', 'bookings:cancel', 'attendance:update',
     'payments:read',
     'feedback:read',
-    'invites:create',
-    'careers:read', 'careers:create', 'careers:update', 'careers:delete',
-    // BUCC Advantage is A-Star's own event and its registrations carry no
-    // org_id, so this is a shared read rather than an org-scoped one: every
-    // org_admin sees the same list.
-    'bucc:read',
-    // Same reasoning for the Playbook webinar series: A-Star's own events,
-    // registrations carry no org_id, so this is a shared read.
-    'playbooks:read',
-    // New-student intake. Rows carry org_id, so unlike the two above this read
-    // is org-scoped: the API filters to the org_admin's own organisation.
     'intake:read',
-    // Tutor applications are sent to A-Star itself and carry no org_id, so this
-    // is a shared read too: every org_admin sees the same queue and can move an
-    // application through it. Update is granted alongside read because the
-    // triage page's only action is the status change — read without it leaves
-    // org_admin looking at a queue they cannot work.
+    'bucc:read',
+    'invites:create',
+    'playbooks:read',
     'applications:read', 'applications:update',
-    'settings:read', 'settings:update',
   ],
 
-  // Schedules and manages tutorials: can create/update but not delete, marks attendance, sees revenue
+  // Runs the timetable: schedules and edits tutorials, takes attendance, and
+  // sees revenue to plan capacity. Cannot delete a tutorial or cancel a booking
+  // — both destroy a paying student's record and stay with org_admin.
   tutor_manager: [
     'tutorials:read', 'tutorials:create', 'tutorials:update',
-    'bookings:read', 'bookings:update',
+    'bookings:read', 'attendance:update',
     'payments:read',
     'feedback:read',
-    'careers:read',
-    'settings:read', 'settings:update',
   ],
 
-  // Teaches tutorials: sees bookings for their sessions, marks attendance, reads feedback
+  // Teaches. Sees the tutorials and who is booked on them, takes attendance,
+  // reads feedback. No money: a tutor is not shown what students paid.
   tutor: [
     'tutorials:read',
-    'bookings:read', 'bookings:update',
+    'bookings:read', 'attendance:update',
     'feedback:read',
-    'settings:read', 'settings:update',
   ],
 
-  // Read-only stakeholder: sees everything but changes nothing
+  // Read-only stakeholder (e.g. someone reporting to the university). Sees the
+  // org's tutorials, rosters, payments and feedback; changes nothing.
   viewer: [
     'tutorials:read',
     'bookings:read',
     'payments:read',
     'feedback:read',
-    'settings:read',
   ],
 };
 
-export function can(role: AppRole, action: string): boolean {
+export function can(role: AppRole, action: Permission): boolean {
   const perms = PERMISSIONS[role] ?? [];
-  if (perms.includes('*')) return true;
-  if (perms.includes(action)) return true;
-  return perms.includes(`${action.split(':')[0]}:*`);
+  return perms.includes('*') || perms.includes(action);
 }
 
 export async function getUserRole(

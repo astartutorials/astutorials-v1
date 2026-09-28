@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
-import { getUserRole } from '@/lib/rbac';
+import { getUserRole, can } from '@/lib/rbac';
 import { logAuditEvent } from '@/lib/audit';
 
 const serviceSupabase = createClient(
@@ -15,7 +15,7 @@ export async function GET() {
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const ctx = await getUserRole(authClient, user.id, user.user_metadata as Record<string, unknown>);
-  if (!ctx || ctx.role !== 'super_admin') {
+  if (!ctx || !can(ctx.role, 'orgs:manage')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const ctx = await getUserRole(authClient, user.id, user.user_metadata as Record<string, unknown>);
-  if (!ctx || ctx.role !== 'super_admin') {
+  if (!ctx || !can(ctx.role, 'orgs:manage')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

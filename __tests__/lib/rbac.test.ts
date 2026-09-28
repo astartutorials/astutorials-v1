@@ -1,89 +1,75 @@
 import { can, getUserRole, AppRole } from '@/lib/rbac';
 
+import type { Permission } from '@/lib/rbac';
+
+/**
+ * The whole permission model as a table. Each row is a permission; each column
+ * a role (super_admin, org_admin, tutor_manager, tutor, viewer). Changing who
+ * can do what means changing a cell here on purpose — the tests below fail on
+ * any grant or revocation that was not also made in this table.
+ */
+const MATRIX: Record<Permission, [boolean, boolean, boolean, boolean, boolean]> = {
+  //                       super  org    mgr    tutor  viewer
+  'tutorials:read':       [true,  true,  true,  true,  true ],
+  'tutorials:create':     [true,  true,  true,  false, false],
+  'tutorials:update':     [true,  true,  true,  false, false],
+  'tutorials:delete':     [true,  true,  false, false, false],
+  'bookings:read':        [true,  true,  true,  true,  true ],
+  'attendance:update':    [true,  true,  true,  true,  false],
+  'bookings:cancel':      [true,  true,  false, false, false],
+  'payments:read':        [true,  true,  true,  false, true ],
+  'feedback:read':        [true,  true,  true,  true,  true ],
+  'intake:read':          [true,  true,  false, false, false],
+  'bucc:read':            [true,  true,  false, false, false],
+  'playbooks:read':       [true,  true,  false, false, false],
+  'applications:read':    [true,  true,  false, false, false],
+  'applications:update':  [true,  true,  false, false, false],
+  'applications:delete':  [true,  false, false, false, false],
+  'careers:read':         [true,  false, false, false, false],
+  'careers:create':       [true,  false, false, false, false],
+  'careers:update':       [true,  false, false, false, false],
+  'careers:delete':       [true,  false, false, false, false],
+  'invites:create':       [true,  true,  false, false, false],
+  'orgs:manage':          [true,  false, false, false, false],
+  'users:create':         [true,  false, false, false, false],
+  'audit:read':           [true,  false, false, false, false],
+};
+
+const ROLES: AppRole[] = ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'];
+
 describe('can()', () => {
-  it('returns true for super_admin on any action', () => {
-    expect(can('super_admin', 'tutorials:read')).toBe(true);
-    expect(can('super_admin', 'applications:delete')).toBe(true);
-    expect(can('super_admin', 'anything:whatsoever')).toBe(true);
-  });
-
-  it('returns true for an exact permission match', () => {
-    expect(can('org_admin', 'tutorials:read')).toBe(true);
-    expect(can('org_admin', 'bookings:update')).toBe(true);
-    expect(can('tutor', 'feedback:read')).toBe(true);
-  });
-
-  it('returns false when the role does not have the permission', () => {
-    expect(can('viewer', 'tutorials:create')).toBe(false);
-    expect(can('viewer', 'bookings:update')).toBe(false);
-    expect(can('tutor', 'tutorials:create')).toBe(false);
-    expect(can('tutor_manager', 'tutorials:delete')).toBe(false);
+  it.each(Object.entries(MATRIX))('%s is granted exactly as the matrix says', (perm, row) => {
+    ROLES.forEach((role, i) => {
+      expect([role, can(role, perm as Permission)]).toEqual([role, row[i]]);
+    });
   });
 
   it('returns false for an unknown role', () => {
     expect(can('ghost' as AppRole, 'tutorials:read')).toBe(false);
   });
 
-  it('org_admin has full tutorial CRUD', () => {
-    (['read', 'create', 'update', 'delete'] as const).forEach(action => {
-      expect(can('org_admin', `tutorials:${action}`)).toBe(true);
-    });
+  // The split that used to be one permission: taking attendance is a tutor's
+  // job, cancelling a paid booking is not.
+  it('lets a tutor take attendance but not cancel a booking', () => {
+    expect(can('tutor', 'attendance:update')).toBe(true);
+    expect(can('tutor', 'bookings:cancel')).toBe(false);
   });
 
-  it('tutor_manager can create and update tutorials but not delete', () => {
-    expect(can('tutor_manager', 'tutorials:create')).toBe(true);
-    expect(can('tutor_manager', 'tutorials:update')).toBe(true);
-    expect(can('tutor_manager', 'tutorials:delete')).toBe(false);
+  it('keeps money away from tutors', () => {
+    expect(can('tutor', 'payments:read')).toBe(false);
   });
 
-  it('tutor can mark attendance (bookings:update) but cannot create tutorials', () => {
-    expect(can('tutor', 'bookings:update')).toBe(true);
-    expect(can('tutor', 'tutorials:create')).toBe(false);
+  it('gives viewer no write permission of any kind', () => {
+    const writes = (Object.keys(MATRIX) as Permission[]).filter((p) => !p.endsWith(':read'));
+    for (const p of writes) expect([p, can('viewer', p)]).toEqual([p, false]);
   });
 
-  it('viewer is read-only across all resources', () => {
-    expect(can('viewer', 'tutorials:read')).toBe(true);
-    expect(can('viewer', 'bookings:read')).toBe(true);
-    expect(can('viewer', 'feedback:read')).toBe(true);
-    (['create', 'update', 'delete'] as const).forEach(action => {
-      expect(can('viewer', `tutorials:${action}`)).toBe(false);
-    });
-    expect(can('viewer', 'bookings:update')).toBe(false);
-  });
-
-  it('org_admin can manage careers (read/create/update/delete)', () => {
-    (['read', 'create', 'update', 'delete'] as const).forEach(action => {
-      expect(can('org_admin', `careers:${action}`)).toBe(true);
-    });
-  });
-
-  it('tutor_manager can read careers but not create or delete', () => {
-    expect(can('tutor_manager', 'careers:read')).toBe(true);
-    expect(can('tutor_manager', 'careers:create')).toBe(false);
-    expect(can('tutor_manager', 'careers:delete')).toBe(false);
-  });
-
-  it('applications are readable and updatable by org_admin, and no one below', () => {
-    for (const action of ['applications:read', 'applications:update'] as const) {
-      expect(can('super_admin', action)).toBe(true);
-      expect(can('org_admin', action)).toBe(true);
-      expect(can('tutor_manager', action)).toBe(false);
-      expect(can('tutor', action)).toBe(false);
-      expect(can('viewer', action)).toBe(false);
+  // A-Star-wide data belongs to super_admin; the careers API used to let
+  // org_admin write while the page was hidden from them.
+  it('keeps A-Star-wide admin (careers, orgs, users, audit) with super_admin', () => {
+    for (const p of ['careers:read', 'careers:update', 'orgs:manage', 'users:create', 'audit:read'] as const) {
+      for (const role of ROLES.slice(1)) expect([role, p, can(role, p)]).toEqual([role, p, false]);
     }
-  });
-
-  it('org_admin cannot delete an application', () => {
-    // read + update is the whole triage flow; removal stays with super_admin.
-    expect(can('org_admin', 'applications:delete')).toBe(false);
-  });
-
-  it('invites:create is available to org_admin and super_admin', () => {
-    expect(can('super_admin', 'invites:create')).toBe(true);
-    expect(can('org_admin', 'invites:create')).toBe(true);
-    expect(can('tutor_manager', 'invites:create')).toBe(false);
-    expect(can('tutor', 'invites:create')).toBe(false);
-    expect(can('viewer', 'invites:create')).toBe(false);
   });
 });
 

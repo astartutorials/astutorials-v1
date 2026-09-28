@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { sendBuccRegistrationConfirmation } from "@/lib/email";
+import { BABCOCK_ORG_ID } from "@/lib/programme-org";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -47,6 +48,9 @@ export async function POST(req: NextRequest) {
   }
 
   const row = {
+    // BUCC is Babcock's computer club, so its registrants are Babcock's
+    // students: org-scoped like every other org dataset.
+    org_id: BABCOCK_ORG_ID,
     full_name: fullName,
     email: email.toLowerCase(),
     phone,

@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Search, Download, ChevronLeft, Clock, Loader2 } from "lucide-react";
+import { useAdminUser } from "@/lib/admin-context";
+import { can } from "@/lib/rbac";
 
 type Tutorial = {
   id: string;
@@ -49,6 +51,8 @@ const COLORS = [
 ];
 
 export default function TutorialAttendancePage() {
+  const { role } = useAdminUser();
+  const canMarkAttendance = !!role && can(role, 'attendance:update');
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
 
@@ -226,7 +230,8 @@ export default function TutorialAttendancePage() {
                     <div className="col-span-2 flex justify-end">
                       <button
                         onClick={() => toggleAttendance(b.id, b.attended)}
-                        disabled={togglingId === b.id}
+                        disabled={togglingId === b.id || !canMarkAttendance}
+                        title={canMarkAttendance ? undefined : "Your role can view attendance but not change it"}
                         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors disabled:opacity-50 ${b.attended ? "bg-emerald-500" : "bg-gray-200"}`}
                       >
                         <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform ${b.attended ? "translate-x-4" : "translate-x-1"}`} />

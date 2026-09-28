@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getUserRole, can } from '@/lib/rbac';
 import { logAuditEvent } from '@/lib/audit';
+
+// Writes go through the service role after the permission check below: the
+// careers table grants signed-in users nothing (migration 012), so the RBAC map
+// is the only gate, not a second, looser one in the database.
+const serviceSupabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function PUT(
   request: NextRequest,
@@ -49,7 +58,7 @@ export async function PUT(
       return NextResponse.json({ message: 'No valid fields provided for update.' }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await serviceSupabase
       .from('careers')
       .update(updateData)
       .eq('id', id)
@@ -116,7 +125,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { data: deleted, error } = await supabase
+    const { data: deleted, error } = await serviceSupabase
       .from('careers')
       .delete()
       .eq('id', id)
