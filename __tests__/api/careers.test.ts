@@ -9,16 +9,20 @@ jest.mock('@/lib/supabase-server', () => ({
   createSupabaseServerClient: jest.fn(),
 }));
 
+jest.mock('@/lib/audit', () => ({ logAuditEvent: jest.fn() }));
+
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 
 import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { logAuditEvent } from '@/lib/audit';
 import { GET as getPublicCareers } from '@/app/api/careers/route';
 import { GET as getAdminCareers, POST as createCareer } from '@/app/api/admin/careers/route';
 import { PUT as updateCareer, DELETE as deleteCareer } from '@/app/api/admin/careers/[id]/route';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
-const ADMIN_USER = { id: 'admin-id', user_metadata: { role: 'super_admin' } };
+const mockAudit = jest.mocked(logAuditEvent);
+const ADMIN_USER = { id: 'admin-id', email: 'admin@test.com', user_metadata: { role: 'super_admin' } };
 
 function mockClient(user: object | null, fromFn = jest.fn()) {
   mockServerClient.mockResolvedValue({
@@ -91,7 +95,7 @@ describe('GET /api/careers', () => {
 });
 
 describe('POST /api/admin/careers', () => {
-  beforeEach(() => mockServerClient.mockReset());
+  beforeEach(() => { mockServerClient.mockReset(); mockAudit.mockReset(); });
 
   it('returns 401 when not authenticated', async () => {
     mockClient(null);
@@ -125,11 +129,18 @@ describe('POST /api/admin/careers', () => {
     expect(res.status).toBe(201);
     const data = await res.json();
     expect(data.job.jobId).toBe('#ENG-123');
+    expect(mockAudit).toHaveBeenCalledWith(expect.objectContaining({
+      actorId: 'admin-id',
+      action: 'career.created',
+      targetType: 'career',
+      targetId: 'c1',
+      targetLabel: '#ENG-123 — Software Engineer',
+    }));
   });
 });
 
 describe('PUT /api/admin/careers/[id]', () => {
-  beforeEach(() => mockServerClient.mockReset());
+  beforeEach(() => { mockServerClient.mockReset(); mockAudit.mockReset(); });
 
   it('returns 401 when not authenticated', async () => {
     mockClient(null);
@@ -159,11 +170,16 @@ describe('PUT /api/admin/careers/[id]', () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.job.status).toBe('inactive');
+    expect(mockAudit).toHaveBeenCalledWith(expect.objectContaining({
+      action: 'career.updated',
+      targetId: 'c1',
+      details: { changed: 'status' },
+    }));
   });
 });
 
 describe('DELETE /api/admin/careers/[id]', () => {
-  beforeEach(() => mockServerClient.mockReset());
+  beforeEach(() => { mockServerClient.mockReset(); mockAudit.mockReset(); });
 
   it('returns 401 when not authenticated', async () => {
     mockClient(null);
@@ -174,13 +190,23 @@ describe('DELETE /api/admin/careers/[id]', () => {
   it('deletes a career and returns 200', async () => {
     const deleteFrom = jest.fn().mockReturnValue({
       delete: jest.fn().mockReturnValue({
-        eq: jest.fn().mockResolvedValue({ error: null }),
+        eq: jest.fn().mockReturnValue({
+          select: jest.fn().mockResolvedValue({
+            data: [{ job_id: '#ENG-123', title: 'Software Engineer' }],
+            error: null,
+          }),
+        }),
       }),
     });
     mockClient(ADMIN_USER, deleteFrom);
 
     const res = await deleteCareer(makeRequest('DELETE', undefined, 'c1'), makeParams('c1'));
     expect(res.status).toBe(200);
+    expect(mockAudit).toHaveBeenCalledWith(expect.objectContaining({
+      action: 'career.deleted',
+      targetId: 'c1',
+      targetLabel: '#ENG-123 — Software Engineer',
+    }));
   });
 });
 
