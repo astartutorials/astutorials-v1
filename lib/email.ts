@@ -576,3 +576,45 @@ export async function sendPlaybookRegistrationConfirmation(opts: {
 
   await send(to, `You're in — ${playbook.name}, ${playbook.dateLabel}`, html);
 }
+
+/** The name is typed by the student; keep it from being read as markup. */
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+}
+
+export async function sendStudentRegistrationConfirmation(opts: {
+  to: string;
+  fullName: string;
+  level: number;
+  session: string;
+}) {
+  const { to, fullName, level, session } = opts;
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">Welcome to A-Star 🎉</h2>
+      <p style="margin-top:0;color:#666">Hi ${escapeHtml(fullName)}, your registration is in.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:24px 0;font-size:14px">
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888;width:40%">Level</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${level} Level</td></tr>
+        <tr><td style="padding:10px 0;color:#888">Session</td>
+            <td style="padding:10px 0;font-weight:600">${session}</td></tr>
+      </table>
+
+      <p style="font-size:13px;color:#666;line-height:1.6">
+        We'll reach out on WhatsApp with tutorials, classes and everything else running for
+        ${level} level this session. Need to change something? Submit the form again with the
+        same email and we'll update your details.
+      </p>
+
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        Please do not reply to this email.<br/>
+        For help, WhatsApp us on <strong>0916 046 5678</strong> or email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+
+  await send(to, `You're registered — A-Star ${level} Level, ${session}`, html);
+}

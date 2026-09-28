@@ -26,6 +26,9 @@ const PERMISSIONS: Record<AppRole, string[]> = {
     // Same reasoning for the Playbook webinar series: A-Star's own events,
     // registrations carry no org_id, so this is a shared read.
     'playbooks:read',
+    // New-student intake. Rows carry org_id, so unlike the two above this read
+    // is org-scoped: the API filters to the org_admin's own organisation.
+    'intake:read',
     // Tutor applications are sent to A-Star itself and carry no org_id, so this
     // is a shared read too: every org_admin sees the same queue and can move an
     // application through it. Update is granted alongside read because the
