@@ -7,6 +7,17 @@ import {
 } from "lucide-react";
 import { useAdminUser } from "@/lib/admin-context";
 
+const EMPTY_REGISTER = { name: "", email: "", password: "", orgId: "", role: "org_admin" };
+
+// Mirrors ASSIGNABLE_ROLES in /api/admin/auth/register. super_admin is not
+// offered: platform-wide access is granted in the database, never from a form.
+const REGISTER_ROLES = [
+  { value: "org_admin",     label: "Org Admin — runs the organisation" },
+  { value: "tutor_manager", label: "Tutor Manager — runs the timetable" },
+  { value: "tutor",         label: "Tutor — teaches and takes attendance" },
+  { value: "viewer",        label: "Viewer — read-only" },
+];
+
 const inputClass =
   "w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-gray-800 bg-white text-sm";
 
@@ -78,7 +89,8 @@ export default function AdminSettingsPage() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
 
-  const [registerForm, setRegisterForm] = useState({ name: "", email: "", password: "" });
+  const [registerForm, setRegisterForm] = useState(EMPTY_REGISTER);
+  const [orgs, setOrgs] = useState<{ id: string; name: string }[] | null>(null);
   const [registerError, setRegisterError] = useState("");
   const [registerSaving, setRegisterSaving] = useState(false);
 
@@ -146,6 +158,19 @@ export default function AdminSettingsPage() {
     }
   }
 
+  // Every account below super_admin belongs to an organisation, so the form
+  // needs the list; loaded on first open rather than for every settings visit.
+  useEffect(() => {
+    if (!showRegisterModal || orgs) return;
+    fetch("/api/admin/orgs")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: { id: string; name: string }[]) => {
+        setOrgs(data);
+        if (data.length === 1) setRegisterForm((p) => ({ ...p, orgId: p.orgId || data[0].id }));
+      })
+      .catch(() => setOrgs([]));
+  }, [showRegisterModal, orgs]);
+
   async function handleRegisterAdmin(e: React.FormEvent) {
     e.preventDefault();
     setRegisterError("");
@@ -161,7 +186,7 @@ export default function AdminSettingsPage() {
         setRegisterError(d.error ?? "Failed to register admin.");
       } else {
         setShowRegisterModal(false);
-        setRegisterForm({ name: "", email: "", password: "" });
+        setRegisterForm(EMPTY_REGISTER);
         showToast("New admin registered successfully.", "success");
       }
     } catch {
@@ -465,7 +490,20 @@ export default function AdminSettingsPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-700">Password</label>
-                <input type="password" placeholder="At least 8 characters" value={registerForm.password} onChange={(e) => setRegisterForm((p) => ({ ...p, password: e.target.value }))} className={inputClass} required />
+                <input type="password" placeholder="At least 8 characters" value={registerForm.password} onChange={(e) => setRegisterForm((p) => ({ ...p, password: e.target.value }))} className={inputClass} required minLength={8} />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700">Organisation</label>
+                <select value={registerForm.orgId} onChange={(e) => setRegisterForm((p) => ({ ...p, orgId: e.target.value }))} className={selectClass} required disabled={!orgs}>
+                  <option value="">{orgs ? "Select an organisation" : "Loading organisations…"}</option>
+                  {orgs?.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700">Role</label>
+                <select value={registerForm.role} onChange={(e) => setRegisterForm((p) => ({ ...p, role: e.target.value }))} className={selectClass} required>
+                  {REGISTER_ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+                </select>
               </div>
               {registerError && <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{registerError}</p>}
               <div className="flex gap-3 pt-1">
