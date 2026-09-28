@@ -6,6 +6,7 @@ import {
   sendBuccClassesReceipt,
   sendNewBookingNotification,
 } from '@/lib/email';
+import { programmeOrgId } from '@/lib/programme-org';
 
 export interface PaystackTransaction {
   reference: string;
@@ -56,7 +57,7 @@ export async function recordBookingFromTransaction(
 
   // Group bookings hang off a tutorial, which also supplies the org scope.
   let tutorialForEmail: { title: string; date: string | null; time: string } | null = null;
-  let bookingOrgId: string | null = meta.org_id ?? null;
+  let bookingOrgId: string | null = programmeOrgId(meta.type) ?? meta.org_id ?? null;
 
   if (!isPrivate && meta.tutorial_id) {
     const { data: tut } = await supabase

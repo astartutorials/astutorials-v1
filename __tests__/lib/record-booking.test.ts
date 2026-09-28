@@ -10,6 +10,7 @@ jest.mock('@/lib/email', () => ({
 
 import * as email from '@/lib/email';
 import { recordBookingFromTransaction, fetchSuccessfulTransactions } from '@/lib/record-booking';
+import { BABCOCK_ORG_ID } from '@/lib/programme-org';
 
 const mockEmails = email as unknown as Record<string, jest.Mock>;
 
@@ -106,6 +107,21 @@ describe('recordBookingFromTransaction', () => {
       error: 'duplicate key',
     });
     expect(mockEmails.sendPreClinicalsReceipt).not.toHaveBeenCalled();
+  });
+
+  // Programme bookings have no tutorial to inherit an org from; without this
+  // they count toward the platform total but not Babcock's revenue.
+  it('attributes pre-clinicals and BUCC bookings to Babcock', async () => {
+    for (const type of ['preclinicals', 'bucc-classes']) {
+      const sb = makeSupabase();
+      await recordBookingFromTransaction(sb, {
+        ...PRECLINICALS_TX,
+        metadata: { ...PRECLINICALS_TX.metadata, type, org_id: 'client-supplied' },
+      });
+      expect(sb.insert).toHaveBeenCalledWith(
+        expect.objectContaining({ org_id: BABCOCK_ORG_ID })
+      );
+    }
   });
 
   it('sends the pre-clinicals receipt and the admin notification', async () => {
