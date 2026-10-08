@@ -10,6 +10,7 @@ import ThemeToggle from "@/components/shared/ThemeToggle";
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [programmesOpen, setProgrammesOpen] = useState(false);
+  const [mobilePastOpen, setMobilePastOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const programmesRef = useRef<HTMLDivElement>(null);
   // Open programmes and past ones both, evaluated against the visitor's clock.
@@ -235,8 +236,8 @@ export default function Navbar() {
         `}
       >
         <div className="p-6 flex flex-col gap-2">
-          {/* Same Programmes section as desktop, flattened — a nested accordion
-              inside a slide-down menu is a tap too many on a phone. */}
+          {/* Same Programmes section as desktop. Current ones are flat; past
+              ones fold away so they don't push the nav links off-screen. */}
           {programmes.length > 0 && (
             <div className="mb-2">
               <p className="px-1 pb-2 text-xs font-bold uppercase tracking-[0.18em] text-fg-faint">
@@ -261,32 +262,43 @@ export default function Navbar() {
                 ))}
               </div>
 
-              {/* Quieter styling than the live cohorts, but still tappable —
-                  these pages are the record of what we've run. */}
+              {/* Collapsed by default — the live cohorts are what a phone
+                  visitor came for; the track record is one tap away. */}
               {pastProgrammes.length > 0 && (
-                <>
-                  <p className="px-1 pt-4 pb-2 text-xs font-bold uppercase tracking-[0.18em] text-fg-faint">
-                    Past programmes
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    {pastProgrammes.map((p) => (
-                      <Link
-                        key={p.key}
-                        href={p.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center justify-between gap-3 p-4 rounded-xl border border-line-subtle bg-surface-sunken transition-colors"
-                      >
-                        <span className="min-w-0">
-                          <span className="block text-base font-semibold text-fg-muted">{p.name}</span>
-                          <span className="mt-0.5 block text-xs text-fg-faint">{p.pastBlurb}</span>
-                        </span>
-                        <span className="shrink-0 rounded-full border border-line bg-surface-raised px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-fg-faint">
-                          Past
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </>
+                <div className="pt-3">
+                  <button
+                    onClick={() => setMobilePastOpen((v) => !v)}
+                    aria-expanded={mobilePastOpen}
+                    aria-controls="mobile-past-programmes"
+                    className="flex w-full items-center justify-between px-1 py-2 text-xs font-bold uppercase tracking-[0.18em] text-fg-faint"
+                  >
+                    Past programmes ({pastProgrammes.length})
+                    <ChevronDown
+                      size={14}
+                      className={`transition-transform duration-200 ${mobilePastOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  {mobilePastOpen && (
+                    <div id="mobile-past-programmes" className="flex flex-col gap-2 pt-1">
+                      {pastProgrammes.map((p) => (
+                        <Link
+                          key={p.key}
+                          href={p.href}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center justify-between gap-3 p-4 rounded-xl border border-line-subtle bg-surface-sunken transition-colors"
+                        >
+                          <span className="min-w-0">
+                            <span className="block text-base font-semibold text-fg-muted">{p.name}</span>
+                            <span className="mt-0.5 block text-xs text-fg-faint">{p.pastBlurb}</span>
+                          </span>
+                          <span className="shrink-0 rounded-full border border-line bg-surface-raised px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-fg-faint">
+                            Past
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           )}

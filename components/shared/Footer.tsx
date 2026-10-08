@@ -1,17 +1,12 @@
+'use client';
+
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Phone, Mail } from "lucide-react";
-import { PLAYBOOKS, playbookHref } from "@/lib/playbooks";
+import { usePrograms } from "@/components/shared/programmes";
 
 const quickLinks = [
   { label: "Home", href: "/" },
-  { label: "BUCC 200L Prep Classes", href: "/bucc" },
-  { label: "Pre-Clinicals Classes", href: "/preclinicals" },
-  { label: "The BUCC Advantage", href: "/bucc/advantage" },
-  // Generated, so the footer keeps up with the registry rather than drifting
-  // from it. Past webinars stay listed for the same reason the Programmes menu
-  // keeps them: they are a record of what we have run.
-  ...PLAYBOOKS.map((p) => ({ label: p.name, href: playbookHref(p.slug) })),
   { label: "Tutorials", href: "/tutorials" },
   { label: "About", href: "/#about" },
   { label: "Careers", href: "/careers" },
@@ -59,6 +54,13 @@ const socials = [
 ];
 
 export default function Footer() {
+  // Only programmes still open — the past ones are a track record, and that
+  // lives in the Programmes menu, not here.
+  const openProgrammes = usePrograms()
+    .filter((p) => p.open)
+    .map((p) => ({ label: p.name, href: p.href }));
+  const links = [quickLinks[0], ...openProgrammes, ...quickLinks.slice(1)];
+
   return (
     <footer className="bg-[#020617] text-white border-t border-white/5">
       <div className="max-w-[1440px] mx-auto px-6 pt-14 pb-10">
@@ -97,7 +99,7 @@ export default function Footer() {
           <div className="md:col-span-3">
             <h4 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-5">Quick Links</h4>
             <ul className="space-y-3">
-              {quickLinks.map(({ label, href }) => (
+              {links.map(({ label, href }) => (
                 <li key={label}>
                   <Link href={href} className="text-gray-400 hover:text-white transition-colors text-sm">
                     {label}
