@@ -26,6 +26,8 @@ export interface Intake {
   opensAt: Date;
   /** Null keeps the intake open until the next one for the same level opens. */
   closesAt: Date | null;
+  /** The intake's WhatsApp group; students are sent straight there after registering. */
+  whatsappGroupUrl?: string;
 }
 
 export const INTAKES: Intake[] = [
@@ -35,6 +37,7 @@ export const INTAKES: Intake[] = [
     orgId: BABCOCK_ORG_ID,
     opensAt: new Date('2026-09-01T00:00:00+01:00'),
     closesAt: null,
+    whatsappGroupUrl: 'https://chat.whatsapp.com/DTvsNnfMDsDHinA896foHM',
   },
 ];
 
