@@ -113,7 +113,11 @@ export default function StudentRegistrationForm({ level }: { level: IntakeLevel 
         course_of_study: form.courseOfStudy,
       });
       setDone(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (intake?.whatsappGroupUrl) {
+        window.location.assign(intake.whatsappGroupUrl);
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     } catch (err) {
       posthog.captureException(err);
       setApiError("Network error. Please check your connection and try again.");
@@ -149,12 +153,22 @@ export default function StudentRegistrationForm({ level }: { level: IntakeLevel 
             confirmation to <span className="font-semibold text-fg">{form.email}</span> and
             we&apos;ll be in touch on WhatsApp.
           </p>
-          <Link
-            href="/"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-[var(--astar-red)] px-6 py-3 font-bold text-white text-sm hover:opacity-90 transition-all"
-          >
-            Back to home <ArrowRight size={16} />
-          </Link>
+          {intake.whatsappGroupUrl ? (
+            // The redirect fires on submit; this is for when WhatsApp didn't open.
+            <a
+              href={intake.whatsappGroupUrl}
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-[var(--astar-red)] px-6 py-3 font-bold text-white text-sm hover:opacity-90 transition-all"
+            >
+              Join the {level} level group chat <ArrowRight size={16} />
+            </a>
+          ) : (
+            <Link
+              href="/"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-[var(--astar-red)] px-6 py-3 font-bold text-white text-sm hover:opacity-90 transition-all"
+            >
+              Back to home <ArrowRight size={16} />
+            </Link>
+          )}
         </div>
       </Shell>
     );
