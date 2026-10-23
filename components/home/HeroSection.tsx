@@ -52,7 +52,7 @@ export default function HeroSection() {
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8 items-center justify-center opacity-80">
           {[
-            { val: "4000+", label: "Active Students" },
+            { val: "7000+", label: "Active Students" },
             { val: "95%",   label: "Pass Rate" },
             { val: "50+",   label: "Expert Tutors" },
             { val: "24/7",  label: "Support", static: true },
