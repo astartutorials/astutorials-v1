@@ -22,6 +22,7 @@ jest.mock('@/lib/posthog-server', () => ({
 jest.mock('@/lib/email', () => ({
   sendGroupBookingConfirmation: jest.fn(),
   sendPrivateBookingReceipt: jest.fn(),
+  sendSemesterPlanReceipt: jest.fn(),
   sendNewBookingNotification: jest.fn(),
 }));
 
@@ -31,7 +32,8 @@ process.env.PAYSTACK_SECRET_KEY = 'sk_test_dummy';
 process.env.NEXT_PUBLIC_BASE_URL = 'http://localhost:3000';
 
 import { GET } from '@/app/api/paystack/verify/route';
-import { sendGroupBookingConfirmation, sendPrivateBookingReceipt } from '@/lib/email';
+import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendSemesterPlanReceipt } from '@/lib/email';
+import { BABCOCK_ORG_ID } from '@/lib/programme-org';
 
 function makeRequest(reference?: string) {
   const url = reference
@@ -299,6 +301,23 @@ describe('GET /api/paystack/verify', () => {
       mockPaystackSuccess({ tutorial_id: 'tut-1', full_name: 'Ada' });
       const res = await GET(makeRequest('ref_group_check'));
       expect(res.headers.get('location')).toContain('ref=ref_group_check');
+    });
+  });
+
+  describe('full semester plan payment', () => {
+    it('records a Babcock programme booking and redirects to the semester plan success page', async () => {
+      mockPaystackSuccess({ type: 'semester-plan', plan: 'group', full_name: 'Ada Obi', course: 'Full Semester Plan: Group Semester Plan' });
+
+      const res = await GET(makeRequest('ref_semester'));
+
+      expect(res.headers.get('location')).toBe('http://localhost:3000/semester-plan/success?ref=ref_semester');
+      expect(mockInsert).toHaveBeenCalledWith(
+        expect.objectContaining({ tutorial_id: null, org_id: BABCOCK_ORG_ID, payment_reference: 'ref_semester' })
+      );
+      expect(mockRpc).not.toHaveBeenCalled();
+      expect(sendSemesterPlanReceipt).toHaveBeenCalledWith(
+        expect.objectContaining({ to: 'student@example.com', planName: 'Group Semester Plan' })
+      );
     });
   });
 });

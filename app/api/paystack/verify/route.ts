@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendPreClinicalsReceipt, sendBuccClassesReceipt, sendNewBookingNotification } from "@/lib/email";
+import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendPreClinicalsReceipt, sendBuccClassesReceipt, sendSemesterPlanReceipt, sendNewBookingNotification } from "@/lib/email";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { programmeOrgId } from "@/lib/programme-org";
+import { SEMESTER_PLANS, isSemesterPlanId } from "@/lib/semester-plan";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -129,6 +130,8 @@ export async function GET(req: NextRequest) {
       ? "preclinicals"
       : meta.type === "bucc-classes"
       ? "bucc-classes"
+      : meta.type === "semester-plan"
+      ? "semester-plan"
       : "group";
   await sendNewBookingNotification({
     bookingType,
@@ -140,6 +143,14 @@ export async function GET(req: NextRequest) {
     tutorialTitle: tutorialForEmail?.title,
     course: meta.course ?? undefined,
   });
+
+  // Full Semester Plan → send receipt, then WhatsApp handoff to get enrolled
+  if (meta.type === "semester-plan") {
+    const plan: unknown = meta.plan;
+    const planName = isSemesterPlanId(plan) ? SEMESTER_PLANS[plan].name : (meta.course ?? "Full Semester Plan");
+    await sendSemesterPlanReceipt({ to: email, fullName, planName, amountPaid, reference });
+    return NextResponse.redirect(`${BASE_URL}/semester-plan/success?ref=${reference}`);
+  }
 
   // BUCC 200L Preparatory Classes → send receipt, then WhatsApp handoff
   if (meta.type === "bucc-classes") {

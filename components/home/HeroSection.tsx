@@ -1,6 +1,8 @@
 import Link from "next/link";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import CountUp from "@/components/shared/CountUp";
+import { ArrowRight, CalendarRange } from "lucide-react";
+import { SEMESTER_PLAN_HREF, SEMESTER_PLAN_NAME } from "@/lib/semester-plan";
 
 export default function HeroSection() {
   return (
@@ -20,12 +22,24 @@ export default function HeroSection() {
             Expert-led group and private tutorials to help you master your courses, ace your exams, and reach your full academic potential.
           </p>
 
-          <div className="flex flex-row items-center justify-center lg:justify-start gap-3 w-full max-w-sm mx-auto lg:mx-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 w-full max-w-sm sm:max-w-lg mx-auto lg:mx-0">
             <Link
               href="/tutorials"
               className="btn-primary flex-1 px-4 py-3.5 rounded-full text-sm md:text-base font-medium text-center shadow-xl shadow-red-500/10 whitespace-nowrap"
             >
               Book a Tutorial Session
+            </Link>
+            {/* The semester-long alternative to booking one at a time, aimed at 100L. */}
+            <Link
+              href={SEMESTER_PLAN_HREF}
+              className="group relative flex-1 inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-full border border-line bg-surface-raised text-fg text-sm md:text-base font-medium whitespace-nowrap hover:border-[var(--astar-red)] transition-all"
+            >
+              <span className="absolute -top-2.5 right-5 rounded-full bg-[var(--astar-navy)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white dark:bg-white dark:text-[var(--astar-navy)]">
+                New · 100L
+              </span>
+              <CalendarRange size={17} className="text-brand-ink" />
+              {SEMESTER_PLAN_NAME}
+              <ArrowRight size={16} className="text-fg-faint group-hover:translate-x-0.5 group-hover:text-brand-ink transition-all" />
             </Link>
           </div>
         </div>
