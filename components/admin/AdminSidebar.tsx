@@ -23,6 +23,7 @@ import {
   Sparkles,
   BookOpen,
   UserPlus,
+  CalendarRange,
 } from "lucide-react";
 import type { AppRole } from "@/lib/rbac";
 import { ADMIN_ROUTES } from "@/lib/admin-routes";
@@ -54,6 +55,7 @@ const NAV_META: { name: string; href: string; icon: typeof LayoutDashboard }[] =
   { name: "BUCC Advantage",    href: "/admin/bucc",            icon: Sparkles        },
   { name: "Playbook Series",   href: "/admin/playbooks",       icon: BookOpen        },
   { name: "Student Intake",    href: "/admin/intake",          icon: UserPlus        },
+  { name: "Semester Plan",     href: "/admin/semester-plan",   icon: CalendarRange   },
   { name: "Careers",           href: "/admin/careers",         icon: Briefcase       },
   { name: "Applications",      href: "/admin/applications",    icon: Users           },
   { name: "Payments",          href: "/admin/payments",        icon: CreditCard      },

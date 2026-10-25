@@ -175,4 +175,31 @@ describe('POST /api/paystack/initialize', () => {
     }));
     expect(res.status).toBe(200);
   });
+
+  describe('full semester plan', () => {
+    const okPaystack = () =>
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ status: true, data: { authorization_url: 'https://paystack.com/pay/x' } }),
+      });
+
+    it('accepts the listed price for each plan', async () => {
+      okPaystack();
+      for (const [plan, amount] of [['group', 75000], ['private', 250000]] as const) {
+        const res = await POST(makeRequest({ email: 'p@example.com', amount, metadata: { type: 'semester-plan', plan } }));
+        expect(res.status).toBe(200);
+      }
+    });
+
+    it('refuses an amount that does not match the plan', async () => {
+      const res = await POST(makeRequest({ email: 'p@example.com', amount: 100, metadata: { type: 'semester-plan', plan: 'private' } }));
+      expect(res.status).toBe(400);
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('refuses an unknown plan', async () => {
+      const res = await POST(makeRequest({ email: 'p@example.com', amount: 75000, metadata: { type: 'semester-plan', plan: 'vip' } }));
+      expect(res.status).toBe(400);
+    });
+  });
 });

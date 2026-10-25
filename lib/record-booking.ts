@@ -4,9 +4,11 @@ import {
   sendPrivateBookingReceipt,
   sendPreClinicalsReceipt,
   sendBuccClassesReceipt,
+  sendSemesterPlanReceipt,
   sendNewBookingNotification,
 } from '@/lib/email';
 import { programmeOrgId } from '@/lib/programme-org';
+import { SEMESTER_PLANS, isSemesterPlanId } from '@/lib/semester-plan';
 
 export interface PaystackTransaction {
   reference: string;
@@ -15,6 +17,7 @@ export interface PaystackTransaction {
   customer?: { email?: string; first_name?: string; phone?: string } | null;
   metadata?: {
     type?: string;
+    plan?: string;
     tutorial_id?: string;
     org_id?: string;
     full_name?: string;
@@ -46,6 +49,7 @@ export async function recordBookingFromTransaction(
   const isPrivate = meta.type === 'private';
   const isPreclinicals = meta.type === 'preclinicals';
   const isBuccClasses = meta.type === 'bucc-classes';
+  const isSemesterPlan = meta.type === 'semester-plan';
 
   const { data: existing } = await supabase
     .from('bookings')
@@ -101,6 +105,8 @@ export async function recordBookingFromTransaction(
         ? 'preclinicals'
         : isBuccClasses
         ? 'bucc-classes'
+        : isSemesterPlan
+        ? 'semester-plan'
         : 'group',
       fullName,
       email,
@@ -116,6 +122,9 @@ export async function recordBookingFromTransaction(
         await sendPreClinicalsReceipt({ to: email, fullName, amountPaid, reference });
       } else if (isBuccClasses) {
         await sendBuccClassesReceipt({ to: email, fullName, amountPaid, reference });
+      } else if (isSemesterPlan) {
+        const planName = isSemesterPlanId(meta.plan) ? SEMESTER_PLANS[meta.plan].name : (meta.course ?? 'Full Semester Plan');
+        await sendSemesterPlanReceipt({ to: email, fullName, planName, amountPaid, reference });
       } else if (isPrivate) {
         await sendPrivateBookingReceipt({ to: email, fullName, amountPaid, reference });
       } else if (tutorialForEmail) {

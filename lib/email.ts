@@ -8,6 +8,7 @@ import {
   BUCC_MEETING_URL,
 } from "@/lib/bucc";
 import type { Playbook } from "@/lib/playbooks";
+import { SEMESTER_PLAN_NAME, SEMESTER_PLAN_TERM } from "@/lib/semester-plan";
 
 const FROM = "Juyi at A-Star Tutorials <bookings@astartutorials.com>";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://astartutorials.com";
@@ -208,6 +209,90 @@ export async function sendBuccClassesReceipt(opts: {
   await send(to, "BUCC 200L Preparatory Classes — Payment Received", html);
 }
 
+export async function sendSemesterPlanReceipt(opts: {
+  to: string;
+  fullName: string;
+  planName: string;
+  amountPaid: number;
+  reference: string;
+}) {
+  const { to, fullName, planName, amountPaid, reference } = opts;
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">Your semester is sorted 🎉</h2>
+      <p style="margin-top:0;color:#666">Hi ${escapeHtml(fullName)}, your ${SEMESTER_PLAN_NAME} is confirmed.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:24px 0;font-size:14px">
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888;width:40%">Plan</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${planName}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Semester</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${SEMESTER_PLAN_TERM}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Amount paid</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">₦${amountPaid.toLocaleString()}</td></tr>
+        <tr><td style="padding:10px 0;color:#888">Reference</td>
+            <td style="padding:10px 0;font-family:monospace;font-size:12px">${reference}</td></tr>
+      </table>
+
+      <p style="font-size:13px;color:#666;line-height:1.6">
+        Please message us on WhatsApp so we can confirm your courses, match you with your tutor and share your timetable.
+      </p>
+
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        Please do not reply to this email.<br/>
+        For help, WhatsApp us on <strong>0916 046 5678</strong> or email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+
+  await send(to, `${SEMESTER_PLAN_NAME} — Payment Received`, html);
+}
+
+/** Admin alert for a Full Semester Plan enquiry — someone who wants a call before paying. */
+export async function sendSemesterPlanEnquiryNotification(opts: {
+  planName: string;
+  submittedBy: string;
+  studentName: string;
+  studentPhone: string;
+  parentName: string;
+  parentPhone: string;
+  courseOfStudy: string;
+}) {
+  const notifyEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
+  if (!notifyEmail) return;
+
+  const rows: [string, string][] = [
+    ['Plan', opts.planName],
+    ['Submitted by', opts.submittedBy],
+    ['Student', opts.studentName],
+    ['Student phone', opts.studentPhone],
+    ['Course of study', opts.courseOfStudy],
+    ['Parent/guardian', opts.parentName],
+    ['Parent phone', opts.parentPhone],
+  ];
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">New Semester Plan Enquiry</h2>
+      <p style="margin-top:0;color:#666">Someone wants to hear more before paying. Reach out soon.</p>
+      <table style="width:100%;border-collapse:collapse;margin:24px 0;font-size:14px">
+        ${rows.map(([label, value]) => `
+          <tr>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;color:#888;width:40%">${label}</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${escapeHtml(value)}</td>
+          </tr>`).join('')}
+      </table>
+      <a href="${BASE_URL}/admin/semester-plan" style="display:inline-block;background:#D93025;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px">
+        View in Admin Panel
+      </a>
+      <p style="font-size:12px;color:#aaa;margin-top:32px">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+
+  await send(notifyEmail, `Semester Plan Enquiry — ${opts.studentName}`, html);
+}
+
 export async function sendPrivateBookingDetails(opts: {
   to: string;
   fullName: string;
@@ -253,7 +338,7 @@ export async function sendPrivateBookingDetails(opts: {
 }
 
 export async function sendNewBookingNotification(opts: {
-  bookingType: 'group' | 'private' | 'preclinicals' | 'bucc-classes';
+  bookingType: 'group' | 'private' | 'preclinicals' | 'bucc-classes' | 'semester-plan';
   fullName: string;
   email: string;
   phone: string | null;
@@ -272,6 +357,8 @@ export async function sendNewBookingNotification(opts: {
     ? `New Pre-Clinicals Registration — ${fullName}`
     : bookingType === 'bucc-classes'
     ? `New BUCC 200L Registration — ${fullName}`
+    : bookingType === 'semester-plan'
+    ? `New Full Semester Plan — ${fullName}`
     : `New Private Booking — ${fullName}`;
 
   const typeLabel = bookingType === 'group'
@@ -280,6 +367,8 @@ export async function sendNewBookingNotification(opts: {
     ? 'Pre-Clinicals Classes'
     : bookingType === 'bucc-classes'
     ? 'BUCC 200L Preparatory Classes'
+    : bookingType === 'semester-plan'
+    ? SEMESTER_PLAN_NAME
     : 'Private Tutorial';
 
   const rows = [

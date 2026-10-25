@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { upsertPaystackCustomer } from "@/lib/paystack-customer";
+import { SEMESTER_PLANS, isSemesterPlanId } from "@/lib/semester-plan";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,6 +23,15 @@ export async function POST(req: NextRequest) {
   const secret = process.env.PAYSTACK_SECRET_KEY;
   if (!secret) {
     return NextResponse.json({ error: "Payment service not configured" }, { status: 500 });
+  }
+
+  // The amount comes from the browser. A semester plan is a large fixed price,
+  // so it is checked against the plan here rather than trusted.
+  if (metadata?.type === "semester-plan") {
+    const plan: unknown = metadata.plan;
+    if (!isSemesterPlanId(plan) || amount !== SEMESTER_PLANS[plan].price) {
+      return NextResponse.json({ error: "Invalid plan or amount." }, { status: 400 });
+    }
   }
 
   // For group bookings, refuse payment if the tutorial is already full
