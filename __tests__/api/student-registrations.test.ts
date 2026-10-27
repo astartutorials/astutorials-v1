@@ -48,7 +48,7 @@ const VALID = {
   birthMonth: 2,
   parentName: 'Okonkwo Chinedu',
   parentPhone: '08011112222',
-  parentEmail: '',
+  parentEmail: 'Chinedu@Example.com',
 };
 
 function makeRequest(body: object) {
@@ -98,6 +98,8 @@ describe('POST /api/student-registrations', () => {
     ['courseOfStudy', ''],
     ['parentName', ''],
     ['parentPhone', ''],
+    ['parentEmail', ''],
+    ['parentEmail', 'not-an-email'],
   ])('returns 400 when %s is invalid', async (field, value) => {
     const upsert = mockUpsert();
     expect((await POST(makeRequest({ ...VALID, [field]: value }))).status).toBe(400);
@@ -126,7 +128,7 @@ describe('POST /api/student-registrations', () => {
         tiktok: 'adacodes',
         birth_day: 14,
         birth_month: 2,
-        parent_email: null,
+        parent_email: 'chinedu@example.com',
       }),
       { onConflict: 'session,entry_level,email' }
     );
