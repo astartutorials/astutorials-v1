@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     !birthDay || birthDay < 1 || birthDay > daysInMonth(birthMonth) ? "A valid birthday" :
     !parentName ? "Parent/guardian's name" :
     !parentPhone ? "Parent/guardian's phone number" :
-    parentEmail && !parentEmail.includes("@") ? "A valid parent/guardian email" :
+    !parentEmail || !parentEmail.includes("@") ? "A valid parent/guardian email" :
     null;
   if (missing) {
     return NextResponse.json({ error: `${missing} is required` }, { status: 400 });
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
     birth_month: birthMonth!,
     parent_name: parentName!,
     parent_phone: parentPhone!,
-    parent_email: parentEmail?.toLowerCase() ?? null,
+    parent_email: parentEmail!.toLowerCase(),
     updated_at: new Date().toISOString(),
   };
 
@@ -142,7 +142,6 @@ export async function POST(req: NextRequest) {
         course_of_study: row.course_of_study,
         has_instagram: !!row.instagram,
         has_tiktok: !!row.tiktok,
-        has_parent_email: !!row.parent_email,
       },
     });
     await posthog.shutdown();

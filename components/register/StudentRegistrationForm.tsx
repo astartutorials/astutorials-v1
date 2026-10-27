@@ -80,7 +80,7 @@ export default function StudentRegistrationForm({ level }: { level: IntakeLevel 
     if (!form.birthMonth || !form.birthDay) e.birthDay = "Pick a day and month";
     if (!form.parentName.trim()) e.parentName = "Required";
     if (!form.parentPhone.trim()) e.parentPhone = "Required";
-    if (form.parentEmail.trim() && !form.parentEmail.includes("@")) e.parentEmail = "Check this email";
+    if (!form.parentEmail.trim() || !form.parentEmail.includes("@")) e.parentEmail = "Valid email required";
     return e;
   }
 
@@ -360,7 +360,7 @@ export default function StudentRegistrationForm({ level }: { level: IntakeLevel 
               <FieldError message={errors.parentPhone} />
             </div>
             <div>
-              <Label optional>Email address</Label>
+              <Label>Email address</Label>
               <input
                 type="email"
                 placeholder="parent@example.com"
