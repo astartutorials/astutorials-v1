@@ -23,6 +23,8 @@ export interface SemesterPlan {
   id: SemesterPlanId;
   name: string;
   price: number;
+  /** Shown struck through beside the price, when the plan is on offer. */
+  originalPrice?: number;
   sessions: number;
   blurb: string;
   features: string[];
@@ -33,6 +35,7 @@ export const SEMESTER_PLANS: Record<SemesterPlanId, SemesterPlan> = {
     id: "group",
     name: "Group Semester Plan",
     price: 75000,
+    originalPrice: 100000,
     sessions: 50,
     blurb: "Small-group classes with coursemates, all semester long.",
     features: [

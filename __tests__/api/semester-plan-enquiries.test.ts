@@ -106,6 +106,7 @@ describe('POST /api/semester-plan-enquiries', () => {
     ['parentName', { parentName: '' }],
     ['parentPhone', { parentPhone: '' }],
     ['parentEmail', { parentEmail: 'not-an-email' }],
+    ['parentEmail', { parentEmail: '' }],
   ])('returns 400 when %s is invalid', async (_field, override) => {
     const insert = mockInsert();
     expect((await POST(makeRequest({ ...VALID, ...override }))).status).toBe(400);
