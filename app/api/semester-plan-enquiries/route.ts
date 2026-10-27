@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     !courseOfStudy ? "Course of study" :
     !parentName ? "Parent/guardian's name" :
     !parentPhone ? "Parent/guardian's phone number" :
-    parentEmail && !parentEmail.includes("@") ? "A valid parent/guardian email" :
+    !parentEmail || !parentEmail.includes("@") ? "A valid parent/guardian email" :
     null;
   if (missing) {
     return NextResponse.json({ error: `${missing} is required` }, { status: 400 });
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     course_of_study: courseOfStudy!,
     parent_name: parentName!,
     parent_phone: parentPhone!,
-    parent_email: parentEmail?.toLowerCase() ?? null,
+    parent_email: parentEmail!.toLowerCase(),
     notes,
   };
 

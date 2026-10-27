@@ -117,9 +117,8 @@ export default function PlanModal({
     if (!form.courseOfStudy.trim()) e.courseOfStudy = "Required";
     if (!form.parentName.trim()) e.parentName = "Required";
     if (!form.parentPhone.trim()) e.parentPhone = "Required";
-    for (const key of ["studentEmail", "parentEmail"] as const) {
-      if (form[key].trim() && !form[key].includes("@")) e[key] = "Valid email required";
-    }
+    if (form.studentEmail.trim() && !form.studentEmail.includes("@")) e.studentEmail = "Valid email required";
+    if (!form.parentEmail.trim() || !form.parentEmail.includes("@")) e.parentEmail = "Valid email required";
     // Paystack needs an email to send the receipt to.
     if (mode === "pay") {
       const key = isParent ? "parentEmail" : "studentEmail";
@@ -134,7 +133,7 @@ export default function PlanModal({
       `Paid by: ${isParent ? "Parent/guardian" : "Student"}`,
       `Course of study: ${form.courseOfStudy}`,
       form.matric ? `Matric: ${form.matric}` : "",
-      `Parent: ${form.parentName} (${form.parentPhone}${form.parentEmail ? `, ${form.parentEmail}` : ""})`,
+      `Parent: ${form.parentName} (${form.parentPhone}, ${form.parentEmail})`,
       form.studentEmail ? `Student email: ${form.studentEmail}` : "",
       form.notes ? `Notes: ${form.notes}` : "",
     ]
@@ -295,6 +294,9 @@ export default function PlanModal({
                   >
                     <span className="block text-sm font-semibold text-fg">{p.name}</span>
                     <span className="block text-lg font-extrabold text-brand-ink">
+                      {p.originalPrice && (
+                        <s className="mr-1.5 text-sm font-semibold text-fg-faint">₦{p.originalPrice.toLocaleString()}</s>
+                      )}
                       ₦{p.price.toLocaleString()}
                     </span>
                     <span className="block text-xs text-fg-faint">{p.sessions} sessions</span>
@@ -430,7 +432,6 @@ export default function PlanModal({
                   </Field>
                   <Field
                     label={isParent ? "Your email" : "Their email"}
-                    optional={mode === "enquire" || !isParent}
                     error={errors.parentEmail}
                   >
                     <input

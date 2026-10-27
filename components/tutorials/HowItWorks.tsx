@@ -22,7 +22,7 @@ const steps = [
 
 export default function HowItWorks() {
     return (
-        <section className="bg-[#EEF2FF] py-12 rounded-3xl mx-4 md:mx-8">
+        <section className="bg-[#EEF2FF] dark:bg-blue-500/10 border border-transparent dark:border-blue-400/15 py-12 rounded-3xl mx-4 md:mx-8">
             <div className="max-w-5xl mx-auto text-center px-4">
                 <h2 className="text-3xl font-bold text-fg mb-3">How It Works</h2>
                 <p className="text-fg-muted mb-10">Three simple steps to start your private learning journey</p>
@@ -41,7 +41,7 @@ export default function HowItWorks() {
                                 transition={{ delay: index * 0.2 }}
                                 className="relative z-10 flex flex-col items-center"
                             >
-                                <div className="w-16 h-16 bg-surface-raised rounded-full shadow-md flex items-center justify-center text-2xl font-bold text-[#335C98] mb-4">
+                                <div className="w-16 h-16 bg-surface-raised rounded-full shadow-md dark:shadow-none ring-1 ring-transparent dark:ring-blue-400/25 flex items-center justify-center text-2xl font-bold text-accent-ink mb-4">
                                     {step.id}
                                 </div>
                                 <h3 className="text-xl font-bold text-fg mb-3">{step.title}</h3>

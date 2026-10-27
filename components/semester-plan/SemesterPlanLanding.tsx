@@ -51,7 +51,7 @@ const COPY: Record<
         <br className="hidden sm:block" /> sorted.
       </>
     ),
-    lead: "Stop booking tutorials one at a time the week before a test. Get 50 sessions with strong tutors who stay with you from the first lecture to the last exam.",
+    lead: "Get 50 sessions with strong tutors who stay with you from the first lecture to the last exam.",
     why: "Why a whole semester?",
   },
   parent: {
@@ -199,7 +199,7 @@ function parentShareUrl() {
   const text = [
     "Hi! A-Star Tutorials has a Full Semester Plan for 100L students: tutorials for the whole first semester, with strong tutors.",
     "",
-    `• Group: ₦${group.price.toLocaleString()} for ${group.sessions} sessions (about ₦${perSessionPrice(group).toLocaleString()} each)`,
+    `• Group: ₦${group.price.toLocaleString()}${group.originalPrice ? ` (down from ₦${group.originalPrice.toLocaleString()})` : ""} for ${group.sessions} sessions (about ₦${perSessionPrice(group).toLocaleString()} each)`,
     `• Private one-on-one: ₦${priv.price.toLocaleString()} for ${priv.sessions} sessions`,
     "",
     "I think it would really help me this semester. Can you take a look?",
@@ -316,7 +316,12 @@ export default function SemesterPlanLanding({ audience }: { audience: Audience }
                 </div>
                 <p className={`mt-1 text-sm ${featured ? "text-on-dark-muted" : "text-fg-subtle"}`}>{p.blurb}</p>
 
-                <div className="mt-6 flex items-baseline gap-2">
+                <div className="mt-6 flex flex-wrap items-baseline gap-x-2">
+                  {p.originalPrice && (
+                    <s className={`text-xl md:text-2xl font-bold ${featured ? "text-on-dark-muted" : "text-fg-faint"}`}>
+                      ₦{p.originalPrice.toLocaleString()}
+                    </s>
+                  )}
                   <span className={`text-4xl md:text-5xl font-extrabold tracking-tight ${featured ? "text-white" : "text-fg"}`}>
                     ₦{p.price.toLocaleString()}
                   </span>
@@ -360,12 +365,6 @@ export default function SemesterPlanLanding({ audience }: { audience: Audience }
             );
           })}
         </div>
-        <p className="mt-6 text-center text-sm text-fg-faint">
-          Just need one session?{" "}
-          <Link href="/tutorials" className="font-semibold text-brand-ink underline underline-offset-2">
-            Book a single tutorial
-          </Link>
-        </p>
       </section>
 
       {/* ── WHY ────────────────────────────────────────────── */}
