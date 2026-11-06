@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { Mic, Star, X } from "lucide-react";
+import { Mic, Star, Users, X } from "lucide-react";
 import type { TfaPanellist, TfaPerson } from "@/lib/tfa";
 
 function initials(name: string) {
@@ -81,7 +81,10 @@ export default function TfaSpeakers({
         </div>
       </div>
 
-      <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <p className="mt-8 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-red-300">
+        <Users size={13} /> Panellists
+      </p>
+      <ul className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {panellists.map((p) => (
           <li key={p.name}>
             <button
