@@ -91,7 +91,7 @@ export default function TfaRegisterForm() {
           id="tfa-name"
           type="text"
           autoComplete="name"
-          placeholder="As on your admission letter, not your IG handle"
+          placeholder="Enter your full name"
           value={form.fullName}
           onChange={(e) => set("fullName", e.target.value)}
           className={inputClass}
@@ -108,7 +108,7 @@ export default function TfaRegisterForm() {
             id="tfa-email"
             type="email"
             autoComplete="email"
-            placeholder="Not your JSS1 email"
+            placeholder="One you actually open"
             value={form.email}
             onChange={(e) => set("email", e.target.value)}
             className={inputClass}
@@ -174,7 +174,7 @@ export default function TfaRegisterForm() {
           <input
             id="tfa-parent"
             type="tel"
-            placeholder="For emergencies only, not for reporting you"
+            placeholder="They'll be proud you came. Trust us."
             value={form.parentPhone}
             onChange={(e) => set("parentPhone", e.target.value)}
             className={inputClass}
@@ -189,7 +189,7 @@ export default function TfaRegisterForm() {
         <textarea
           id="tfa-question"
           rows={2}
-          placeholder="Anything goes. 'How do I survive 8am classes?' counts."
+          placeholder="Anything goes. 'How do I survive 7am classes?' counts."
           value={form.question}
           onChange={(e) => set("question", e.target.value)}
           className={`${inputClass} resize-none`}
