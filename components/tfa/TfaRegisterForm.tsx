@@ -5,7 +5,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import posthog from "posthog-js";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { validateBookingForm } from "@/lib/validate";
-import { TFA_ATTENDEE_TYPES, TFA_HEARD_OPTIONS } from "@/lib/tfa";
+import { TFA_ATTENDEE_TYPES, TFA_HEARD_OPTIONS, TFA_QUESTION_TARGETS, TFA_ANY_SPEAKER } from "@/lib/tfa";
 
 const inputClass =
   "w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg text-base bg-surface-raised";
@@ -25,6 +25,7 @@ export default function TfaRegisterForm() {
     courseOfStudy: "",
     parentPhone: "",
     question: "",
+    questionFor: TFA_ANY_SPEAKER,
     heardVia: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -68,6 +69,7 @@ export default function TfaRegisterForm() {
         course_of_study: form.courseOfStudy || null,
         heard_via: form.heardVia || null,
         has_question: !!form.question.trim(),
+        question_for: form.question.trim() ? form.questionFor : null,
       });
 
       window.location.href = `/tfa/success?name=${encodeURIComponent(form.fullName)}`;
@@ -151,7 +153,7 @@ export default function TfaRegisterForm() {
         </div>
         <div>
           <label htmlFor="tfa-course" className={labelClass}>
-            {isParent ? "Your child's course" : "Course of study"} <Optional />
+            {isParent ? "Your child's department" : "Department"} <Optional />
           </label>
           <input
             id="tfa-course"
@@ -182,16 +184,35 @@ export default function TfaRegisterForm() {
 
       <div>
         <label htmlFor="tfa-question" className={labelClass}>
-          A question for the panel <Optional />
+          Got a question for the speakers? <Optional />
         </label>
         <textarea
           id="tfa-question"
           rows={2}
-          placeholder="Anything you want the student leaders to answer on the day."
+          placeholder="We'll put the best ones to the speakers on the day."
           value={form.question}
           onChange={(e) => set("question", e.target.value)}
           className={`${inputClass} resize-none`}
         />
+        {form.question.trim() && (
+          <div className="mt-3">
+            <label htmlFor="tfa-question-for" className={labelClass}>
+              Who is it for?
+            </label>
+            <select
+              id="tfa-question-for"
+              value={form.questionFor}
+              onChange={(e) => set("questionFor", e.target.value)}
+              className={`${inputClass} appearance-none cursor-pointer`}
+            >
+              {TFA_QUESTION_TARGETS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div>
@@ -234,7 +255,7 @@ export default function TfaRegisterForm() {
           </>
         ) : (
           <>
-            Register for Free <ArrowRight size={18} />
+            Complete Registration <ArrowRight size={18} />
           </>
         )}
       </button>

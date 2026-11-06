@@ -4,7 +4,7 @@ import { verifyTurnstile } from "@/lib/turnstile";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { sendTfaRegistrationConfirmation } from "@/lib/email";
 import { BABCOCK_ORG_ID } from "@/lib/programme-org";
-import { TFA_ATTENDEE_TYPES, isTfaOpen } from "@/lib/tfa";
+import { TFA_ATTENDEE_TYPES, TFA_QUESTION_TARGETS, TFA_ANY_SPEAKER, isTfaOpen } from "@/lib/tfa";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -56,6 +56,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Tell us who is registering" }, { status: 400 });
   }
 
+  // Only meaningful alongside a question; an unknown name falls back to the
+  // catch-all rather than rejecting a registration over an optional field.
+  const question = clean(body.question, 1000);
+  const target = clean(body.questionFor, 200);
+  const questionFor = question
+    ? target && TFA_QUESTION_TARGETS.includes(target) ? target : TFA_ANY_SPEAKER
+    : null;
+
   const row = {
     // The event is at BUTH, for Babcock's freshers: org-scoped like every
     // other org dataset.
@@ -66,7 +74,8 @@ export async function POST(req: NextRequest) {
     attendee_type: attendeeType,
     course_of_study: clean(body.courseOfStudy, 120),
     parent_phone: clean(body.parentPhone, 40),
-    question: clean(body.question, 1000),
+    question,
+    question_for: questionFor,
     heard_via: clean(body.heardVia, 60),
   };
 
@@ -99,6 +108,7 @@ export async function POST(req: NextRequest) {
         course_of_study: row.course_of_study,
         heard_via: row.heard_via,
         has_question: !!row.question,
+        question_for: row.question_for,
         has_parent_phone: !!row.parent_phone,
       },
     });

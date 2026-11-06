@@ -13,6 +13,7 @@ type Registration = {
   course_of_study: string | null;
   parent_phone: string | null;
   question: string | null;
+  question_for: string | null;
   heard_via: string | null;
   created_at: string;
 };
@@ -30,12 +31,12 @@ function csvCell(value: string | null) {
 function downloadCsv(rows: Registration[]) {
   const headers = [
     "Full Name", "Email", "WhatsApp", "Attendee Type", "Course of Study",
-    "Parent/Guardian Phone", "Question for Panel", "Heard Via", "Registered At",
+    "Parent/Guardian Phone", "Question", "Question For", "Heard Via", "Registered At",
   ];
   const body = rows.map((r) =>
     [
       r.full_name, r.email, r.phone, r.attendee_type, r.course_of_study,
-      r.parent_phone, r.question, r.heard_via, r.created_at,
+      r.parent_phone, r.question, r.question_for, r.heard_via, r.created_at,
     ].map(csvCell).join(",")
   );
   // BOM so Excel opens the names as UTF-8.
@@ -203,7 +204,7 @@ export default function AdminTfaPage() {
               </div>
               {r.question && (
                 <p className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
-                  <span className="text-gray-400">Question:</span> {r.question}
+                  <span className="text-gray-400">Question{r.question_for ? ` for ${r.question_for}` : ""}:</span> {r.question}
                 </p>
               )}
             </div>

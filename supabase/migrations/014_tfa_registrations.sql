@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.tfa_registrations (
     course_of_study TEXT,
     parent_phone TEXT,
     question TEXT,
+    question_for TEXT,
     heard_via TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -35,3 +36,7 @@ CREATE INDEX IF NOT EXISTS tfa_registrations_org_created_at_idx
 -- is granted, so the table is closed to the browser: the rows hold students'
 -- and parents' contact details.
 ALTER TABLE public.tfa_registrations ENABLE ROW LEVEL SECURITY;
+
+-- Which speaker the question is for. Added after the first draft of this file;
+-- harmless when the CREATE above already included it.
+ALTER TABLE public.tfa_registrations ADD COLUMN IF NOT EXISTS question_for TEXT;

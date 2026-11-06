@@ -1,15 +1,30 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2, ArrowRight, CalendarDays, Clock, MapPin } from "lucide-react";
+import { CheckCircle2, ArrowRight, CalendarDays, Clock, MapPin, CalendarPlus, Share2, Check } from "lucide-react";
 import {
   TFA_EVENT_NAME,
   TFA_THEME,
   TFA_DATE_LABEL,
   TFA_TIME_LABEL,
   TFA_VENUE_SHORT,
+  TFA_SHARE_TEXT,
+  tfaGoogleCalendarUrl,
+  tfaIcs,
 } from "@/lib/tfa";
+
+function downloadIcs() {
+  const url = URL.createObjectURL(new Blob([tfaIcs()], { type: "text/calendar;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "freshers-advantage-2.ics";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+const secondaryBtn =
+  "flex-1 border border-line bg-surface-raised text-fg py-3 rounded-xl font-semibold text-sm inline-flex items-center justify-center gap-2 hover:border-[var(--astar-red)] transition-all";
 
 const WHATSAPP_PHONE = "2349160465678";
 
@@ -28,6 +43,17 @@ function whatsAppUrl(name: string) {
 function SuccessContent() {
   const name = useSearchParams().get("name") ?? "";
   const firstName = name.trim().split(" ")[0];
+  const [shared, setShared] = useState(false);
+
+  // Native share sheet on phones; elsewhere, copy the invite to the clipboard.
+  async function share() {
+    if (navigator.share) {
+      await navigator.share({ text: TFA_SHARE_TEXT }).catch(() => {});
+      return;
+    }
+    await navigator.clipboard?.writeText(TFA_SHARE_TEXT).catch(() => {});
+    setShared(true);
+  }
 
   return (
     <div className="min-h-screen bg-[var(--astar-bg)] flex items-center justify-center px-4 py-16">
@@ -69,6 +95,20 @@ function SuccessContent() {
             come early to get a good seat.
           </p>
 
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-fg-faint mb-2">
+              Add to calendar
+            </p>
+            <div className="flex gap-2">
+              <a href={tfaGoogleCalendarUrl()} target="_blank" rel="noopener noreferrer" className={secondaryBtn}>
+                <CalendarPlus size={16} /> Google
+              </a>
+              <button type="button" onClick={downloadIcs} className={secondaryBtn}>
+                <CalendarPlus size={16} /> Apple / Outlook
+              </button>
+            </div>
+          </div>
+
           <a
             href={whatsAppUrl(name)}
             className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-brand-hover transition-all shadow-lg"
@@ -76,12 +116,11 @@ function SuccessContent() {
             Get reminders on WhatsApp <ArrowRight size={18} />
           </a>
 
-          <p className="text-center text-xs text-fg-faint">
-            Bring a friend. They can register at{" "}
-            <a href="/tfa" className="font-semibold text-brand-ink underline">
-              astartutorials.com/tfa
-            </a>
-          </p>
+          <button type="button" onClick={share} className={`w-full ${secondaryBtn}`}>
+            {shared ? <><Check size={16} /> Invite copied, paste it to a friend</> : <><Share2 size={16} /> Invite a friend</>}
+          </button>
+
+          <p className="text-center text-sm font-bold text-brand-ink">Equipped for Success.</p>
         </div>
       </div>
     </div>

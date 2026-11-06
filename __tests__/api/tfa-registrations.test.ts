@@ -29,7 +29,7 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 
 import { POST } from '@/app/api/tfa-registrations/route';
 import { BABCOCK_ORG_ID } from '@/lib/programme-org';
-import { TFA_CLOSES_AT } from '@/lib/tfa';
+import { TFA_CLOSES_AT, TFA_QUESTION_TARGETS, TFA_ANY_SPEAKER } from '@/lib/tfa';
 
 function mockUpsert(result: { error: unknown } = { error: null }) {
   const upsert = jest.fn().mockResolvedValue(result);
@@ -118,10 +118,29 @@ describe('POST /api/tfa-registrations', () => {
         course_of_study: 'Nursing',
         parent_phone: null,
         question: null,
+        question_for: null,
         heard_via: null,
       },
       { onConflict: 'email' }
     );
+  });
+
+  it('saves who a question is for', async () => {
+    const upsert = mockUpsert();
+    await POST(makeRequest({ ...VALID, question: 'How?', questionFor: TFA_QUESTION_TARGETS[1] }));
+    expect(upsert.mock.calls[0][0]).toMatchObject({ question: 'How?', question_for: TFA_QUESTION_TARGETS[1] });
+  });
+
+  it('falls back to any speaker for an unknown target', async () => {
+    const upsert = mockUpsert();
+    await POST(makeRequest({ ...VALID, question: 'How?', questionFor: 'Someone else' }));
+    expect(upsert.mock.calls[0][0].question_for).toBe(TFA_ANY_SPEAKER);
+  });
+
+  it('drops the target when there is no question', async () => {
+    const upsert = mockUpsert();
+    await POST(makeRequest({ ...VALID, question: '  ', questionFor: TFA_QUESTION_TARGETS[1] }));
+    expect(upsert.mock.calls[0][0].question_for).toBeNull();
   });
 
   it('caps a very long answer', async () => {
