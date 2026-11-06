@@ -1,6 +1,5 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import {
   CalendarDays,
   Clock,
@@ -16,6 +15,7 @@ import {
   ArrowDown,
 } from "lucide-react";
 import TfaRegisterForm from "./TfaRegisterForm";
+import { useTfaOpen } from "@/components/shared/useTfaOpen";
 import { ProgrammeEndedBanner, ProgrammeEndedCta } from "@/components/shared/ProgrammeEnded";
 import {
   TFA_EVENT_NAME,
@@ -29,15 +29,7 @@ import {
   TFA_PANELLISTS,
   TFA_PROGRAMME,
   TFA_HIGHLIGHTS,
-  isTfaOpen,
 } from "@/lib/tfa";
-
-// Evaluated on the visitor's clock: the page is static, so a build-time answer
-// would freeze into the HTML. Server snapshot is "open" so hydration matches.
-const subscribe = () => () => {};
-function useTfaOpen() {
-  return useSyncExternalStore(subscribe, () => isTfaOpen(), () => true);
-}
 
 const HIGHLIGHT_ICONS = [Users, Mic, Music, Store, BookOpen, Award];
 
