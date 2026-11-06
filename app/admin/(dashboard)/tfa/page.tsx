@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Search, Loader2, Download, Ticket } from "lucide-react";
-import { TFA_EVENT_NAME, TFA_ATTENDEE_TYPES } from "@/lib/tfa";
+import { TFA_EVENT_NAME, TFA_ATTENDEE_TYPES, TFA_LEGACY_ATTENDEE_TYPES } from "@/lib/tfa";
 
 type Registration = {
   id: string;
@@ -96,6 +96,12 @@ export default function AdminTfaPage() {
       label: t,
       count: all.filter((r) => r.attendee_type === t).length,
     })),
+    // Retired options: shown only while some registration still carries one.
+    ...TFA_LEGACY_ATTENDEE_TYPES.map((t) => ({
+      id: t,
+      label: t,
+      count: all.filter((r) => r.attendee_type === t).length,
+    })).filter((f) => f.count > 0),
   ];
 
   return (

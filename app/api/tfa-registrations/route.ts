@@ -9,6 +9,7 @@ import {
   TFA_QUESTION_TARGETS,
   TFA_ANY_SPEAKER,
   TFA_PARENT_TYPE,
+  TFA_HEARD_OPTIONS,
   isTfaOpen,
 } from "@/lib/tfa";
 
@@ -69,17 +70,31 @@ export async function POST(req: NextRequest) {
   // A parent registering is the parent, so neither parent field applies to them.
   const isParent = attendeeType === TFA_PARENT_TYPE;
   const parentName = isParent ? null : clean(body.parentName, 120);
+  const parentPhone = isParent ? null : clean(body.parentPhone, 40);
   if (!isParent && !parentName) {
     return NextResponse.json({ error: "Parent's / guardian's full name is required" }, { status: 400 });
   }
+  if (!isParent && !parentPhone) {
+    return NextResponse.json({ error: "Parent's / guardian's phone number is required" }, { status: 400 });
+  }
 
-  // Only meaningful alongside a question; an unknown name falls back to the
-  // catch-all rather than rejecting a registration over an optional field.
+  const courseOfStudy = clean(body.courseOfStudy, 120);
+  if (!courseOfStudy) {
+    return NextResponse.json({ error: "Department is required" }, { status: 400 });
+  }
+  const heardVia = clean(body.heardVia, 60);
+  if (!heardVia || !TFA_HEARD_OPTIONS.includes(heardVia)) {
+    return NextResponse.json({ error: "Tell us how you heard about the event" }, { status: 400 });
+  }
+
   const question = clean(body.question, 1000);
+  if (!question) {
+    return NextResponse.json({ error: "A question for the speakers is required" }, { status: 400 });
+  }
+  // An unknown name falls back to the catch-all rather than rejecting the
+  // registration over who the question is addressed to.
   const target = clean(body.questionFor, 200);
-  const questionFor = question
-    ? target && TFA_QUESTION_TARGETS.includes(target) ? target : TFA_ANY_SPEAKER
-    : null;
+  const questionFor = target && TFA_QUESTION_TARGETS.includes(target) ? target : TFA_ANY_SPEAKER;
 
   const row = {
     // The event is at BUTH, for Babcock's freshers: org-scoped like every
@@ -90,12 +105,12 @@ export async function POST(req: NextRequest) {
     phone,
     call_phone: callPhone,
     attendee_type: attendeeType,
-    course_of_study: clean(body.courseOfStudy, 120),
+    course_of_study: courseOfStudy,
     parent_name: parentName,
-    parent_phone: isParent ? null : clean(body.parentPhone, 40),
+    parent_phone: parentPhone,
     question,
     question_for: questionFor,
-    heard_via: clean(body.heardVia, 60),
+    heard_via: heardVia,
   };
 
   // Upsert: registering twice updates the answers, it doesn't add a second row.
