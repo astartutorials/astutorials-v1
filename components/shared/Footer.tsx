@@ -8,7 +8,7 @@ import { usePrograms } from "@/components/shared/programmes";
 const quickLinks = [
   { label: "Home", href: "/" },
   { label: "Tutorials", href: "/tutorials" },
-  { label: "About", href: "/#about" },
+  { label: "About", href: "/about" },
   { label: "Careers", href: "/careers" },
   { label: "Become a Tutor", href: "/apply" },
   { label: "Book a Tutorial", href: "/tutorials" },
