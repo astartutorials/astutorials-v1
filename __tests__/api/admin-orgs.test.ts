@@ -4,8 +4,8 @@ const mockListUsers = jest.fn();
 const mockServiceFrom = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
-    from: (...args: any[]) => mockServiceFrom(...args),
-    auth: { admin: { listUsers: (...args: any[]) => mockListUsers(...args) } },
+    from: (...args: unknown[]) => mockServiceFrom(...args),
+    auth: { admin: { listUsers: (...args: unknown[]) => mockListUsers(...args) } },
   })),
 }));
 
@@ -19,6 +19,7 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { GET as getOrgs, POST as createOrg } from '@/app/api/admin/orgs/route';
 import { GET as getOrgById, PATCH as patchOrg, DELETE as deleteOrg } from '@/app/api/admin/orgs/[id]/route';
+import { asServerClient, makeChain } from '../helpers/supabase';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 
@@ -31,7 +32,7 @@ function mockAuth(user: object | null) {
   const rows = user && (user as { id?: string }).id?.startsWith('super') === false && !(user as { user_metadata?: { role?: string } }).user_metadata?.role
     ? [{ role: 'org_admin', org_id: 'org-1' }]
     : [{ role: 'super_admin', org_id: null }];
-  mockServerClient.mockResolvedValue({
+  mockServerClient.mockResolvedValue(asServerClient({
     from: jest.fn(() => ({ select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: user ? rows : [] }) }) }) }) })),
     auth: {
       getUser: jest.fn().mockResolvedValue({
@@ -39,27 +40,13 @@ function mockAuth(user: object | null) {
         error: user ? null : { message: 'Unauthorized' },
       }),
     },
-  } as any);
+  }));
 }
 
 function makeParams(id: string) {
   return { params: Promise.resolve({ id }) };
 }
 
-// Universal chainable/awaitable mock for Supabase query builders
-function makeChain(data: any, error: any = null) {
-  const result = { data, error };
-  const chain: any = {
-    then: (onFulfilled: any) => Promise.resolve(result).then(onFulfilled),
-    catch: (onRejected: any) => Promise.resolve(result).catch(onRejected),
-    finally: (onFinally: any) => Promise.resolve(result).finally(onFinally),
-  };
-  ['select', 'order', 'eq', 'gte', 'neq', 'in', 'limit', 'single', 'maybeSingle',
-   'insert', 'update', 'delete', 'upsert'].forEach(m => {
-    chain[m] = jest.fn(() => chain);
-  });
-  return chain;
-}
 
 // ─── GET /api/admin/orgs ────────────────────────────────────────────────────
 

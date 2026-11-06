@@ -10,7 +10,7 @@ const mockRpc = jest.fn().mockResolvedValue({ error: null });
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     from: jest.fn(() => ({ insert: mockInsert, select: mockSelectChain })),
-    rpc: (...args: any[]) => mockRpc(...args),
+    rpc: (...args: unknown[]) => mockRpc(...args),
   })),
 }));
 

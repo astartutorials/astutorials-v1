@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
@@ -8,10 +9,12 @@ export default function BecomeTutor() {
         {/* Left: Image */}
         <div className="relative">
           <div className="aspect-square rounded-[2rem] overflow-hidden border border-white/10 relative">
-            <img
+            <Image
               src="/become-tutor.jpg"
               alt="A-Star Tutor Teaching"
-              className="w-full h-full object-cover"
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
             />
             <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-red-900/90 to-transparent">
               <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 inline-flex items-center gap-3">

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 
 const mockFrom = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({ from: (...args: any[]) => mockFrom(...args) })),
+  createClient: jest.fn(() => ({ from: (...args: unknown[]) => mockFrom(...args) })),
 }));
 
 jest.mock('@/lib/supabase-server', () => ({
@@ -19,13 +19,14 @@ import { logAuditEvent } from '@/lib/audit';
 import { GET as getPublicCareers } from '@/app/api/careers/route';
 import { GET as getAdminCareers, POST as createCareer } from '@/app/api/admin/careers/route';
 import { PUT as updateCareer, DELETE as deleteCareer } from '@/app/api/admin/careers/[id]/route';
+import { asServerClient } from '../helpers/supabase';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 const mockAudit = jest.mocked(logAuditEvent);
 const ADMIN_USER = { id: 'admin-id', email: 'admin@test.com', user_metadata: { role: 'super_admin' } };
 
 function mockClient(user: object | null, fromFn = jest.fn()) {
-  mockServerClient.mockResolvedValue({
+  mockServerClient.mockResolvedValue(asServerClient({
     auth: {
       getUser: jest.fn().mockResolvedValue({
         data: { user },
@@ -33,7 +34,7 @@ function mockClient(user: object | null, fromFn = jest.fn()) {
       }),
     },
     from: fromFn,
-  } as any);
+  }));
 }
 
 function makeRequest(method: string, body?: object, id?: string) {
@@ -238,7 +239,7 @@ describe('GET /api/admin/careers', () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data).toHaveLength(2);
-    expect(data.find((c: any) => c.status === 'draft')).toBeDefined();
+    expect(data.find((c: { status: string }) => c.status === 'draft')).toBeDefined();
   });
 
   it('returns 500 when Supabase errors', async () => {

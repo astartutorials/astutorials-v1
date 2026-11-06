@@ -20,6 +20,7 @@ import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { GET, POST } from '@/app/api/admin/tutorials/route';
 import { GET as getTutorial, PUT, DELETE } from '@/app/api/admin/tutorials/[id]/route';
+import { asServerClient } from '../helpers/supabase';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 const ADMIN_USER = { id: 'admin-id', user_metadata: { role: 'super_admin' } };
@@ -35,10 +36,10 @@ function getIdServiceFrom() {
 }
 
 function mockAuthClient(user: object | null, fromFn = jest.fn()) {
-  mockServerClient.mockResolvedValue({
+  mockServerClient.mockResolvedValue(asServerClient({
     auth: { getUser: jest.fn().mockResolvedValue({ data: { user }, error: user ? null : { message: 'Unauthorized' } }) },
     from: fromFn,
-  } as any);
+  }));
 }
 
 function makeRequest(method: string, body?: object, id?: string) {
@@ -81,7 +82,7 @@ describe('GET /api/admin/tutorials', () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data).toHaveLength(2);
-    expect(data.some((t: any) => t.status === 'draft')).toBe(true);
+    expect(data.some((t: { status: string }) => t.status === 'draft')).toBe(true);
   });
 
   it('returns 500 when Supabase errors', async () => {

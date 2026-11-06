@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2 } from "lucide-react";
 import posthog from "posthog-js";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
@@ -32,6 +33,7 @@ function FieldError({ msg }: { msg?: string }) {
 
 /** Inline (not a modal): on /tfa the form is the page, most visitors arrive from a link or QR code to register. */
 export default function TfaRegisterForm() {
+  const router = useRouter();
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -102,7 +104,7 @@ export default function TfaRegisterForm() {
         question_for: form.question.trim() ? form.questionFor : null,
       });
 
-      window.location.href = `/tfa/success?name=${encodeURIComponent(form.fullName)}`;
+      router.push(`/tfa/success?name=${encodeURIComponent(form.fullName)}`);
     } catch (err) {
       posthog.captureException(err);
       setApiError("Network error. Please check your connection and try again.");

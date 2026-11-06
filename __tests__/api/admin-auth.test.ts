@@ -10,24 +10,25 @@ jest.mock('@/lib/posthog-server', () => ({
 
 const mockCheckLoginRateLimit = jest.fn().mockResolvedValue({ allowed: true });
 jest.mock('@/lib/rate-limit', () => ({
-  checkLoginRateLimit: (...args: any[]) => mockCheckLoginRateLimit(...args),
+  checkLoginRateLimit: (...args: unknown[]) => mockCheckLoginRateLimit(...args),
 }));
 
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { POST as login } from '@/app/api/auth/admin/login/route';
 import { POST as logout } from '@/app/api/auth/admin/logout/route';
 import { NextRequest } from 'next/server';
+import { asServerClient } from '../helpers/supabase';
 
 const mockSupabase = jest.mocked(createSupabaseServerClient);
 
 function mockClient(auth: object, roleRows: { role: string; org_id: string | null }[] = []) {
-  mockSupabase.mockResolvedValue({
+  mockSupabase.mockResolvedValue(asServerClient({
     auth,
     // getUserRole reads user_roles; pass rows to resolve a real, org-scoped role.
     from: jest.fn(() => ({
       select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: roleRows }) }) }) }),
     })),
-  } as any);
+  }));
 }
 
 function makeLoginRequest(body: object) {

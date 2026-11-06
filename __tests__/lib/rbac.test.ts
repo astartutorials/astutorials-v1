@@ -1,6 +1,7 @@
 import { can, getUserRole, AppRole } from '@/lib/rbac';
 
 import type { Permission } from '@/lib/rbac';
+import { asSupabaseClient } from '../helpers/supabase';
 
 /**
  * The whole permission model as a table. Each row is a permission; each column
@@ -79,7 +80,7 @@ describe('getUserRole()', () => {
     const order = jest.fn().mockReturnValue({ limit });
     const eq = jest.fn().mockReturnValue({ order });
     const select = jest.fn().mockReturnValue({ eq });
-    return { from: jest.fn().mockReturnValue({ select }) } as any;
+    return asSupabaseClient({ from: jest.fn().mockReturnValue({ select }) });
   }
 
   it('returns the role and orgId from the DB when a row is found', async () => {
@@ -108,9 +109,9 @@ describe('getUserRole()', () => {
   });
 
   it('falls back to user_metadata when DB throws', async () => {
-    const supabase = {
+    const supabase = asSupabaseClient({
       from: jest.fn().mockImplementation(() => { throw new Error('DB unavailable'); }),
-    } as any;
+    });
     const result = await getUserRole(supabase, 'user-1', { role: 'super_admin' });
     expect(result?.role).toBe('super_admin');
   });
@@ -120,9 +121,9 @@ describe('getUserRole()', () => {
   // org filter entirely and read every organisation's data. It is now denied.
   it('denies metadata role "admin" because it carries no org scope', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    const supabase = {
+    const supabase = asSupabaseClient({
       from: jest.fn().mockImplementation(() => { throw new Error(); }),
-    } as any;
+    });
     const result = await getUserRole(supabase, 'user-1', { role: 'admin' });
     expect(result).toBeNull();
     jest.restoreAllMocks();

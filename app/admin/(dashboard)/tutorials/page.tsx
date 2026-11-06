@@ -93,23 +93,20 @@ export default function AdminTutorialsPage() {
     }
   }
 
+  function fetchTutorials() {
+    return fetch("/api/admin/tutorials")
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) { setFetchError(true); return; }
+        setTutorials(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setFetchError(true))
+      .finally(() => setLoading(false));
+  }
+
   useEffect(() => {
     fetchTutorials();
   }, []);
-
-  async function fetchTutorials() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/tutorials");
-      const data = await res.json();
-      if (!res.ok) { setFetchError(true); return; }
-      setTutorials(Array.isArray(data) ? data : []);
-    } catch {
-      setFetchError(true);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function deleteTutorial(id: string) {
     const target = tutorials.find((t) => t.id === id);

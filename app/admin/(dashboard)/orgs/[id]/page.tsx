@@ -126,8 +126,15 @@ export default function OrgDetailPage({ params }: { params: Promise<{ id: string
   const [changingRole, setChangingRole] = useState<string | null>(null);
   const [removingUser, setRemovingUser] = useState<string | null>(null);
 
-  const fetchDetail = useCallback(async () => {
+  // Navigating to another org reuses this component: show the spinner again
+  // (set during render, React's pattern for resetting state on a prop change).
+  const [loadedFor, setLoadedFor] = useState(id);
+  if (loadedFor !== id) {
+    setLoadedFor(id);
     setLoading(true);
+  }
+
+  const fetchDetail = useCallback(async () => {
     try {
       const res = await fetch(`/api/admin/orgs/${id}`);
       const data = await res.json();
@@ -186,6 +193,7 @@ export default function OrgDetailPage({ params }: { params: Promise<{ id: string
       setShowAddModal(false);
       setAddForm({ name: '', email: '', password: '', role: 'tutor_manager' });
       showToast('User added to organisation.', 'success');
+      setLoading(true);
       fetchDetail();
     } finally {
       setAddSaving(false);

@@ -9,7 +9,7 @@ const mockFromImpl = {
 };
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
-    auth: { admin: { createUser: (...a: any[]) => mockCreateUser(...a), deleteUser: (...a: any[]) => mockDeleteUser(...a) } },
+    auth: { admin: { createUser: (...a: unknown[]) => mockCreateUser(...a), deleteUser: (...a: unknown[]) => mockDeleteUser(...a) } },
     from: jest.fn(() => mockFromImpl),
   })),
 }));
@@ -37,7 +37,7 @@ function makeRequest(body: object) {
   });
 }
 
-function mockInviteLookup(invite: any) {
+function mockInviteLookup(invite: object | null) {
   mockFromImpl.select.mockReturnValue({
     eq: jest.fn().mockReturnValue({
       single: jest.fn().mockResolvedValue({ data: invite, error: invite ? null : { message: 'Not found' } }),

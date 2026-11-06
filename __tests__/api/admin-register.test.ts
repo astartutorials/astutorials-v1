@@ -6,10 +6,10 @@ jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     auth: {
       admin: {
-        createUser: (...args: any[]) => mockCreateUser(...args),
+        createUser: (...args: unknown[]) => mockCreateUser(...args),
       },
     },
-    from: (...args: any[]) => mockFrom(...args),
+    from: (...args: unknown[]) => mockFrom(...args),
   })),
 }));
 
@@ -22,19 +22,20 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { POST } from '@/app/api/admin/auth/register/route';
+import { asServerClient } from '../helpers/supabase';
 
 const mockServer = jest.mocked(createSupabaseServerClient);
 const ADMIN_USER = { id: 'admin-id', email: 'admin@astar.ng', user_metadata: { role: 'super_admin' } };
 
 function mockAuth(user: object | null) {
-  mockServer.mockResolvedValue({
+  mockServer.mockResolvedValue(asServerClient({
     auth: {
       getUser: jest.fn().mockResolvedValue({
         data: { user },
         error: user ? null : { message: 'Unauthorized' },
       }),
     },
-  } as any);
+  }));
 }
 
 function makeRequest(body: object) {

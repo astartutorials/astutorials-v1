@@ -9,7 +9,7 @@ jest.mock('@supabase/supabase-js', () => ({
 
 const mockVerifyTurnstile = jest.fn().mockResolvedValue(true);
 jest.mock('@/lib/turnstile', () => ({
-  verifyTurnstile: (...args: any[]) => mockVerifyTurnstile(...args),
+  verifyTurnstile: (...args: unknown[]) => mockVerifyTurnstile(...args),
 }));
 
 jest.mock('@/lib/posthog-server', () => ({
@@ -72,14 +72,13 @@ describe('POST /api/tutor-applications', () => {
   });
 
   it('returns 400 when fullName is missing', async () => {
-    const { fullName, ...bodyWithoutName } = validBody;
-    const res = await POST(makeRequest(bodyWithoutName));
+    // undefined is dropped by JSON.stringify, so the field is absent.
+    const res = await POST(makeRequest({ ...validBody, fullName: undefined }));
     expect(res.status).toBe(400);
   });
 
   it('returns 400 when email is missing', async () => {
-    const { email, ...bodyWithoutEmail } = validBody;
-    const res = await POST(makeRequest(bodyWithoutEmail));
+    const res = await POST(makeRequest({ ...validBody, email: undefined }));
     expect(res.status).toBe(400);
   });
 

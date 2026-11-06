@@ -94,11 +94,14 @@ export default function AdminSettingsPage() {
   const [registerError, setRegisterError] = useState("");
   const [registerSaving, setRegisterSaving] = useState(false);
 
-  useEffect(() => {
-    if (!roleLoading) {
-      setFormData(prev => ({ ...prev, adminName: name, email, phone }));
-    }
-  }, [roleLoading, name, email, phone]);
+  // Copy the signed-in admin's details into the form once they load (and if
+  // they change). Set during render, React's pattern for syncing from props.
+  const profileKey = roleLoading ? null : `${name}\u0000${email}\u0000${phone}`;
+  const [syncedProfile, setSyncedProfile] = useState<string | null>(null);
+  if (profileKey !== null && profileKey !== syncedProfile) {
+    setSyncedProfile(profileKey);
+    setFormData(prev => ({ ...prev, adminName: name, email, phone }));
+  }
 
   function showToast(message: string, type: "success" | "error") {
     setToast({ message, type });

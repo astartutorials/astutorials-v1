@@ -6,7 +6,7 @@ jest.mock('@supabase/supabase-js', () => ({
 
 const mockVerifyTurnstile = jest.fn().mockResolvedValue(true);
 jest.mock('@/lib/turnstile', () => ({
-  verifyTurnstile: (...args: any[]) => mockVerifyTurnstile(...args),
+  verifyTurnstile: (...args: unknown[]) => mockVerifyTurnstile(...args),
 }));
 
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
@@ -19,7 +19,7 @@ function getFrom() {
   return (createClient as jest.Mock).mock.results[0].value.from as jest.Mock;
 }
 
-function mockInsert(result: { error: any }) {
+function mockInsert(result: { error: unknown }) {
   getFrom().mockReturnValue({ insert: jest.fn().mockResolvedValue(result) });
 }
 

@@ -42,10 +42,7 @@ export default function OrgsPage() {
   const [form, setForm] = useState({ name: '', type: 'university', location: '' });
   const [formError, setFormError] = useState('');
 
-  useEffect(() => { fetchOrgs(); }, []);
-
   async function fetchOrgs() {
-    setLoading(true);
     try {
       const res = await fetch('/api/admin/orgs');
       const data = await res.json();
@@ -54,6 +51,8 @@ export default function OrgsPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => { fetchOrgs(); }, []);
 
   function showToast(message: string, type: 'success' | 'error') {
     setToast({ message, type });

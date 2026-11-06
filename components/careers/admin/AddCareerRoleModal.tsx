@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Link as LinkIcon, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export type CareerFull = {
   id: string;
@@ -41,6 +41,21 @@ const EMPTY_FORM = {
   status: "active",
 };
 
+function formFor(editJob: CareerFull | null | undefined) {
+  if (!editJob) return EMPTY_FORM;
+  return {
+    roleTitle: editJob.title,
+    department: editJob.category,
+    jobType: editJob.type,
+    location: editJob.location,
+    description: editJob.description ?? "",
+    responsibilities: editJob.responsibilities ?? "",
+    requirements: editJob.requirements ?? "",
+    applicationLink: editJob.application_link ?? "",
+    status: editJob.status,
+  };
+}
+
 export default function AddCareerRoleModal({
   isOpen,
   onClose,
@@ -49,28 +64,18 @@ export default function AddCareerRoleModal({
 }: AddCareerRoleModalProps) {
   const isEditing = !!editJob;
 
-  const [formData, setFormData] = useState(EMPTY_FORM);
+  const [formData, setFormData] = useState(() => formFor(editJob));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (editJob) {
-      setFormData({
-        roleTitle: editJob.title,
-        department: editJob.category,
-        jobType: editJob.type,
-        location: editJob.location,
-        description: editJob.description ?? "",
-        responsibilities: editJob.responsibilities ?? "",
-        requirements: editJob.requirements ?? "",
-        applicationLink: editJob.application_link ?? "",
-        status: editJob.status,
-      });
-    } else {
-      setFormData(EMPTY_FORM);
-    }
+  // Reset the form whenever the modal opens or switches job. Done during
+  // render (React's pattern for resetting state on a prop change).
+  const [shownFor, setShownFor] = useState({ editJob, isOpen });
+  if (shownFor.editJob !== editJob || shownFor.isOpen !== isOpen) {
+    setShownFor({ editJob, isOpen });
+    setFormData(formFor(editJob));
     setError("");
-  }, [editJob, isOpen]);
+  }
 
   const set = (key: string, value: string) =>
     setFormData((prev) => ({ ...prev, [key]: value }));

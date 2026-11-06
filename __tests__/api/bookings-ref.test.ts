@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 
 const mockFrom = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({ from: (...args: any[]) => mockFrom(...args) })),
+  createClient: jest.fn(() => ({ from: (...args: unknown[]) => mockFrom(...args) })),
 }));
 
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
@@ -20,9 +20,7 @@ function InviteForm() {
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
-  useEffect(() => {
-    if (!token) setError('No invite token found. Please use the link from your email.');
-  }, [token]);
+  const tokenError = token ? '' : 'No invite token found. Please use the link from your email.';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -100,7 +98,7 @@ function InviteForm() {
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
+        {(error || tokenError) && <p className="text-sm text-red-600 font-medium">{error || tokenError}</p>}
 
         <button
           type="submit"

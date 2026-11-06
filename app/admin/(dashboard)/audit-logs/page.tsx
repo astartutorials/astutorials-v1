@@ -84,9 +84,11 @@ export default function AuditLogsPage() {
   const [filterTo, setFilterTo] = useState('');
   const [hideSystem, setHideSystem] = useState(false);
 
-  // Remembered per browser so the preference survives a reload.
+  // Remembered per browser so the preference survives a reload. Read after
+  // mount: localStorage doesn't exist during the server render.
   useEffect(() => {
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe read of browser storage
       if (localStorage.getItem(HIDE_SYSTEM_KEY) === '1') setHideSystem(true);
     } catch { /* storage unavailable */ }
   }, []);
@@ -109,25 +111,38 @@ export default function AuditLogsPage() {
     return `/api/admin/audit-logs?${params}`;
   }, [filterAction, filterActor, filterFrom, filterTo, hideSystem]);
 
-  const fetchLogs = useCallback(async (p: number) => {
+  // A filter change refetches page 1 (effect below); show loading for it,
+  // set during render rather than inside the effect.
+  const filterUrl = buildUrl(1);
+  const [fetchedFilterUrl, setFetchedFilterUrl] = useState(filterUrl);
+  if (fetchedFilterUrl !== filterUrl) {
+    setFetchedFilterUrl(filterUrl);
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch(buildUrl(p));
-      if (!res.ok) throw new Error('Failed to load audit logs');
-      const json = await res.json();
-      setLogs(json.logs);
-      setPage(json.page);
-      setPages(json.pages);
-      setTotal(json.total);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
+  }
+
+  const fetchLogs = useCallback((p: number) => {
+    return fetch(buildUrl(p))
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Failed to load audit logs');
+        const json = await res.json();
+        setLogs(json.logs);
+        setPage(json.page);
+        setPages(json.pages);
+        setTotal(json.total);
+      })
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : 'Unknown error'))
+      .finally(() => setLoading(false));
   }, [buildUrl]);
 
   useEffect(() => { fetchLogs(1); }, [fetchLogs]);
+
+  // Refresh and pagination buttons.
+  function reloadLogs(p: number) {
+    setLoading(true);
+    setError(null);
+    fetchLogs(p);
+  }
 
   function clearFilters() {
     setFilterAction('');
@@ -163,7 +178,7 @@ export default function AuditLogsPage() {
             {hideSystem ? 'Heartbeats hidden' : 'Hide heartbeats'}
           </button>
           <button
-            onClick={() => fetchLogs(page)}
+            onClick={() => reloadLogs(page)}
             disabled={loading}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 text-sm transition-colors disabled:opacity-50"
           >
@@ -283,14 +298,14 @@ export default function AuditLogsPage() {
           <span>Page {page} of {pages}</span>
           <div className="flex gap-2">
             <button
-              onClick={() => fetchLogs(page - 1)}
+              onClick={() => reloadLogs(page - 1)}
               disabled={page <= 1 || loading}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft size={14} /> Prev
             </button>
             <button
-              onClick={() => fetchLogs(page + 1)}
+              onClick={() => reloadLogs(page + 1)}
               disabled={page >= pages || loading}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
