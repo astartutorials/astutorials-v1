@@ -91,7 +91,7 @@ export default function TfaRegisterForm() {
           id="tfa-name"
           type="text"
           autoComplete="name"
-          placeholder="Enter your full name"
+          placeholder="As on your admission letter, not your IG handle"
           value={form.fullName}
           onChange={(e) => set("fullName", e.target.value)}
           className={inputClass}
@@ -108,7 +108,7 @@ export default function TfaRegisterForm() {
             id="tfa-email"
             type="email"
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder="Not your JSS1 email"
             value={form.email}
             onChange={(e) => set("email", e.target.value)}
             className={inputClass}
@@ -123,7 +123,7 @@ export default function TfaRegisterForm() {
             id="tfa-phone"
             type="tel"
             autoComplete="tel"
-            placeholder="08012345678"
+            placeholder="No spam, promise"
             value={form.phone}
             onChange={(e) => set("phone", e.target.value)}
             className={inputClass}
@@ -158,7 +158,7 @@ export default function TfaRegisterForm() {
           <input
             id="tfa-course"
             type="text"
-            placeholder="e.g. Nursing Science"
+            placeholder="e.g. Law, not 'vibes'"
             value={form.courseOfStudy}
             onChange={(e) => set("courseOfStudy", e.target.value)}
             className={inputClass}
@@ -174,7 +174,7 @@ export default function TfaRegisterForm() {
           <input
             id="tfa-parent"
             type="tel"
-            placeholder="Either parent works, e.g. 08012345678"
+            placeholder="For emergencies only, not for reporting you"
             value={form.parentPhone}
             onChange={(e) => set("parentPhone", e.target.value)}
             className={inputClass}
@@ -189,7 +189,7 @@ export default function TfaRegisterForm() {
         <textarea
           id="tfa-question"
           rows={2}
-          placeholder="We'll put the best ones to the speakers on the day."
+          placeholder="Anything goes. 'How do I survive 8am classes?' counts."
           value={form.question}
           onChange={(e) => set("question", e.target.value)}
           className={`${inputClass} resize-none`}
@@ -225,7 +225,7 @@ export default function TfaRegisterForm() {
           onChange={(e) => set("heardVia", e.target.value)}
           className={`${inputClass} appearance-none cursor-pointer`}
         >
-          <option value="">Select an option</option>
+          <option value="">Go on, who told you?</option>
           {TFA_HEARD_OPTIONS.map((h) => (
             <option key={h} value={h}>
               {h}
