@@ -167,11 +167,18 @@ export const TFA_PROGRAMME: TfaSlot[] = [
 /** Who is filling in the form. Stored as the value; also the API's allow-list. */
 export const TFA_ATTENDEE_TYPES = [
   "Fresher (100 Level)",
-  "Direct Entry / Transfer student",
-  "Returning student",
+  "Direct Entry Student",
+  "Transfer Student",
+  "Returning Student",
   "Parent / Guardian",
-  "Other",
 ] as const;
+
+/**
+ * Options the form offered before they were split or dropped (6 Nov 2026).
+ * Early registrations still carry them, so the admin page keeps a filter for
+ * each; the API no longer accepts them.
+ */
+export const TFA_LEGACY_ATTENDEE_TYPES = ["Direct Entry / Transfer student", "Returning student", "Other"];
 
 /** The attendee type that is itself the parent: no separate parent name or phone is asked for. */
 export const TFA_PARENT_TYPE = "Parent / Guardian";

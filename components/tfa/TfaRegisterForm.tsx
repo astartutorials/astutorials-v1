@@ -17,8 +17,13 @@ const inputClass =
   "w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg text-base bg-surface-raised";
 const labelClass = "text-sm font-semibold text-fg-muted block mb-1.5";
 
-function Optional() {
-  return <span className="text-fg-faint font-normal">(optional)</span>;
+/** Every field on this form is required, so every label carries the marker. */
+function Req() {
+  return <span className="text-brand-ink">*</span>;
+}
+
+function FieldError({ msg }: { msg?: string }) {
+  return msg ? <p className="mt-1 text-xs text-red-500">{msg}</p> : null;
 }
 
 /** Inline (not a modal): on /tfa the form is the page, most visitors arrive from a link or QR code to register. */
@@ -28,7 +33,7 @@ export default function TfaRegisterForm() {
     email: "",
     phone: "",
     callPhone: "",
-    attendeeType: TFA_ATTENDEE_TYPES[0] as string,
+    attendeeType: "",
     courseOfStudy: "",
     parentName: "",
     parentPhone: "",
@@ -55,7 +60,11 @@ export default function TfaRegisterForm() {
     const errs = validateBookingForm(form) as Record<string, string>;
     if (!form.attendeeType) errs.attendeeType = "Required";
     if (!callPhone.trim()) errs.callPhone = "Required";
+    if (!form.courseOfStudy.trim()) errs.courseOfStudy = "Required";
     if (!isParent && !form.parentName.trim()) errs.parentName = "Required";
+    if (!isParent && !form.parentPhone.trim()) errs.parentPhone = "Required";
+    if (!form.heardVia) errs.heardVia = "Required";
+    if (!form.question.trim()) errs.question = "Required";
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
@@ -120,7 +129,7 @@ export default function TfaRegisterForm() {
 
       <div>
         <label htmlFor="tfa-email" className={labelClass}>
-          Email <span className="text-brand-ink">*</span>
+          Email Address <Req />
         </label>
         <input
           id="tfa-email"
@@ -186,8 +195,11 @@ export default function TfaRegisterForm() {
             id="tfa-type"
             value={form.attendeeType}
             onChange={(e) => set("attendeeType", e.target.value)}
-            className={`${inputClass} appearance-none cursor-pointer`}
+            className={`${inputClass} appearance-none cursor-pointer ${form.attendeeType ? "" : "text-fg-faint"}`}
           >
+            <option value="" disabled>
+              Select one
+            </option>
             {TFA_ATTENDEE_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
@@ -198,7 +210,7 @@ export default function TfaRegisterForm() {
         </div>
         <div>
           <label htmlFor="tfa-course" className={labelClass}>
-            {isParent ? "Your child's department" : "Department"} <Optional />
+            {isParent ? "Your Child's Department (Course of Study)" : "Department (Course of Study)"} <Req />
           </label>
           <input
             id="tfa-course"
@@ -208,6 +220,7 @@ export default function TfaRegisterForm() {
             onChange={(e) => set("courseOfStudy", e.target.value)}
             className={inputClass}
           />
+          <FieldError msg={errors.courseOfStudy} />
         </div>
       </div>
 
@@ -229,7 +242,7 @@ export default function TfaRegisterForm() {
           </div>
           <div>
             <label htmlFor="tfa-parent" className={labelClass}>
-              Parent/Guardian&apos;s Phone Number <Optional />
+              Parent/Guardian&apos;s Phone Number <Req />
             </label>
             <input
               id="tfa-parent"
@@ -239,13 +252,36 @@ export default function TfaRegisterForm() {
               onChange={(e) => set("parentPhone", e.target.value)}
               className={inputClass}
             />
+            <FieldError msg={errors.parentPhone} />
           </div>
         </div>
       )}
 
       <div>
+        <label htmlFor="tfa-heard" className={labelClass}>
+          How did you hear about The Freshers&apos; Advantage? <Req />
+        </label>
+        <select
+          id="tfa-heard"
+          value={form.heardVia}
+          onChange={(e) => set("heardVia", e.target.value)}
+          className={`${inputClass} appearance-none cursor-pointer ${form.heardVia ? "" : "text-fg-faint"}`}
+        >
+          <option value="" disabled>
+            Go on, who told you?
+          </option>
+          {TFA_HEARD_OPTIONS.map((h) => (
+            <option key={h} value={h}>
+              {h}
+            </option>
+          ))}
+        </select>
+        <FieldError msg={errors.heardVia} />
+      </div>
+
+      <div>
         <label htmlFor="tfa-question" className={labelClass}>
-          Got a question for the speakers? <Optional />
+          Got a question for the speaker/panellists? <Req />
         </label>
         <textarea
           id="tfa-question"
@@ -255,6 +291,7 @@ export default function TfaRegisterForm() {
           onChange={(e) => set("question", e.target.value)}
           className={`${inputClass} resize-none`}
         />
+        <FieldError msg={errors.question} />
         {form.question.trim() && (
           <div className="mt-3">
             <label htmlFor="tfa-question-for" className={labelClass}>
@@ -274,25 +311,6 @@ export default function TfaRegisterForm() {
             </select>
           </div>
         )}
-      </div>
-
-      <div>
-        <label htmlFor="tfa-heard" className={labelClass}>
-          How did you hear about this? <Optional />
-        </label>
-        <select
-          id="tfa-heard"
-          value={form.heardVia}
-          onChange={(e) => set("heardVia", e.target.value)}
-          className={`${inputClass} appearance-none cursor-pointer`}
-        >
-          <option value="">Go on, who told you?</option>
-          {TFA_HEARD_OPTIONS.map((h) => (
-            <option key={h} value={h}>
-              {h}
-            </option>
-          ))}
-        </select>
       </div>
 
       <Turnstile

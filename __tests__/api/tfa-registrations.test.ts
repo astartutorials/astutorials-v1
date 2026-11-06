@@ -43,7 +43,11 @@ const VALID = {
   phone: '08012345678',
   callPhone: '08087654321',
   attendeeType: 'Fresher (100 Level)',
+  courseOfStudy: 'Nursing',
   parentName: 'Anne Byron',
+  parentPhone: '08011112222',
+  heardVia: 'WhatsApp',
+  question: 'How do I survive 7am classes?',
 };
 
 function makeRequest(body: object | string) {
@@ -93,6 +97,13 @@ describe('POST /api/tfa-registrations', () => {
     ['unknown attendee type', { attendeeType: 'Lecturer' }],
     ['calls number', { callPhone: '  ' }],
     ["parent's name", { parentName: '' }],
+    ["parent's phone", { parentPhone: ' ' }],
+    ['department', { courseOfStudy: '' }],
+    ['how they heard', { heardVia: '' }],
+    ['unknown source', { heardVia: 'Carrier pigeon' }],
+    ['question', { question: '  ' }],
+    ['retired attendee type', { attendeeType: 'Direct Entry / Transfer student' }],
+    ['dropped attendee type', { attendeeType: 'Other' }],
   ])('returns 400 for a bad %s', async (_label, patch) => {
     const upsert = mockUpsert();
     expect((await POST(makeRequest({ ...VALID, ...patch }))).status).toBe(400);
@@ -107,7 +118,7 @@ describe('POST /api/tfa-registrations', () => {
         fullName: '  Ada Lovelace ',
         email: ' Ada@Babcock.Edu.NG ',
         courseOfStudy: ' Nursing ',
-        question: '',
+        question: ' How? ',
         orgId: 'some-other-org',
       })
     );
@@ -122,10 +133,10 @@ describe('POST /api/tfa-registrations', () => {
         attendee_type: 'Fresher (100 Level)',
         course_of_study: 'Nursing',
         parent_name: 'Anne Byron',
-        parent_phone: null,
-        question: null,
-        question_for: null,
-        heard_via: null,
+        parent_phone: '08011112222',
+        question: 'How?',
+        question_for: TFA_ANY_SPEAKER,
+        heard_via: 'WhatsApp',
       },
       { onConflict: 'email' }
     );
@@ -159,11 +170,13 @@ describe('POST /api/tfa-registrations', () => {
     expect(upsert.mock.calls[0][0].question_for).toBe(TFA_ANY_SPEAKER);
   });
 
-  it('drops the target when there is no question', async () => {
-    const upsert = mockUpsert();
-    await POST(makeRequest({ ...VALID, question: '  ', questionFor: TFA_QUESTION_TARGETS[1] }));
-    expect(upsert.mock.calls[0][0].question_for).toBeNull();
-  });
+  it.each(['Direct Entry Student', 'Transfer Student', 'Returning Student'])(
+    'accepts %s as an attendee type',
+    async (attendeeType) => {
+      mockUpsert();
+      expect((await POST(makeRequest({ ...VALID, attendeeType }))).status).toBe(201);
+    }
+  );
 
   it('caps a very long answer', async () => {
     const upsert = mockUpsert();
