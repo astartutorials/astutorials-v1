@@ -5,6 +5,7 @@ jest.mock('@/lib/supabase-server', () => ({
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { POST } from '@/app/api/admin/auth/update-password/route';
 import { NextRequest } from 'next/server';
+import { asServerClient } from '../helpers/supabase';
 
 const mockServer = jest.mocked(createSupabaseServerClient);
 
@@ -12,11 +13,11 @@ const ADMIN_USER = { id: 'admin-id', email: 'admin@astar.ng', user_metadata: {} 
 
 function mockClient(opts: {
   user?: object | null;
-  signInError?: any;
-  updateError?: any;
+  signInError?: unknown;
+  updateError?: unknown;
 } = {}) {
   const user = opts.user !== undefined ? opts.user : ADMIN_USER;
-  mockServer.mockResolvedValue({
+  mockServer.mockResolvedValue(asServerClient({
     auth: {
       getUser: jest.fn().mockResolvedValue({
         data: { user },
@@ -25,7 +26,7 @@ function mockClient(opts: {
       signInWithPassword: jest.fn().mockResolvedValue({ error: opts.signInError ?? null }),
       updateUser: jest.fn().mockResolvedValue({ error: opts.updateError ?? null }),
     },
-  } as any);
+  }));
 }
 
 function makeRequest(body: object) {
@@ -92,13 +93,13 @@ describe('POST /api/admin/auth/update-password', () => {
   it('verifies current password before updating — passes email and current password to signInWithPassword', async () => {
     const mockSignIn = jest.fn().mockResolvedValue({ error: null });
     const mockUpdateUser = jest.fn().mockResolvedValue({ error: null });
-    mockServer.mockResolvedValue({
+    mockServer.mockResolvedValue(asServerClient({
       auth: {
         getUser: jest.fn().mockResolvedValue({ data: { user: ADMIN_USER }, error: null }),
         signInWithPassword: mockSignIn,
         updateUser: mockUpdateUser,
       },
-    } as any);
+    }));
 
     await POST(makeRequest({ currentPassword: 'myoldpass', newPassword: 'betterpassword' }));
 

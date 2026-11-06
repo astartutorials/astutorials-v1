@@ -1,4 +1,3 @@
-import { NextRequest } from 'next/server';
 
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({ from: jest.fn() })),
@@ -15,14 +14,15 @@ process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test_anon_key';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { GET } from '@/app/api/admin/bookings/route';
+import { asServerClient } from '../helpers/supabase';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 const ADMIN_USER = { id: 'admin-id', user_metadata: { role: 'super_admin' } };
 
 function mockAuth(user: object | null) {
-  mockServerClient.mockResolvedValue({
+  mockServerClient.mockResolvedValue(asServerClient({
     auth: { getUser: jest.fn().mockResolvedValue({ data: { user }, error: user ? null : { message: 'Unauthorized' } }) },
-  } as any);
+  }));
 }
 
 // The route creates supabase at module scope — grab it from the first createClient call
@@ -95,7 +95,7 @@ describe('GET /api/admin/bookings', () => {
     // Set up the auth client so getUserRole reads from DB and gets org_id: 'org-uuid'
     // getUserRole now uses .order().limit(2) returning an array (nulls-first for platform-wide priority)
     const limit = jest.fn().mockResolvedValue({ data: [{ role: 'org_admin', org_id: 'org-uuid' }] });
-    mockServerClient.mockResolvedValue({
+    mockServerClient.mockResolvedValue(asServerClient({
       auth: {
         getUser: jest.fn().mockResolvedValue({
           data: { user: { id: 'admin-id', user_metadata: {} } },
@@ -109,14 +109,14 @@ describe('GET /api/admin/bookings', () => {
           }),
         }),
       }),
-    } as any);
+    }));
 
     // Service client mock: order() returns a thenable that also has .eq()
     // so the route can either await it directly or chain .eq() first
     const mockEq = jest.fn().mockResolvedValue({ data: [], error: null });
     const mockOrderResult = {
       eq: mockEq,
-      then: (resolve: any) => Promise.resolve({ data: [], error: null }).then(resolve),
+      then: (resolve: (v: { data: never[]; error: null }) => unknown) => Promise.resolve({ data: [], error: null }).then(resolve),
     };
     const mockOrder = jest.fn().mockReturnValue(mockOrderResult);
     const mockSelect = jest.fn().mockReturnValue({ order: mockOrder });

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 
 const mockFrom = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({ from: (...args: any[]) => mockFrom(...args) })),
+  createClient: jest.fn(() => ({ from: (...args: unknown[]) => mockFrom(...args) })),
 }));
 
 jest.mock('@/lib/supabase-server', () => ({
@@ -24,19 +24,20 @@ import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { sendApplicationShortlisted, sendApplicationRejected, sendApplicationAccepted } from '@/lib/email';
 import { GET } from '@/app/api/admin/applications/route';
 import { PATCH } from '@/app/api/admin/applications/[id]/route';
+import { asServerClient } from '../helpers/supabase';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 const ADMIN_USER = { id: 'admin-id', email: 'admin@test.com', user_metadata: { role: 'super_admin' } };
 
 function mockAuth(user: object | null) {
-  mockServerClient.mockResolvedValue({
+  mockServerClient.mockResolvedValue(asServerClient({
     auth: {
       getUser: jest.fn().mockResolvedValue({
         data: { user },
         error: user ? null : { message: 'Unauthorized' },
       }),
     },
-  } as any);
+  }));
 }
 
 function patchReq(body: object) {

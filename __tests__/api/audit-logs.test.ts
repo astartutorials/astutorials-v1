@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 
 const mockFrom = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({ from: (...args: any[]) => mockFrom(...args) })),
+  createClient: jest.fn(() => ({ from: (...args: unknown[]) => mockFrom(...args) })),
 }));
 
 jest.mock('@/lib/supabase-server', () => ({
@@ -14,6 +14,7 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { GET } from '@/app/api/admin/audit-logs/route';
+import { asServerClient } from '../helpers/supabase';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 
@@ -28,7 +29,7 @@ function mockAuth(user: object | null) {
   const rows = user && (user as { id?: string }).id?.startsWith('super') === false && !(user as { user_metadata?: { role?: string } }).user_metadata?.role
     ? [{ role: 'org_admin', org_id: 'org-1' }]
     : [{ role: 'super_admin', org_id: null }];
-  mockServerClient.mockResolvedValue({
+  mockServerClient.mockResolvedValue(asServerClient({
     from: jest.fn(() => ({ select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: user ? rows : [] }) }) }) }) })),
     auth: {
       getUser: jest.fn().mockResolvedValue({
@@ -36,7 +37,7 @@ function mockAuth(user: object | null) {
         error: user ? null : { message: 'Unauthorized' },
       }),
     },
-  } as any);
+  }));
 }
 
 function makeGetRequest(page?: number) {

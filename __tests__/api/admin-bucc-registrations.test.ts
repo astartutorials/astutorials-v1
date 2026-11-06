@@ -1,6 +1,6 @@
 const mockFrom = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({ from: (...args: any[]) => mockFrom(...args) })),
+  createClient: jest.fn(() => ({ from: (...args: unknown[]) => mockFrom(...args) })),
 }));
 
 jest.mock('@/lib/supabase-server', () => ({
@@ -12,6 +12,7 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { GET } from '@/app/api/admin/bucc-registrations/route';
+import { asServerClient } from '../helpers/supabase';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 
@@ -20,7 +21,7 @@ const mockServerClient = jest.mocked(createSupabaseServerClient);
  * is supplied there; user_metadata is only the fallback path.
  */
 function mockAuth(user: object | null, roleRows: object[] | null = null) {
-  mockServerClient.mockResolvedValue({
+  mockServerClient.mockResolvedValue(asServerClient({
     auth: {
       getUser: jest.fn().mockResolvedValue({
         data: { user },
@@ -33,11 +34,11 @@ function mockAuth(user: object | null, roleRows: object[] | null = null) {
       order: jest.fn().mockReturnThis(),
       limit: jest.fn().mockResolvedValue({ data: roleRows }),
     }),
-  } as any);
+  }));
 }
 
 /** A select → order (→ eq) chain; awaiting it at any point yields `result`. */
-function mockRows(result: { data: any; error: any }) {
+function mockRows(result: { data: unknown; error: unknown }) {
   const eq = jest.fn();
   const chain = { eq, then: (resolve: (v: unknown) => void) => resolve(result) };
   eq.mockReturnValue(chain);

@@ -62,18 +62,15 @@ export default function ApplicationsPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState(false);
 
-  async function fetchApplications() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/applications");
-      const data = await res.json();
-      if (!res.ok) { setFetchError(true); return; }
-      setApplications(Array.isArray(data) ? data : []);
-    } catch {
-      setFetchError(true);
-    } finally {
-      setLoading(false);
-    }
+  function fetchApplications() {
+    return fetch("/api/admin/applications")
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) { setFetchError(true); return; }
+        setApplications(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setFetchError(true))
+      .finally(() => setLoading(false));
   }
 
   useEffect(() => { fetchApplications(); }, []);

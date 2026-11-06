@@ -4,17 +4,17 @@ import { NextRequest } from 'next/server';
 // the handle we need to stub the query chain.
 const mockFrom = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({ from: (...args: any[]) => mockFrom(...args) })),
+  createClient: jest.fn(() => ({ from: (...args: unknown[]) => mockFrom(...args) })),
 }));
 
 const mockVerifyTurnstile = jest.fn().mockResolvedValue(true);
 jest.mock('@/lib/turnstile', () => ({
-  verifyTurnstile: (...args: any[]) => mockVerifyTurnstile(...args),
+  verifyTurnstile: (...args: unknown[]) => mockVerifyTurnstile(...args),
 }));
 
 const mockSendConfirmation = jest.fn().mockResolvedValue(undefined);
 jest.mock('@/lib/email', () => ({
-  sendPlaybookRegistrationConfirmation: (...args: any[]) => mockSendConfirmation(...args),
+  sendPlaybookRegistrationConfirmation: (...args: unknown[]) => mockSendConfirmation(...args),
 }));
 
 const mockCapture = jest.fn();
@@ -34,7 +34,7 @@ import { POST } from '@/app/api/playbook-registrations/route';
 import { getPlaybook } from '@/lib/playbooks';
 
 /** Wires the `from().upsert()` chain and hands back the upsert spy. */
-function mockUpsert(result: { error: any } = { error: null }) {
+function mockUpsert(result: { error: unknown } = { error: null }) {
   const upsert = jest.fn().mockResolvedValue(result);
   mockFrom.mockReturnValue({ upsert });
   return upsert;

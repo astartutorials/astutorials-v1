@@ -14,8 +14,10 @@ function ResetForm() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [showPw, setShowPw] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'exchanging' | 'ready' | 'submitting' | 'done' | 'error'>('idle');
-  const [error, setError] = useState('');
+  const [status, setStatus] = useState<'idle' | 'exchanging' | 'ready' | 'submitting' | 'done' | 'error'>(
+    code ? 'exchanging' : 'error'
+  );
+  const [error, setError] = useState(code ? '' : 'Invalid or missing reset link. Please request a new one.');
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,12 +25,7 @@ function ResetForm() {
   );
 
   useEffect(() => {
-    if (!code) {
-      setStatus('error');
-      setError('Invalid or missing reset link. Please request a new one.');
-      return;
-    }
-    setStatus('exchanging');
+    if (!code) return;
     supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
       if (error) {
         setStatus('error');

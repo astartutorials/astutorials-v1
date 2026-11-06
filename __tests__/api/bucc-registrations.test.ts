@@ -4,17 +4,17 @@ import { NextRequest } from 'next/server';
 // the handle we need to stub the query chain.
 const mockFrom = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({ from: (...args: any[]) => mockFrom(...args) })),
+  createClient: jest.fn(() => ({ from: (...args: unknown[]) => mockFrom(...args) })),
 }));
 
 const mockVerifyTurnstile = jest.fn().mockResolvedValue(true);
 jest.mock('@/lib/turnstile', () => ({
-  verifyTurnstile: (...args: any[]) => mockVerifyTurnstile(...args),
+  verifyTurnstile: (...args: unknown[]) => mockVerifyTurnstile(...args),
 }));
 
 const mockSendConfirmation = jest.fn().mockResolvedValue(undefined);
 jest.mock('@/lib/email', () => ({
-  sendBuccRegistrationConfirmation: (...args: any[]) => mockSendConfirmation(...args),
+  sendBuccRegistrationConfirmation: (...args: unknown[]) => mockSendConfirmation(...args),
 }));
 
 const mockCapture = jest.fn();
@@ -33,7 +33,7 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 import { POST } from '@/app/api/bucc-registrations/route';
 
 /** Wires the `from().upsert()` chain and hands back the upsert spy. */
-function mockUpsert(result: { error: any } = { error: null }) {
+function mockUpsert(result: { error: unknown } = { error: null }) {
   const upsert = jest.fn().mockResolvedValue(result);
   mockFrom.mockReturnValue({ upsert });
   return upsert;

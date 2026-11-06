@@ -1,8 +1,7 @@
-import { NextRequest } from 'next/server';
 
 const mockServiceFrom = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({ from: (...args: any[]) => mockServiceFrom(...args) })),
+  createClient: jest.fn(() => ({ from: (...args: unknown[]) => mockServiceFrom(...args) })),
 }));
 
 jest.mock('@/lib/supabase-server', () => ({
@@ -14,21 +13,21 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { GET } from '@/app/api/admin/dashboard/route';
+import { asServerClient, makeChain } from '../helpers/supabase';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 
 const SUPER_ADMIN = { id: 'super-id', user_metadata: { role: 'super_admin' } };
-const ORG_ADMIN = { id: 'admin-id', user_metadata: { role: 'super_admin' } };
 
 function mockAuth(user: object | null) {
-  mockServerClient.mockResolvedValue({
+  mockServerClient.mockResolvedValue(asServerClient({
     auth: {
       getUser: jest.fn().mockResolvedValue({
         data: { user },
         error: user ? null : { message: 'Unauthorized' },
       }),
     },
-  } as any);
+  }));
 }
 
 // Universal chainable/awaitable mock for Supabase query builders.
@@ -42,18 +41,6 @@ function mockAuth(user: object | null) {
 //   6. from('bookings')   (paid)
 //   7. from('bookings')   (all)
 //   8. from('feedback')   (ratings)
-function makeChain(data: any) {
-  const result = { data, error: null };
-  const chain: any = {
-    then: (onFulfilled: any) => Promise.resolve(result).then(onFulfilled),
-    catch: (onRejected: any) => Promise.resolve(result).catch(onRejected),
-    finally: (onFinally: any) => Promise.resolve(result).finally(onFinally),
-  };
-  ['select', 'order', 'eq', 'gte', 'neq', 'in', 'limit'].forEach(m => {
-    chain[m] = jest.fn(() => chain);
-  });
-  return chain;
-}
 
 const ORG = { id: 'org-1', name: 'Babcock', type: 'university', location: 'Ilishan' };
 const ACTIVE_TUT = { id: 'tut-1', org_id: 'org-1', status: 'active' };
@@ -66,14 +53,14 @@ const UPCOMING_ROW = { id: 'tut-1', code: 'MTH201', title: 'Calculus', date: '20
 const RECENT_FEEDBACK = { full_name: 'Ada', rating: 4, created_at: '2025-06-01', tutorials: { title: 'Calculus', org_id: 'org-1', organisations: { name: 'Babcock' } } };
 
 function setupMocks(opts: {
-  upcoming?: any[];
-  recentFeedback?: any[];
-  recentPayments?: any[];
-  orgs?: any[];
-  tutorials?: any[];
-  paidBookings?: any[];
-  allBookings?: any[];
-  feedbackRows?: any[];
+  upcoming?: unknown[];
+  recentFeedback?: unknown[];
+  recentPayments?: unknown[];
+  orgs?: unknown[];
+  tutorials?: unknown[];
+  paidBookings?: unknown[];
+  allBookings?: unknown[];
+  feedbackRows?: unknown[];
 } = {}) {
   const {
     upcoming = [UPCOMING_ROW],
@@ -248,12 +235,12 @@ describe('GET /api/admin/dashboard — role-shaped response', () => {
   beforeEach(() => { mockServerClient.mockReset(); mockServiceFrom.mockReset(); });
 
   function mockAuthAs(role: string) {
-    mockServerClient.mockResolvedValue({
+    mockServerClient.mockResolvedValue(asServerClient({
       auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1', user_metadata: {} } }, error: null }) },
       from: jest.fn(() => ({
         select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: [{ role, org_id: 'org-1' }] }) }) }) }),
       })),
-    } as any);
+    }));
   }
 
   it('withholds revenue and payments from a tutor', async () => {

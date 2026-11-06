@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { X, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { validateBookingForm } from "@/lib/validate";
 import posthog from "posthog-js";
@@ -19,6 +20,7 @@ const inputClass =
   "w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg text-base bg-surface-raised";
 
 export default function RegisterModal({ onClose }: { onClose: () => void }) {
+  const router = useRouter();
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -82,7 +84,7 @@ export default function RegisterModal({ onClose }: { onClose: () => void }) {
         has_parent_phone: !!form.parentPhone.trim(),
       });
 
-      window.location.href = `/bucc/advantage/success?name=${encodeURIComponent(form.fullName)}`;
+      router.push(`/bucc/advantage/success?name=${encodeURIComponent(form.fullName)}`);
     } catch (err) {
       posthog.captureException(err);
       setApiError("Network error. Please check your connection and try again.");

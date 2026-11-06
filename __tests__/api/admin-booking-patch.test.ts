@@ -4,8 +4,8 @@ const mockFrom = jest.fn();
 const mockRpc = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
-    from: (...args: any[]) => mockFrom(...args),
-    rpc: (...args: any[]) => mockRpc(...args),
+    from: (...args: unknown[]) => mockFrom(...args),
+    rpc: (...args: unknown[]) => mockRpc(...args),
   })),
 }));
 
@@ -20,19 +20,20 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { PATCH } from '@/app/api/admin/bookings/[id]/route';
+import { asServerClient } from '../helpers/supabase';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 const ADMIN_USER = { id: 'admin-id', email: 'admin@test.com', user_metadata: { role: 'super_admin' } };
 
 function mockAuth(user: object | null) {
-  mockServerClient.mockResolvedValue({
+  mockServerClient.mockResolvedValue(asServerClient({
     auth: {
       getUser: jest.fn().mockResolvedValue({
         data: { user },
         error: user ? null : { message: 'Unauthorized' },
       }),
     },
-  } as any);
+  }));
 }
 
 function makeRequest(id: string, body: object) {
@@ -218,12 +219,12 @@ describe('PATCH /api/admin/bookings/[id] — role split', () => {
   beforeEach(() => { mockServerClient.mockReset(); mockFrom.mockReset(); mockRpc.mockReset(); });
 
   function mockAuthAs(role: string) {
-    mockServerClient.mockResolvedValue({
+    mockServerClient.mockResolvedValue(asServerClient({
       auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1', email: 'u@test.com', user_metadata: {} } }, error: null }) },
       from: jest.fn(() => ({
         select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: [{ role, org_id: 'org-1' }] }) }) }) }),
       })),
-    } as any);
+    }));
   }
 
   it('lets a tutor take attendance', async () => {

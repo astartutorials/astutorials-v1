@@ -12,6 +12,7 @@ process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
 process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test_anon_key';
 
 import { middleware } from '@/middleware';
+import { createServerClient } from '@supabase/ssr';
 
 const MOCK_USER = { id: 'admin-id', email: 'admin@astar.com', user_metadata: { role: 'super_admin' } };
 
@@ -72,8 +73,7 @@ describe('Admin middleware', () => {
   describe('session reading', () => {
     it('uses getSession (not getUser) to avoid rate limiting', async () => {
       mockGetSession.mockResolvedValue({ data: { session: null } });
-      const { createServerClient } = require('@supabase/ssr');
-      const mockClient = (createServerClient as jest.Mock).mock.results[0]?.value;
+      const mockClient = jest.mocked(createServerClient).mock.results[0]?.value;
 
       await middleware(makeRequest('/admin/tutorials'));
 

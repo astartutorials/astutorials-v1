@@ -9,7 +9,7 @@ jest.mock('@supabase/supabase-js', () => ({
 
 const mockVerifyTurnstile = jest.fn().mockResolvedValue(true);
 jest.mock('@/lib/turnstile', () => ({
-  verifyTurnstile: (...args: any[]) => mockVerifyTurnstile(...args),
+  verifyTurnstile: (...args: unknown[]) => mockVerifyTurnstile(...args),
 }));
 
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';

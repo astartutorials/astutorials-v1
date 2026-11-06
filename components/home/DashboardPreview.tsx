@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 
@@ -12,7 +13,7 @@ export default function DashboardPreview() {
           
           <div className="relative z-10 rounded-2xl md:rounded-2xl overflow-hidden shadow-2xl shadow-gray-900/10 border border-line/50 bg-surface-raised">
              {/* Main Preview Image */}
-             <img src="/images/dashboard-preview.png" alt="A-Star Student Collaboration" className="w-full h-auto object-cover" loading="lazy" />
+             <Image src="/images/dashboard-preview.png" alt="A-Star Student Collaboration" width={1280} height={960} sizes="(min-width: 1024px) 50vw, 100vw" className="w-full h-auto object-cover" />
 
              {/* Floating UI Badges */}
              

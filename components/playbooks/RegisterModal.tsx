@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { X, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { validateBookingForm } from "@/lib/validate";
 import posthog from "posthog-js";
@@ -27,6 +28,8 @@ export default function RegisterModal({
 }) {
   const { form: cfg } = playbook;
   const asksDiscipline = cfg.disciplineLabel !== "" && cfg.disciplines.length > 0;
+
+  const router = useRouter();
 
   const [form, setForm] = useState({
     fullName: "",
@@ -96,9 +99,9 @@ export default function RegisterModal({
         has_parent_phone: !!form.parentPhone.trim(),
       });
 
-      window.location.href = `/playbooks/${playbook.slug}/success?name=${encodeURIComponent(
+      router.push(`/playbooks/${playbook.slug}/success?name=${encodeURIComponent(
         form.fullName
-      )}`;
+      )}`);
     } catch (err) {
       posthog.captureException(err);
       setApiError("Network error. Please check your connection and try again.");
