@@ -9,8 +9,10 @@ type Registration = {
   full_name: string;
   email: string;
   phone: string;
+  call_phone: string | null;
   attendee_type: string;
   course_of_study: string | null;
+  parent_name: string | null;
   parent_phone: string | null;
   question: string | null;
   question_for: string | null;
@@ -30,13 +32,13 @@ function csvCell(value: string | null) {
 
 function downloadCsv(rows: Registration[]) {
   const headers = [
-    "Full Name", "Email", "WhatsApp", "Attendee Type", "Course of Study",
-    "Parent/Guardian Phone", "Question", "Question For", "Heard Via", "Registered At",
+    "Full Name", "Email", "WhatsApp", "Phone (Calls)", "Attendee Type", "Course of Study",
+    "Parent/Guardian Name", "Parent/Guardian Phone", "Question", "Question For", "Heard Via", "Registered At",
   ];
   const body = rows.map((r) =>
     [
-      r.full_name, r.email, r.phone, r.attendee_type, r.course_of_study,
-      r.parent_phone, r.question, r.question_for, r.heard_via, r.created_at,
+      r.full_name, r.email, r.phone, r.call_phone, r.attendee_type, r.course_of_study,
+      r.parent_name, r.parent_phone, r.question, r.question_for, r.heard_via, r.created_at,
     ].map(csvCell).join(",")
   );
   // BOM so Excel opens the names as UTF-8.
@@ -82,7 +84,7 @@ export default function AdminTfaPage() {
     const q = query.trim().toLowerCase();
     if (!q) return source;
     return source.filter((r) =>
-      [r.full_name, r.email, r.phone, r.course_of_study, r.parent_phone]
+      [r.full_name, r.email, r.phone, r.call_phone, r.course_of_study, r.parent_name, r.parent_phone]
         .some((f) => (f ?? "").toLowerCase().includes(q))
     );
   }, [all, typeFilter, query]);
@@ -189,16 +191,29 @@ export default function AdminTfaPage() {
 
               <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1.5 text-xs text-gray-500">
                 <span>
-                  <a href={`tel:${r.phone.replace(/[^\d+]/g, "")}`} className="hover:text-[#D93025]">{r.phone}</a>
+                  <a href={waLink(r.phone)} target="_blank" rel="noopener noreferrer" className="hover:text-[#D93025]">
+                    <span className="text-gray-400">WhatsApp:</span> {r.phone}
+                  </a>
                   <span className="text-gray-300 mx-1.5">·</span>
-                  <a href={waLink(r.phone)} target="_blank" rel="noopener noreferrer" className="hover:text-[#D93025]">WhatsApp</a>
+                  {(() => {
+                    // Older rows have no calls number; the WhatsApp line is the best fallback.
+                    const call = r.call_phone ?? r.phone;
+                    return (
+                      <a href={`tel:${call.replace(/[^\d+]/g, "")}`} className="hover:text-[#D93025]">
+                        <span className="text-gray-400">Calls:</span> {call}
+                      </a>
+                    );
+                  })()}
                   <span className="text-gray-300 mx-1.5">·</span>
                   <a href={`mailto:${r.email}`} className="hover:text-[#D93025]">{r.email}</a>
                 </span>
-                {r.parent_phone && (
+                {(r.parent_name || r.parent_phone) && (
                   <span>
-                    <span className="text-gray-400">Parent:</span>{" "}
-                    <a href={`tel:${r.parent_phone.replace(/[^\d+]/g, "")}`} className="hover:text-[#D93025]">{r.parent_phone}</a>
+                    <span className="text-gray-400">Parent:</span> {r.parent_name}
+                    {r.parent_name && r.parent_phone && <span className="text-gray-300 mx-1.5">·</span>}
+                    {r.parent_phone && (
+                      <a href={`tel:${r.parent_phone.replace(/[^\d+]/g, "")}`} className="hover:text-[#D93025]">{r.parent_phone}</a>
+                    )}
                   </span>
                 )}
               </div>

@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2, ArrowRight, CalendarDays, Clock, MapPin, CalendarPlus, Share2, Check } from "lucide-react";
+import { CheckCircle2, ArrowRight, Users, CalendarDays, Clock, MapPin, CalendarPlus, Share2, Check } from "lucide-react";
 import {
   TFA_EVENT_NAME,
   TFA_THEME,
@@ -10,6 +10,7 @@ import {
   TFA_TIME_LABEL,
   TFA_VENUE_SHORT,
   TFA_SHARE_TEXT,
+  TFA_WHATSAPP_GROUP_URL,
   tfaGoogleCalendarUrl,
   tfaIcs,
 } from "@/lib/tfa";
@@ -109,16 +110,33 @@ function SuccessContent() {
             </div>
           </div>
 
-          <a
-            href={whatsAppUrl(name)}
-            className="w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-brand-hover transition-all shadow-lg"
-          >
-            Get reminders on WhatsApp <ArrowRight size={18} />
-          </a>
-
           <button type="button" onClick={share} className={`w-full ${secondaryBtn}`}>
             {shared ? <><Check size={16} /> Invite copied, paste it to a friend</> : <><Share2 size={16} /> Invite a friend</>}
           </button>
+
+          {/* The last step, and the one that matters most after the day itself:
+              the 100L group is where updates and the class community live. */}
+          <div className="rounded-xl border border-brand-soft-border bg-brand-soft p-5">
+            <p className="text-xs font-bold uppercase tracking-wider text-brand-ink">Last step</p>
+            <p className="mt-1 text-sm text-fg-muted leading-relaxed">
+              Join the main 100L WhatsApp group for event updates and to meet your classmates.
+            </p>
+            <a
+              href={TFA_WHATSAPP_GROUP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 w-full bg-[var(--astar-red)] text-white py-3.5 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-brand-hover transition-all shadow-lg"
+            >
+              <Users size={18} /> Join the 100L WhatsApp group <ArrowRight size={18} />
+            </a>
+          </div>
+
+          <p className="text-center text-xs text-fg-faint">
+            Prefer a direct message?{" "}
+            <a href={whatsAppUrl(name)} className="font-semibold text-brand-ink hover:underline">
+              Get reminders from us on WhatsApp
+            </a>
+          </p>
 
           <p className="text-center text-sm font-bold text-brand-ink">Equipped for Success.</p>
         </div>
