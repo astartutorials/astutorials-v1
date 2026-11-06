@@ -7,13 +7,13 @@ import {
 
 describe('semester plan', () => {
   it('prices the two plans as agreed', () => {
-    expect(SEMESTER_PLANS.group).toMatchObject({ price: 75000, sessions: 50 });
-    expect(SEMESTER_PLANS.private).toMatchObject({ price: 250000, sessions: 50 });
+    expect(SEMESTER_PLANS.group).toMatchObject({ price: 100000, sessions: 50 });
+    expect(SEMESTER_PLANS.private).toMatchObject({ price: 300000, sessions: 50 });
   });
 
   it('works out a per-session price', () => {
-    expect(perSessionPrice(SEMESTER_PLANS.group)).toBe(1500);
-    expect(perSessionPrice(SEMESTER_PLANS.private)).toBe(5000);
+    expect(perSessionPrice(SEMESTER_PLANS.group)).toBe(2000);
+    expect(perSessionPrice(SEMESTER_PLANS.private)).toBe(6000);
   });
 
   it('recognises only the real plan ids', () => {

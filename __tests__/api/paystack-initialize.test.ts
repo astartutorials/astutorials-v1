@@ -185,7 +185,7 @@ describe('POST /api/paystack/initialize', () => {
 
     it('accepts the listed price for each plan', async () => {
       okPaystack();
-      for (const [plan, amount] of [['group', 75000], ['private', 250000]] as const) {
+      for (const [plan, amount] of [['group', 100000], ['private', 300000]] as const) {
         const res = await POST(makeRequest({ email: 'p@example.com', amount, metadata: { type: 'semester-plan', plan } }));
         expect(res.status).toBe(200);
       }
@@ -198,7 +198,7 @@ describe('POST /api/paystack/initialize', () => {
     });
 
     it('refuses an unknown plan', async () => {
-      const res = await POST(makeRequest({ email: 'p@example.com', amount: 75000, metadata: { type: 'semester-plan', plan: 'vip' } }));
+      const res = await POST(makeRequest({ email: 'p@example.com', amount: 100000, metadata: { type: 'semester-plan', plan: 'vip' } }));
       expect(res.status).toBe(400);
     });
   });
