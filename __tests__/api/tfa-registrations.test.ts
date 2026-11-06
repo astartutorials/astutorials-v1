@@ -99,9 +99,7 @@ describe('POST /api/tfa-registrations', () => {
     ["parent's name", { parentName: '' }],
     ["parent's phone", { parentPhone: ' ' }],
     ['department', { courseOfStudy: '' }],
-    ['how they heard', { heardVia: '' }],
     ['unknown source', { heardVia: 'Carrier pigeon' }],
-    ['question', { question: '  ' }],
     ['retired attendee type', { attendeeType: 'Direct Entry / Transfer student' }],
     ['dropped attendee type', { attendeeType: 'Other' }],
   ])('returns 400 for a bad %s', async (_label, patch) => {
@@ -140,6 +138,15 @@ describe('POST /api/tfa-registrations', () => {
       },
       { onConflict: 'email' }
     );
+  });
+
+  it('accepts a registration without how they heard or a question', async () => {
+    const upsert = mockUpsert();
+    const res = await POST(
+      makeRequest({ ...VALID, heardVia: '', question: '  ', questionFor: TFA_QUESTION_TARGETS[1] })
+    );
+    expect(res.status).toBe(201);
+    expect(upsert.mock.calls[0][0]).toMatchObject({ heard_via: null, question: null, question_for: null });
   });
 
   it("doesn't ask a parent for their own parent's details", async () => {
