@@ -82,19 +82,20 @@ export async function POST(req: NextRequest) {
   if (!courseOfStudy) {
     return NextResponse.json({ error: "Department is required" }, { status: 400 });
   }
+  // Optional, but when given it must be one of the dropdown's options.
   const heardVia = clean(body.heardVia, 60);
-  if (!heardVia || !TFA_HEARD_OPTIONS.includes(heardVia)) {
+  if (heardVia && !TFA_HEARD_OPTIONS.includes(heardVia)) {
     return NextResponse.json({ error: "Tell us how you heard about the event" }, { status: 400 });
   }
 
+  // Optional. Who it's for only means something alongside a question; an
+  // unknown name falls back to the catch-all rather than rejecting the
+  // registration over an optional field.
   const question = clean(body.question, 1000);
-  if (!question) {
-    return NextResponse.json({ error: "A question for the speakers is required" }, { status: 400 });
-  }
-  // An unknown name falls back to the catch-all rather than rejecting the
-  // registration over who the question is addressed to.
   const target = clean(body.questionFor, 200);
-  const questionFor = target && TFA_QUESTION_TARGETS.includes(target) ? target : TFA_ANY_SPEAKER;
+  const questionFor = question
+    ? target && TFA_QUESTION_TARGETS.includes(target) ? target : TFA_ANY_SPEAKER
+    : null;
 
   const row = {
     // The event is at BUTH, for Babcock's freshers: org-scoped like every

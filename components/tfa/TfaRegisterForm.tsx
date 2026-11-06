@@ -17,9 +17,13 @@ const inputClass =
   "w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg text-base bg-surface-raised";
 const labelClass = "text-sm font-semibold text-fg-muted block mb-1.5";
 
-/** Every field on this form is required, so every label carries the marker. */
+/** Required fields carry the marker; the two optional ones say so instead. */
 function Req() {
   return <span className="text-brand-ink">*</span>;
+}
+
+function Optional() {
+  return <span className="text-fg-faint font-normal">(optional)</span>;
 }
 
 function FieldError({ msg }: { msg?: string }) {
@@ -63,8 +67,6 @@ export default function TfaRegisterForm() {
     if (!form.courseOfStudy.trim()) errs.courseOfStudy = "Required";
     if (!isParent && !form.parentName.trim()) errs.parentName = "Required";
     if (!isParent && !form.parentPhone.trim()) errs.parentPhone = "Required";
-    if (!form.heardVia) errs.heardVia = "Required";
-    if (!form.question.trim()) errs.question = "Required";
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
@@ -259,7 +261,7 @@ export default function TfaRegisterForm() {
 
       <div>
         <label htmlFor="tfa-heard" className={labelClass}>
-          How did you hear about The Freshers&apos; Advantage? <Req />
+          How did you hear about The Freshers&apos; Advantage? <Optional />
         </label>
         <select
           id="tfa-heard"
@@ -267,7 +269,7 @@ export default function TfaRegisterForm() {
           onChange={(e) => set("heardVia", e.target.value)}
           className={`${inputClass} appearance-none cursor-pointer ${form.heardVia ? "" : "text-fg-faint"}`}
         >
-          <option value="" disabled>
+          <option value="">
             Go on, who told you?
           </option>
           {TFA_HEARD_OPTIONS.map((h) => (
@@ -276,12 +278,11 @@ export default function TfaRegisterForm() {
             </option>
           ))}
         </select>
-        <FieldError msg={errors.heardVia} />
       </div>
 
       <div>
         <label htmlFor="tfa-question" className={labelClass}>
-          Got a question for the speaker/panellists? <Req />
+          Got a question for the speaker/panellists? <Optional />
         </label>
         <textarea
           id="tfa-question"
@@ -291,7 +292,6 @@ export default function TfaRegisterForm() {
           onChange={(e) => set("question", e.target.value)}
           className={`${inputClass} resize-none`}
         />
-        <FieldError msg={errors.question} />
         {form.question.trim() && (
           <div className="mt-3">
             <label htmlFor="tfa-question-for" className={labelClass}>
