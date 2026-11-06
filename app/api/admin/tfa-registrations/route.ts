@@ -29,7 +29,7 @@ export async function GET() {
   let query = supabase
     .from("tfa_registrations")
     .select(
-      "id, full_name, email, phone, attendee_type, course_of_study, parent_phone, question, question_for, heard_via, created_at"
+      "id, full_name, email, phone, call_phone, attendee_type, course_of_study, parent_name, parent_phone, question, question_for, heard_via, created_at"
     )
     .order("created_at", { ascending: false });
 

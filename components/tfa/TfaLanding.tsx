@@ -15,6 +15,7 @@ import {
   ArrowDown,
 } from "lucide-react";
 import TfaRegisterForm from "./TfaRegisterForm";
+import PanellistGrid from "./PanellistGrid";
 import { useTfaOpen } from "@/components/shared/useTfaOpen";
 import { ProgrammeEndedBanner, ProgrammeEndedCta } from "@/components/shared/ProgrammeEnded";
 import {
@@ -179,14 +180,7 @@ export default function TfaLanding() {
             </div>
           </div>
 
-          <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {TFA_PANELLISTS.map((p) => (
-              <li key={p.name} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                <p className="font-bold text-sm leading-snug">{p.name}</p>
-                <p className="mt-0.5 text-xs text-on-dark-muted leading-relaxed">{p.role}</p>
-              </li>
-            ))}
-          </ul>
+          <PanellistGrid panellists={TFA_PANELLISTS} />
         </div>
       </section>
 

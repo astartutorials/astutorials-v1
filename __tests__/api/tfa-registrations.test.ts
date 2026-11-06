@@ -41,7 +41,9 @@ const VALID = {
   fullName: 'Ada Lovelace',
   email: 'ada@babcock.edu.ng',
   phone: '08012345678',
+  callPhone: '08087654321',
   attendeeType: 'Fresher (100 Level)',
+  parentName: 'Anne Byron',
 };
 
 function makeRequest(body: object | string) {
@@ -89,6 +91,8 @@ describe('POST /api/tfa-registrations', () => {
     ['WhatsApp number', { phone: '' }],
     ['attendee type', { attendeeType: '' }],
     ['unknown attendee type', { attendeeType: 'Lecturer' }],
+    ['calls number', { callPhone: '  ' }],
+    ["parent's name", { parentName: '' }],
   ])('returns 400 for a bad %s', async (_label, patch) => {
     const upsert = mockUpsert();
     expect((await POST(makeRequest({ ...VALID, ...patch }))).status).toBe(400);
@@ -114,8 +118,10 @@ describe('POST /api/tfa-registrations', () => {
         full_name: 'Ada Lovelace',
         email: 'ada@babcock.edu.ng',
         phone: '08012345678',
+        call_phone: '08087654321',
         attendee_type: 'Fresher (100 Level)',
         course_of_study: 'Nursing',
+        parent_name: 'Anne Byron',
         parent_phone: null,
         question: null,
         question_for: null,
@@ -123,6 +129,22 @@ describe('POST /api/tfa-registrations', () => {
       },
       { onConflict: 'email' }
     );
+  });
+
+  it("doesn't ask a parent for their own parent's details", async () => {
+    const upsert = mockUpsert();
+    const res = await POST(
+      makeRequest({ ...VALID, attendeeType: 'Parent / Guardian', parentName: '', parentPhone: '0809' })
+    );
+    expect(res.status).toBe(201);
+    expect(upsert.mock.calls[0][0]).toMatchObject({ parent_name: null, parent_phone: null });
+  });
+
+  it('still requires a calls number from a parent', async () => {
+    const upsert = mockUpsert();
+    const res = await POST(makeRequest({ ...VALID, attendeeType: 'Parent / Guardian', callPhone: '' }));
+    expect(res.status).toBe(400);
+    expect(upsert).not.toHaveBeenCalled();
   });
 
   it('saves who a question is for', async () => {

@@ -1,3 +1,4 @@
+import { existsSync } from 'fs';
 import { tfaIcs, tfaGoogleCalendarUrl, isTfaOpen, TFA_CLOSES_AT, TFA_QUESTION_TARGETS, TFA_PANELLISTS } from '@/lib/tfa';
 
 describe('lib/tfa', () => {
@@ -17,5 +18,12 @@ describe('lib/tfa', () => {
 
   it('lets a question go to any speaker, the keynote, the convener or any panellist', () => {
     expect(TFA_QUESTION_TARGETS).toHaveLength(3 + TFA_PANELLISTS.length);
+  });
+
+  it('gives every panellist a photo that exists and a bio', () => {
+    for (const p of TFA_PANELLISTS) {
+      expect(existsSync(`public${p.photo}`)).toBe(true);
+      expect(p.bio.length).toBeGreaterThan(0);
+    }
   });
 });

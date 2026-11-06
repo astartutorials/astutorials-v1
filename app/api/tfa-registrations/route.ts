@@ -4,7 +4,13 @@ import { verifyTurnstile } from "@/lib/turnstile";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { sendTfaRegistrationConfirmation } from "@/lib/email";
 import { BABCOCK_ORG_ID } from "@/lib/programme-org";
-import { TFA_ATTENDEE_TYPES, TFA_QUESTION_TARGETS, TFA_ANY_SPEAKER, isTfaOpen } from "@/lib/tfa";
+import {
+  TFA_ATTENDEE_TYPES,
+  TFA_QUESTION_TARGETS,
+  TFA_ANY_SPEAKER,
+  TFA_PARENT_TYPE,
+  isTfaOpen,
+} from "@/lib/tfa";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -42,6 +48,7 @@ export async function POST(req: NextRequest) {
   const email = clean(body.email, 200);
   const phone = clean(body.phone, 40);
   const attendeeType = clean(body.attendeeType, 60);
+  const callPhone = clean(body.callPhone, 40);
 
   if (!fullName) {
     return NextResponse.json({ error: "Full name is required" }, { status: 400 });
@@ -54,6 +61,16 @@ export async function POST(req: NextRequest) {
   }
   if (!attendeeType || !(TFA_ATTENDEE_TYPES as readonly string[]).includes(attendeeType)) {
     return NextResponse.json({ error: "Tell us who is registering" }, { status: 400 });
+  }
+  if (!callPhone) {
+    return NextResponse.json({ error: "A phone number for calls is required" }, { status: 400 });
+  }
+
+  // A parent registering is the parent, so neither parent field applies to them.
+  const isParent = attendeeType === TFA_PARENT_TYPE;
+  const parentName = isParent ? null : clean(body.parentName, 120);
+  if (!isParent && !parentName) {
+    return NextResponse.json({ error: "Parent's / guardian's full name is required" }, { status: 400 });
   }
 
   // Only meaningful alongside a question; an unknown name falls back to the
@@ -71,9 +88,11 @@ export async function POST(req: NextRequest) {
     full_name: fullName,
     email: email.toLowerCase(),
     phone,
+    call_phone: callPhone,
     attendee_type: attendeeType,
     course_of_study: clean(body.courseOfStudy, 120),
-    parent_phone: clean(body.parentPhone, 40),
+    parent_name: parentName,
+    parent_phone: isParent ? null : clean(body.parentPhone, 40),
     question,
     question_for: questionFor,
     heard_via: clean(body.heardVia, 60),

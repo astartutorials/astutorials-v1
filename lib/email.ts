@@ -16,6 +16,7 @@ import {
   TFA_TIME_LABEL,
   TFA_VENUE,
   TFA_KEYNOTE,
+  TFA_WHATSAPP_GROUP_URL,
 } from "@/lib/tfa";
 
 const FROM = "Juyi at A-Star Tutorials <bookings@astartutorials.com>";
@@ -740,6 +741,12 @@ export async function sendTfaRegistrationConfirmation(opts: { to: string; fullNa
       <p style="font-size:13px;color:#666;line-height:1.6">
         Arrival and registration start at 10:00 AM, so come early to get a good seat. You'll hear a keynote
         from ${TFA_KEYNOTE.name}, two panels of student leaders, and the unveiling of the A-Star Ambassadors.
+      </p>
+
+      <p style="margin:28px 0;text-align:center">
+        <a href="${TFA_WHATSAPP_GROUP_URL}" style="display:inline-block;background:#D93025;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 24px;border-radius:10px">
+          Join the 100L WhatsApp group
+        </a>
       </p>
 
       <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">

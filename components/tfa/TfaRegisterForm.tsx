@@ -5,7 +5,13 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import posthog from "posthog-js";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { validateBookingForm } from "@/lib/validate";
-import { TFA_ATTENDEE_TYPES, TFA_HEARD_OPTIONS, TFA_QUESTION_TARGETS, TFA_ANY_SPEAKER } from "@/lib/tfa";
+import {
+  TFA_ATTENDEE_TYPES,
+  TFA_HEARD_OPTIONS,
+  TFA_QUESTION_TARGETS,
+  TFA_ANY_SPEAKER,
+  TFA_PARENT_TYPE,
+} from "@/lib/tfa";
 
 const inputClass =
   "w-full px-4 py-3 rounded-xl border border-line focus:border-[var(--astar-red)] focus:ring-4 focus:ring-red-500/10 outline-none transition-all placeholder:text-fg-faint text-fg text-base bg-surface-raised";
@@ -21,20 +27,25 @@ export default function TfaRegisterForm() {
     fullName: "",
     email: "",
     phone: "",
+    callPhone: "",
     attendeeType: TFA_ATTENDEE_TYPES[0] as string,
     courseOfStudy: "",
+    parentName: "",
     parentPhone: "",
     question: "",
     questionFor: TFA_ANY_SPEAKER,
     heardVia: "",
   });
+  // Most people call and WhatsApp on the same line; one tick saves retyping it.
+  const [sameAsWhatsApp, setSameAsWhatsApp] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
 
-  const isParent = form.attendeeType === "Parent / Guardian";
+  const isParent = form.attendeeType === TFA_PARENT_TYPE;
+  const callPhone = sameAsWhatsApp ? form.phone : form.callPhone;
 
   const set = (key: keyof typeof form, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -43,6 +54,8 @@ export default function TfaRegisterForm() {
     e.preventDefault();
     const errs = validateBookingForm(form) as Record<string, string>;
     if (!form.attendeeType) errs.attendeeType = "Required";
+    if (!callPhone.trim()) errs.callPhone = "Required";
+    if (!isParent && !form.parentName.trim()) errs.parentName = "Required";
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
@@ -53,7 +66,13 @@ export default function TfaRegisterForm() {
       const res = await fetch("/api/tfa-registrations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, parentPhone: isParent ? "" : form.parentPhone, turnstileToken }),
+        body: JSON.stringify({
+          ...form,
+          callPhone,
+          parentName: isParent ? "" : form.parentName,
+          parentPhone: isParent ? "" : form.parentPhone,
+          turnstileToken,
+        }),
       });
       turnstileRef.current?.reset();
 
@@ -99,22 +118,23 @@ export default function TfaRegisterForm() {
         {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName}</p>}
       </div>
 
+      <div>
+        <label htmlFor="tfa-email" className={labelClass}>
+          Email <span className="text-brand-ink">*</span>
+        </label>
+        <input
+          id="tfa-email"
+          type="email"
+          autoComplete="email"
+          placeholder="One you actually open"
+          value={form.email}
+          onChange={(e) => set("email", e.target.value)}
+          className={inputClass}
+        />
+        {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="tfa-email" className={labelClass}>
-            Email <span className="text-brand-ink">*</span>
-          </label>
-          <input
-            id="tfa-email"
-            type="email"
-            autoComplete="email"
-            placeholder="One you actually open"
-            value={form.email}
-            onChange={(e) => set("email", e.target.value)}
-            className={inputClass}
-          />
-          {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
-        </div>
         <div>
           <label htmlFor="tfa-phone" className={labelClass}>
             WhatsApp Number <span className="text-brand-ink">*</span>
@@ -129,6 +149,31 @@ export default function TfaRegisterForm() {
             className={inputClass}
           />
           {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
+        </div>
+        <div>
+          <label htmlFor="tfa-call-phone" className={labelClass}>
+            Phone Number (Calls) <span className="text-brand-ink">*</span>
+          </label>
+          <input
+            id="tfa-call-phone"
+            type="tel"
+            autoComplete="tel"
+            placeholder="A number we can call"
+            value={callPhone}
+            onChange={(e) => set("callPhone", e.target.value)}
+            disabled={sameAsWhatsApp}
+            className={`${inputClass} disabled:opacity-60`}
+          />
+          <label className="mt-1.5 inline-flex items-center gap-2 text-xs text-fg-subtle cursor-pointer">
+            <input
+              type="checkbox"
+              checked={sameAsWhatsApp}
+              onChange={(e) => setSameAsWhatsApp(e.target.checked)}
+              className="accent-[var(--astar-red)]"
+            />
+            Same as WhatsApp
+          </label>
+          {errors.callPhone && <p className="mt-1 text-xs text-red-500">{errors.callPhone}</p>}
         </div>
       </div>
 
@@ -167,18 +212,34 @@ export default function TfaRegisterForm() {
       </div>
 
       {!isParent && (
-        <div>
-          <label htmlFor="tfa-parent" className={labelClass}>
-            Parent&apos;s / Guardian&apos;s Phone Number <Optional />
-          </label>
-          <input
-            id="tfa-parent"
-            type="tel"
-            placeholder="They'll be proud you came. Trust us."
-            value={form.parentPhone}
-            onChange={(e) => set("parentPhone", e.target.value)}
-            className={inputClass}
-          />
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="tfa-parent-name" className={labelClass}>
+              Parent/Guardian&apos;s Full Name <span className="text-brand-ink">*</span>
+            </label>
+            <input
+              id="tfa-parent-name"
+              type="text"
+              placeholder="Their full name"
+              value={form.parentName}
+              onChange={(e) => set("parentName", e.target.value)}
+              className={inputClass}
+            />
+            {errors.parentName && <p className="mt-1 text-xs text-red-500">{errors.parentName}</p>}
+          </div>
+          <div>
+            <label htmlFor="tfa-parent" className={labelClass}>
+              Parent/Guardian&apos;s Phone Number <Optional />
+            </label>
+            <input
+              id="tfa-parent"
+              type="tel"
+              placeholder="They'll be proud you came. Trust us."
+              value={form.parentPhone}
+              onChange={(e) => set("parentPhone", e.target.value)}
+              className={inputClass}
+            />
+          </div>
         </div>
       )}
 
