@@ -52,7 +52,7 @@ describe('canAccessAdminPath', () => {
 
   // The pages on that list org_admin is let into: the two webinar consoles and
   // the tutor application queue. All three stay shut to every role below.
-  it.each(['/admin/bucc', '/admin/playbooks', '/admin/applications'])(
+  it.each(['/admin/bucc', '/admin/playbooks', '/admin/applications', '/admin/tfa'])(
     'opens %s to super_admin and org_admin only',
     (path) => {
       expect(canAccessAdminPath('super_admin', path)).toBe(true);

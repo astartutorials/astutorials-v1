@@ -9,6 +9,14 @@ import {
 } from "@/lib/bucc";
 import type { Playbook } from "@/lib/playbooks";
 import { SEMESTER_PLAN_NAME, SEMESTER_PLAN_TERM } from "@/lib/semester-plan";
+import {
+  TFA_EVENT_NAME,
+  TFA_THEME,
+  TFA_DATE_LABEL,
+  TFA_TIME_LABEL,
+  TFA_VENUE,
+  TFA_KEYNOTE,
+} from "@/lib/tfa";
 
 const FROM = "Juyi at A-Star Tutorials <bookings@astartutorials.com>";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://astartutorials.com";
@@ -706,4 +714,41 @@ export async function sendStudentRegistrationConfirmation(opts: {
   `;
 
   await send(to, `You're registered — A-Star ${level} Level, ${session}`, html);
+}
+
+export async function sendTfaRegistrationConfirmation(opts: { to: string; fullName: string }) {
+  const { to, fullName } = opts;
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">You're registered 🎉</h2>
+      <p style="margin-top:0;color:#666">Hi ${escapeHtml(fullName)}, your seat at ${TFA_EVENT_NAME} is saved.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:24px 0;font-size:14px">
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888;width:40%">Event</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${TFA_EVENT_NAME}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Theme</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee">${TFA_THEME}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Date</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${TFA_DATE_LABEL}</td></tr>
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Time</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${TFA_TIME_LABEL}</td></tr>
+        <tr><td style="padding:10px 0;color:#888">Venue</td>
+            <td style="padding:10px 0">${TFA_VENUE}</td></tr>
+      </table>
+
+      <p style="font-size:13px;color:#666;line-height:1.6">
+        Arrival and registration start at 10:00 AM, so come early to get a good seat. You'll hear a keynote
+        from ${TFA_KEYNOTE.name}, two panels of student leaders, and the unveiling of the A-Star Ambassadors.
+      </p>
+
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        Please do not reply to this email.<br/>
+        For help, WhatsApp us on <strong>0916 046 5678</strong> or email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+
+  await send(to, `You're in — ${TFA_EVENT_NAME}, ${TFA_DATE_LABEL}`, html);
 }

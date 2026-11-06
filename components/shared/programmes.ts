@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import { isBuccClassesOpen, BUCC_CLASSES_END_DATE, BUCC_CLASSES_DATE_RANGE } from "@/lib/bucc-classes";
 import { isPreClinicalsOpen, PRECLINICALS_END_DATE, PRECLINICALS_DATE_RANGE } from "@/lib/preclinicals";
 import { isBuccOpen, BUCC_CLOSES_AT, BUCC_DATE_LABEL } from "@/lib/bucc";
+import { isTfaOpen, TFA_CLOSES_AT, TFA_DATE_LABEL } from "@/lib/tfa";
 import { PLAYBOOKS, isPlaybookOpen, playbookHref } from "@/lib/playbooks";
 
 export type Programme = {
@@ -46,6 +47,16 @@ function buildProgrammes(now: Date): Programme[] {
   }));
 
   const all: Programme[] = [
+    {
+      key: "tfa",
+      name: "The Freshers' Advantage 2.0",
+      href: "/tfa",
+      blurb: "Free event for freshers · 8th Nov, BUTH",
+      pastBlurb: `Free event · ${TFA_DATE_LABEL}`,
+      tag: "Free",
+      endsAt: TFA_CLOSES_AT,
+      open: isTfaOpen(now),
+    },
     {
       key: "bucc-classes",
       name: "BUCC 200L Prep Classes",
