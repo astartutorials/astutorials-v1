@@ -34,8 +34,7 @@ export const SEMESTER_PLANS: Record<SemesterPlanId, SemesterPlan> = {
   group: {
     id: "group",
     name: "Group Semester Plan",
-    price: 75000,
-    originalPrice: 100000,
+    price: 100000,
     sessions: 50,
     blurb: "Small-group classes with coursemates, all semester long.",
     features: [
@@ -49,7 +48,7 @@ export const SEMESTER_PLANS: Record<SemesterPlanId, SemesterPlan> = {
   private: {
     id: "private",
     name: "Private Semester Plan",
-    price: 250000,
+    price: 300000,
     sessions: 50,
     blurb: "One-on-one sessions built around one student.",
     features: [

@@ -5,7 +5,6 @@ import {
   Clock,
   MapPin,
   Mic,
-  Star,
   Sparkles,
   Users,
   Music,
@@ -15,7 +14,7 @@ import {
   ArrowDown,
 } from "lucide-react";
 import TfaRegisterForm from "./TfaRegisterForm";
-import PanellistGrid from "./PanellistGrid";
+import TfaSpeakers from "./TfaSpeakers";
 import { useTfaOpen } from "@/components/shared/useTfaOpen";
 import { ProgrammeEndedBanner, ProgrammeEndedCta } from "@/components/shared/ProgrammeEnded";
 import {
@@ -33,15 +32,6 @@ import {
 } from "@/lib/tfa";
 
 const HIGHLIGHT_ICONS = [Users, Mic, Music, Store, BookOpen, Award];
-
-function initials(name: string) {
-  return name
-    .replace(/^Dr\.?\s+/i, "")
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w.charAt(0))
-    .join("");
-}
 
 export default function TfaLanding() {
   const open = useTfaOpen();
@@ -151,36 +141,7 @@ export default function TfaLanding() {
             Speakers &amp; Panellists
           </h2>
 
-          <div className="mt-8 grid md:grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-[var(--astar-red)] p-5 flex items-center gap-4">
-              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 text-lg font-extrabold">
-                {initials(TFA_KEYNOTE.name)}
-              </div>
-              <div>
-                <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-red-100">
-                  <Mic size={13} /> Keynote Speaker
-                </p>
-                <p className="mt-0.5 font-bold leading-snug">{TFA_KEYNOTE.name}</p>
-                <p className="text-sm text-red-100">
-                  {TFA_KEYNOTE.role} · {TFA_KEYNOTE.note}
-                </p>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 flex items-center gap-4">
-              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-white/10 text-lg font-extrabold">
-                {initials(TFA_CONVENER.name)}
-              </div>
-              <div>
-                <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-red-300">
-                  <Star size={13} /> Convener
-                </p>
-                <p className="mt-0.5 font-bold leading-snug">{TFA_CONVENER.name}</p>
-                <p className="text-sm text-on-dark-muted">{TFA_CONVENER.role}</p>
-              </div>
-            </div>
-          </div>
-
-          <PanellistGrid panellists={TFA_PANELLISTS} />
+          <TfaSpeakers keynote={TFA_KEYNOTE} convener={TFA_CONVENER} panellists={TFA_PANELLISTS} />
         </div>
       </section>
 

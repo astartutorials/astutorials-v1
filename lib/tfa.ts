@@ -29,26 +29,33 @@ export function isTfaOpen(now: Date = new Date()): boolean {
 
 export type TfaPerson = { name: string; role: string };
 
-export const TFA_KEYNOTE: TfaPerson & { note: string } = {
+/**
+ * A speaker's card shows the photo, name and role; the bio opens in a dialog
+ * on tap, so long bios cost the page no height. Photos are 480px square crops
+ * in public/tfa/panellists. Bios are the speakers' own words, lightly
+ * copy-edited (typos, a duplicated paragraph); one string per paragraph.
+ */
+export type TfaPanellist = TfaPerson & { photo: string; bio: string[] };
+
+const photo = (slug: string) => `/tfa/panellists/${slug}.jpg`;
+
+export const TFA_KEYNOTE: TfaPanellist & { note: string } = {
   name: "Dr. Uchenna Aguocha-Ohiagbaji",
   role: "Medical Doctor & Serial Entrepreneur",
   note: "Babcock Alum",
+  photo: photo("aguocha"),
+  bio: [
+    "Dr. Uchenna Uzoma Ezeigbo Aguocha-Ohiagbaji, popularly known as Dr. Uche Aguocha, is a second-generation medical doctor, entrepreneur, and personal finance and business coach.",
+    "He is the founder of Eduhub Nigeria, The Finance Village, Citytop Media, and Leomart Storage & Transport, and co-founder of Agrovault, A-Star Tutorials, Code-It Technologies, and Gold Plate.",
+    "As a personal finance and business coach, Dr. Uche equips individuals with the knowledge and practical skills to manage their finances, make smarter financial decisions, and build additional income streams. He also helps entrepreneurs structure, strengthen, and grow sustainable businesses.",
+    "Passionate about knowledge sharing, youth development, and entrepreneurship, Dr. Uche is committed to empowering the next generation with the knowledge, skills, and opportunities to create meaningful impact and contribute to Africa's development.",
+  ],
 };
 
 export const TFA_CONVENER: TfaPerson = {
   name: "Paul Olabode Upah",
   role: "CEO, A-Star Tutorials",
 };
-
-/**
- * A panellist's card shows the photo, name and role; the bio opens in a dialog
- * on tap, so eight long bios cost the page no height. Photos are square crops
- * in public/tfa/panellists. Bios are the panellists' own words, lightly
- * copy-edited (typos, a duplicated paragraph); one string per paragraph.
- */
-export type TfaPanellist = TfaPerson & { photo: string; bio: string[] };
-
-const photo = (slug: string) => `/tfa/panellists/${slug}.jpg`;
 
 export const TFA_PANELLISTS: TfaPanellist[] = [
   {
