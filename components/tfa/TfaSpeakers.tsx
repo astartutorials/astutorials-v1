@@ -3,16 +3,7 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { Mic, Star, Users, X } from "lucide-react";
-import type { TfaPanellist, TfaPerson } from "@/lib/tfa";
-
-function initials(name: string) {
-  return name
-    .replace(/^Dr\.?\s+/i, "")
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w.charAt(0))
-    .join("");
-}
+import type { TfaPanellist } from "@/lib/tfa";
 
 /**
  * The keynote and convener up top, then the panellists: photo, name and role
@@ -28,7 +19,7 @@ export default function TfaSpeakers({
   panellists,
 }: {
   keynote: TfaPanellist & { note: string };
-  convener: TfaPerson;
+  convener: TfaPanellist;
   panellists: TfaPanellist[];
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -67,18 +58,29 @@ export default function TfaSpeakers({
             </span>
           </span>
         </button>
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 flex items-center gap-4">
-          <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-white/10 text-lg font-extrabold">
-            {initials(convener.name)}
-          </div>
-          <div>
-            <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-red-300">
+        <button
+          type="button"
+          onClick={() => open(convener)}
+          className="group text-left rounded-2xl border border-white/10 bg-white/5 p-5 flex items-center gap-4 hover:bg-white/10 hover:border-white/20 transition-colors"
+        >
+          <Image
+            src={convener.photo}
+            alt=""
+            width={56}
+            height={56}
+            className="h-14 w-14 flex-shrink-0 rounded-2xl object-cover ring-2 ring-white/10"
+          />
+          <span className="min-w-0">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-red-300">
               <Star size={13} /> Convener
-            </p>
-            <p className="mt-0.5 font-bold leading-snug">{convener.name}</p>
-            <p className="text-sm text-on-dark-muted">{convener.role}</p>
-          </div>
-        </div>
+            </span>
+            <span className="block mt-0.5 font-bold leading-snug">{convener.name}</span>
+            <span className="block text-sm text-on-dark-muted">{convener.role}</span>
+            <span className="block mt-1 text-[11px] font-semibold text-red-300 group-hover:underline">
+              Read bio
+            </span>
+          </span>
+        </button>
       </div>
 
       <p className="mt-8 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-red-300">

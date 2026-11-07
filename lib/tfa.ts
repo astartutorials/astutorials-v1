@@ -52,9 +52,15 @@ export const TFA_KEYNOTE: TfaPanellist & { note: string } = {
   ],
 };
 
-export const TFA_CONVENER: TfaPerson = {
+export const TFA_CONVENER: TfaPanellist = {
   name: "Paul Olabode Upah",
   role: "CEO, A-Star Tutorials",
+  photo: photo("upah"),
+  bio: [
+    "Paul Olabode Upah is an entrepreneur, educational innovator and emerging business leader. He is the co-founder and CEO of A-Star Tutorials, co-founder of Gold Plate, and COO and co-owner of Leomart Storage & Transport.",
+    "Currently a Biochemistry student at Babcock University, Paul aspires to become a medical doctor. He is passionate about entrepreneurship, education, leadership, technology and youth development.",
+    "Through his ventures, Paul is committed to building sustainable institutions, developing people, and creating opportunities that promote academic excellence, entrepreneurial growth and human capacity development. Driven by a vision to empower young people to realise their potential, he is particularly passionate about contributing to the development of individuals, institutions and society at large.",
+  ],
 };
 
 export const TFA_PANELLISTS: TfaPanellist[] = [
