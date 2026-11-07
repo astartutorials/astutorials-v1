@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   CalendarDays,
   Clock,
@@ -12,6 +13,7 @@ import {
   BookOpen,
   Award,
   ArrowDown,
+  Download,
 } from "lucide-react";
 import TfaRegisterForm from "./TfaRegisterForm";
 import TfaSpeakers from "./TfaSpeakers";
@@ -29,6 +31,7 @@ import {
   TFA_PANELLISTS,
   TFA_PROGRAMME,
   TFA_HIGHLIGHTS,
+  TFA_FLYER,
 } from "@/lib/tfa";
 
 const HIGHLIGHT_ICONS = [Users, Mic, Music, Store, BookOpen, Award];
@@ -178,6 +181,29 @@ export default function TfaLanding() {
             </a>
           </div>
         )}
+      </section>
+
+      {/* ── FLYER ───────────────────────────────────────────── */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-16 md:pb-20 text-center">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg">Event flyer</h2>
+        <p className="mt-2 text-sm md:text-base text-fg-subtle">
+          Save it and share it with your coursemates.
+        </p>
+        <Image
+          src={TFA_FLYER.src}
+          alt={TFA_FLYER.alt}
+          width={TFA_FLYER.width}
+          height={TFA_FLYER.height}
+          sizes="(min-width: 640px) 448px, 100vw"
+          className="mt-8 w-full max-w-md mx-auto rounded-2xl shadow-xl"
+        />
+        <a
+          href={TFA_FLYER.src}
+          download="freshers-advantage-2.0-flyer.jpg"
+          className="mt-6 inline-flex items-center gap-2 rounded-full border border-line-subtle bg-surface-raised px-6 py-3 text-sm font-bold text-fg hover:bg-surface-inset transition-colors"
+        >
+          <Download size={16} /> Download flyer
+        </a>
       </section>
     </div>
   );

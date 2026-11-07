@@ -17,6 +17,14 @@ export const TFA_VENUE =
   "600-Seater Auditorium, Babcock University Teaching Hospital (BUTH), Ilishan-Remo, Ogun State";
 export const TFA_VENUE_SHORT = "600-Seater Auditorium, BUTH";
 
+/** The event flyer: homepage band, /tfa and the link preview on WhatsApp etc. */
+export const TFA_FLYER = {
+  src: "/tfa/flyer.jpg",
+  width: 1063,
+  height: 1280,
+  alt: "The Freshers' Advantage 2.0 flyer. Theme: Equipped For Success. Convener Paul Upah, keynote speaker Dr. Uchenna Aguocha-Ohiagbaji and eight student-leader panellists. 8th November 2026, 10:00 AM, 600 Seater Auditorium, BUTH. Over 1 million naira worth of gifts to be won.",
+};
+
 /**
  * Registration stays open until the event ends (15:00 WAT = 14:00 UTC), so a
  * fresher can still sign up from a QR code at the door.

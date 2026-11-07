@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, Clock, MapPin, Mic, Users, Music } from "lucide-react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import { useTfaOpen } from "@/components/shared/useTfaOpen";
-import { TFA_THEME, TFA_DATE_LABEL, TFA_TIME_LABEL, TFA_VENUE_SHORT, TFA_KEYNOTE, TFA_PANELLISTS } from "@/lib/tfa";
+import { TFA_THEME, TFA_DATE_LABEL, TFA_TIME_LABEL, TFA_VENUE_SHORT, TFA_KEYNOTE, TFA_PANELLISTS, TFA_FLYER } from "@/lib/tfa";
 
 const meta = [
   { Icon: CalendarDays, label: TFA_DATE_LABEL },
@@ -77,10 +77,10 @@ export default function TfaCTA() {
           <div className="lg:col-span-5 lg:pl-8 lg:border-l lg:border-white/10">
             <Link href="/tfa" className="block group">
               <Image
-                src="/tfa/flyer.jpg"
-                alt="The Freshers' Advantage 2.0 flyer. Theme: Equipped For Success. Convener Paul Upah, keynote speaker Dr. Uchenna Aguocha-Ohiagbaji and eight student-leader panellists. 8th November 2026, 10:00 AM, 600 Seater Auditorium, BUTH. Over 1 million naira worth of gifts to be won."
-                width={1063}
-                height={1280}
+                src={TFA_FLYER.src}
+                alt={TFA_FLYER.alt}
+                width={TFA_FLYER.width}
+                height={TFA_FLYER.height}
                 sizes="(min-width: 1024px) 360px, 100vw"
                 className="w-full max-w-xs mx-auto rounded-2xl shadow-lg group-hover:-translate-y-0.5 transition-transform duration-300"
               />
