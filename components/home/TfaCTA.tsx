@@ -1,5 +1,6 @@
 'use client';
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CalendarDays, Clock, MapPin, Mic, Users, Music } from "lucide-react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
@@ -53,6 +54,17 @@ export default function TfaCTA() {
               ))}
             </ul>
 
+            <ul className="mt-6 space-y-2.5">
+              {highlights.map(({ Icon, label }) => (
+                <li key={label} className="flex items-center gap-3 text-sm md:text-base text-gray-200">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--astar-red)]">
+                    <Icon size={15} />
+                  </div>
+                  <span>{label}</span>
+                </li>
+              ))}
+            </ul>
+
             <Link
               href="/tfa"
               className="mt-8 inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-[var(--astar-red)] px-8 py-4 font-bold text-white shadow-lg shadow-red-500/20 hover:-translate-y-0.5 transition-all duration-300"
@@ -62,16 +74,18 @@ export default function TfaCTA() {
             </Link>
           </div>
 
-          <ul className="lg:col-span-5 space-y-3">
-            {highlights.map(({ Icon, label }) => (
-              <li key={label} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--astar-red)]">
-                  <Icon size={18} />
-                </div>
-                <span className="text-sm md:text-base font-medium">{label}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="lg:col-span-5 lg:pl-8 lg:border-l lg:border-white/10">
+            <Link href="/tfa" className="block group">
+              <Image
+                src="/tfa/flyer.jpg"
+                alt="The Freshers' Advantage 2.0 flyer. Theme: Equipped For Success. Convener Paul Upah, keynote speaker Dr. Uchenna Aguocha-Ohiagbaji and eight student-leader panellists. 8th November 2026, 10:00 AM, 600 Seater Auditorium, BUTH. Over 1 million naira worth of gifts to be won."
+                width={1063}
+                height={1280}
+                sizes="(min-width: 1024px) 360px, 100vw"
+                className="w-full max-w-xs mx-auto rounded-2xl shadow-lg group-hover:-translate-y-0.5 transition-transform duration-300"
+              />
+            </Link>
+          </div>
         </div>
       </div>
     </ScrollReveal>
