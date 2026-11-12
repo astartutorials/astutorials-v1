@@ -106,7 +106,7 @@ export default function Testimonials() {
       >
         {testimonials.map((t, i) => (
           <div key={i} className="flex-none w-[88vw] md:w-96 snap-start">
-            <div className="h-full bg-surface-raised border border-line-subtle rounded-2xl shadow-sm p-6 flex flex-col justify-between">
+            <div className="group h-full bg-surface-raised border border-line-subtle rounded-2xl shadow-sm p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
               <div>
                 <p className="font-serif text-4xl leading-none text-brand-ink opacity-15 select-none mb-1">&ldquo;</p>
                 <p className="text-fg-muted italic text-sm leading-relaxed">{t.quote}</p>
@@ -122,7 +122,8 @@ export default function Testimonials() {
                     <p className="text-[11px] text-fg-faint mt-0.5">{t.detail}</p>
                   </div>
                 </div>
-                <span className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full bg-brand-soft text-brand-ink border border-brand-soft-border">
+                {/* The result, marked in red pen like a graded script. */}
+                <span className="inline-block -rotate-2 rounded-md border-2 border-[var(--astar-red)] px-2.5 py-0.5 font-hand text-lg font-bold leading-snug text-[var(--astar-red)] transition-transform duration-300 group-hover:rotate-0 group-hover:scale-105">
                   {t.badge}
                 </span>
               </div>

@@ -1,7 +1,11 @@
 'use client';
 
+import { useState } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, GraduationCap } from "lucide-react";
+import Tilt from "@/components/shared/fun/Tilt";
+import { RedPenTick } from "@/components/shared/fun/RedPen";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import { useOpenIntake } from "@/components/shared/useOpenIntake";
 import { intakeHref } from "@/lib/intakes";
@@ -11,8 +15,67 @@ import { intakeHref } from "@/lib/intakes";
  * registry, so next year's band updates itself when the new intake is added,
  * and the band disappears whenever no 100 level intake is open.
  */
+/** A fresher's to-do list. The last item is the one we want ticked. */
+// By November a fresher has resumed and matriculated (a celebration, not an
+// ordeal); the user picked these on 2026-11-12.
+const DONE = ["Resume at Babcock", "Matriculate 🎉", "Start taking proper notes"];
+
+function ToDoCard({ href, ticked }: { href: string; ticked: boolean }) {
+  const reduce = useReducedMotion();
+  return (
+    <Link href={href} aria-label="Register with A-Star" className="block">
+      <Tilt rest={2} max={7}>
+        <div
+          className="relative w-72 rounded-2xl bg-[#FFFDF3] dark:bg-[#1d2333] px-7 pt-6 pb-7 shadow-xl shadow-gray-300/40 dark:shadow-black/40 border border-amber-100 dark:border-white/10"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(to bottom, transparent 0, transparent 31px, rgba(53,94,169,0.12) 31px, rgba(53,94,169,0.12) 32px)",
+            backgroundPosition: "0 52px",
+          }}
+        >
+          {/* tape */}
+          <span aria-hidden className="absolute -top-3 left-1/2 h-6 w-20 -translate-x-1/2 rotate-[-3deg] rounded-sm bg-red-200/70 dark:bg-red-400/30" />
+          <p className="font-hand text-2xl font-bold text-fg">My 100L to-do</p>
+          <ul className="mt-2 font-hand text-xl leading-8 text-fg-muted">
+            {DONE.map((item, i) => (
+              <li key={item} className="flex items-center gap-2">
+                <RedPenTick delay={0.3 + i * 0.35} className="h-4 w-4 shrink-0" />
+                <span className="relative">
+                  {item}
+                  <motion.span
+                    aria-hidden
+                    className="absolute left-0 top-1/2 h-[2px] w-full origin-left bg-fg-faint"
+                    initial={{ scaleX: 0 }}
+                    whileInView={{ scaleX: 1 }}
+                    viewport={{ once: true }}
+                    transition={reduce ? { duration: 0 } : { delay: 0.5 + i * 0.35, duration: 0.4 }}
+                  />
+                </span>
+              </li>
+            ))}
+            <li className="flex items-center gap-2 font-bold text-fg">
+              <span className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border-2 border-[var(--astar-red)]">
+                {ticked && <RedPenTick className="absolute -top-1.5 left-0 h-5 w-5" />}
+              </span>
+              Register with A-Star
+            </li>
+          </ul>
+          <motion.p
+            className="absolute -right-4 bottom-3 font-hand text-lg font-bold text-[var(--astar-red)] rotate-[-8deg]"
+            animate={ticked ? { y: 0 } : { y: [0, -4, 0] }}
+            transition={reduce || ticked ? { duration: 0 } : { repeat: Infinity, duration: 1.6 }}
+          >
+            {ticked ? "done!" : "← 2 mins"}
+          </motion.p>
+        </div>
+      </Tilt>
+    </Link>
+  );
+}
+
 export default function StudentIntakeCTA() {
   const intake = useOpenIntake(100);
+  const [ticked, setTicked] = useState(false);
   if (!intake) return null;
 
   return (
@@ -35,6 +98,14 @@ export default function StudentIntakeCTA() {
               Register with A-Star as a new 100 level student. We&apos;ll keep you posted on
               tutorials, classes and everything that helps you start strong.
             </p>
+          </div>
+
+          <div
+            className="flex justify-center lg:order-last"
+            onPointerEnter={() => setTicked(true)}
+            onPointerLeave={() => setTicked(false)}
+          >
+            <ToDoCard href={intakeHref(100)} ticked={ticked} />
           </div>
 
           <div className="lg:pl-8">

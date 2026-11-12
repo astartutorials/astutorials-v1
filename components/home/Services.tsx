@@ -6,6 +6,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
+import Tilt from "@/components/shared/fun/Tilt";
 
 export default function Services() {
   const services = [
@@ -44,10 +45,10 @@ export default function Services() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {services.map((service, index) => (
+          <Tilt key={index} max={6} className="h-full">
           <Link
-            key={index}
             href={service.href}
-            className={`group relative p-8 rounded-3xl transition-all duration-300 hover:-translate-y-2 cursor-pointer ${service.highlight ? 'bg-[#355EA9] text-white shadow-xl shadow-blue-900/20' : 'bg-surface-raised border border-line-subtle text-fg shadow-sm hover:shadow-xl hover:shadow-gray-200/40'}`}
+            className={`group relative block h-full p-8 rounded-3xl transition-shadow duration-300 cursor-pointer ${service.highlight ? 'bg-[#355EA9] text-white shadow-xl shadow-blue-900/20' : 'bg-surface-raised border border-line-subtle text-fg shadow-sm hover:shadow-xl hover:shadow-gray-200/40'}`}
           >
             {service.highlight && <service.icon className="absolute top-8 right-8 w-32 h-32 text-white/5 -rotate-12 pointer-events-none transition-transform duration-500 group-hover:scale-110" />}
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-xl transition-colors duration-300 ${service.highlight ? 'bg-white/10 text-white' : 'bg-brand-soft text-brand-ink'}`}>
@@ -59,6 +60,7 @@ export default function Services() {
               {service.action} <ArrowRight className="w-3 h-3 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
             </div>
           </Link>
+          </Tilt>
         ))}
       </div>
     </ScrollReveal>

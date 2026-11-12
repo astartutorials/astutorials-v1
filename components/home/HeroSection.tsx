@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import CountUp from "@/components/shared/CountUp";
+import { RedPenUnderline } from "@/components/shared/fun/RedPen";
 import { ArrowRight, CalendarRange } from "lucide-react";
 import { SEMESTER_PLAN_HREF, SEMESTER_PLAN_NAME } from "@/lib/semester-plan";
 
@@ -13,9 +14,11 @@ export default function HeroSection() {
         <div className="text-center lg:text-left">
           <h1 className="text-fg mb-6 font-normal tracking-tighter leading-[1.1] text-4xl md:text-6xl lg:text-7xl">
             Unlock your academic potential with{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--astar-red)] to-red-400">
-              A-Star Tutorials.
-            </span>
+            <RedPenUnderline delay={0.9} className="whitespace-nowrap">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--astar-red)] to-red-400">
+                A-Star Tutorials.
+              </span>
+            </RedPenUnderline>
           </h1>
 
           <p className="text-lg md:text-xl text-fg-subtle font-light mb-10 leading-relaxed">
@@ -23,23 +26,26 @@ export default function HeroSection() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 w-full max-w-sm sm:max-w-lg mx-auto lg:mx-0">
-            <Link
-              href="/tutorials"
-              className="btn-primary flex-1 px-4 py-3.5 rounded-full text-sm md:text-base font-medium text-center shadow-xl shadow-red-500/10 whitespace-nowrap"
-            >
-              Book a Tutorial Session
-            </Link>
-            {/* The semester-long alternative to booking one at a time, aimed at 100L. */}
+            {/* Primary: the semester-long plan (Uche, 2026-11-12). */}
             <Link
               href={SEMESTER_PLAN_HREF}
-              className="group relative flex-1 inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-full border border-line bg-surface-raised text-fg text-sm md:text-base font-medium whitespace-nowrap hover:border-[var(--astar-red)] transition-all"
+              className="group btn-primary relative flex-1 inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-full text-sm md:text-base font-semibold shadow-xl shadow-red-500/20 whitespace-nowrap hover:-translate-y-0.5 transition-all"
             >
-              <span className="absolute -top-2.5 right-5 rounded-full bg-[var(--astar-navy)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white dark:bg-white dark:text-[var(--astar-navy)]">
+              <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+                <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-white/25 animate-[shine_3.5s_ease-in-out_infinite]" />
+              </span>
+              <span className="absolute top-0 right-5 -translate-y-1/2 rounded-full bg-[var(--astar-navy)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white dark:bg-white dark:text-[var(--astar-navy)]">
                 New · 100L
               </span>
-              <CalendarRange size={17} className="text-brand-ink" />
+              <CalendarRange size={17} />
               {SEMESTER_PLAN_NAME}
-              <ArrowRight size={16} className="text-fg-faint group-hover:translate-x-0.5 group-hover:text-brand-ink transition-all" />
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link
+              href="/tutorials"
+              className="flex-1 inline-flex items-center justify-center px-4 py-3.5 rounded-full border border-line bg-surface-raised text-fg text-sm md:text-base font-medium whitespace-nowrap hover:border-[var(--astar-red)] hover:-translate-y-0.5 transition-all"
+            >
+              Book a Tutorial Session
             </Link>
           </div>
         </div>

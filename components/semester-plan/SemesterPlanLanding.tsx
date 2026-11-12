@@ -20,6 +20,7 @@ import {
   Wallet,
 } from "lucide-react";
 import posthog from "posthog-js";
+import { RedPenCircle, RedPenUnderline } from "@/components/shared/fun/RedPen";
 import PlanModal, { type Audience, type PlanModalMode } from "./PlanModal";
 import {
   SEMESTER_PLANS,
@@ -48,7 +49,7 @@ const COPY: Record<
     title: (
       <>
         Your whole first semester,
-        <br className="hidden sm:block" /> sorted.
+        <br className="hidden sm:block" /> <RedPenCircle delay={0.8}>sorted.</RedPenCircle>
       </>
     ),
     lead: "Get 50 sessions with strong tutors who stay with you from the first lecture to the last exam.",
@@ -58,7 +59,7 @@ const COPY: Record<
     eyebrow: "For parents of 100L students",
     title: (
       <>
-        Give your child a strong start
+        Give your child a <RedPenUnderline delay={0.8}>strong start</RedPenUnderline>
         <br className="hidden sm:block" /> at university.
       </>
     ),

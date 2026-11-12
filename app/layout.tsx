@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Space_Grotesk } from 'next/font/google'
+import { Space_Grotesk, Caveat } from 'next/font/google'
 import './globals.css'
 import ClientFrame from '@/components/shared/ClientFrame'
 import { ThemeProvider } from '@/components/shared/ThemeProvider'
@@ -10,6 +10,13 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'], 
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-space-grotesk' 
+})
+
+// Handwriting for red-pen notes on the CTAs (tickets, checklists, grades).
+const caveat = Caveat({
+  subsets: ['latin'],
+  weight: ['500', '700'],
+  variable: '--font-caveat',
 })
 
 export const metadata: Metadata = {
@@ -71,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={spaceGrotesk.variable} suppressHydrationWarning>
+    <html lang="en" className={`${spaceGrotesk.variable} ${caveat.variable}`} suppressHydrationWarning>
       <head>
         {/*
           Runs before first paint, so the page is never painted light and then

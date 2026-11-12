@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { ChevronDown, MessageCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import { HOME_FAQS, type Faq } from "@/lib/faq";
 
@@ -56,17 +57,34 @@ export default function FAQ() {
           </p>
 
           <div className="mt-8 rounded-3xl bg-[#ECE5DD] dark:bg-[#0b141a] p-5 shadow-inner space-y-3">
-            <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-[#D9FDD3] dark:bg-[#005c4b] px-4 py-2.5 text-sm text-[#111b21] dark:text-white shadow-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-tr-sm bg-[#D9FDD3] dark:bg-[#005c4b] px-4 py-2.5 text-sm text-[#111b21] dark:text-white shadow-sm"
+            >
               Hi! Which courses do you have tutorials for?
-            </div>
-            <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-[#D9FDD3] dark:bg-[#005c4b] px-4 py-2.5 text-sm text-[#111b21] dark:text-white shadow-sm">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 1.2 }}
+              className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-tr-sm bg-[#D9FDD3] dark:bg-[#005c4b] px-4 py-2.5 text-sm text-[#111b21] dark:text-white shadow-sm"
+            >
               And can my parents pay for me?
-            </div>
-            <div className="inline-flex items-center gap-1 rounded-2xl rounded-tl-sm bg-white dark:bg-[#202c33] px-4 py-3 shadow-sm" aria-label="A-Star is typing">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 2 }}
+              className="inline-flex items-center gap-1 rounded-2xl rounded-tl-sm bg-white dark:bg-[#202c33] px-4 py-3 shadow-sm" aria-label="A-Star is typing">
               {[0, 150, 300].map((d) => (
                 <span key={d} className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: `${d}ms` }} />
               ))}
-            </div>
+            </motion.div>
           </div>
 
           <a
