@@ -6,31 +6,33 @@ import { RedPenTick } from "@/components/shared/fun/RedPen";
 /**
  * What "we match you with a tutor" looks like: a small stack of tutor cards
  * that fans out on hover, with a MATCHED stamp on the top one. No real tutors
- * are shown; the top card describes the match, not a person.
+ * are shown: the cards behind are other courses and times in the pool, and the
+ * top card describes the match, not a person.
  */
 const MATCH_POINTS = ["Excelled in your course", "Fits your timetable", "Online or in person"];
+
+/** Other tutors in the pool, peeking out behind your match. Courses, not people. */
+// A deck: each card peeks above the one in front, showing its top line. On
+// hover the deck fans out sideways.
+const CANDIDATES = [
+  { course: "GST 111", when: "Evenings", position: "-translate-y-14 scale-[0.88] group-hover:translate-x-24 group-hover:-translate-y-6 group-hover:rotate-6" },
+  { course: "CHM 101", when: "Weekends", position: "-translate-y-7 scale-[0.94] group-hover:-translate-x-24 group-hover:-translate-y-3 group-hover:-rotate-6" },
+] as const;
 
 export default function TutorMatch() {
   const reduce = useReducedMotion();
   return (
-    <div className="group relative mx-auto h-64 w-72" aria-label="We match you with a tutor who excelled in your course and fits your timetable">
-      {/* the other candidates */}
-      {[-1, 1].map((side) => (
+    <div className="group relative mx-auto mt-14 h-64 w-72" aria-label="We match you with a tutor who excelled in your course and fits your timetable">
+      {/* the other candidates: other tutors in the pool, each for a different course and time */}
+      {CANDIDATES.map((c) => (
         <div
-          key={side}
+          key={c.course}
           aria-hidden
-          className={`absolute inset-0 rounded-3xl border border-line-subtle bg-surface-raised shadow-md transition-transform duration-500 ${
-            side < 0
-              ? "-rotate-6 group-hover:-translate-x-16 group-hover:-rotate-12"
-              : "rotate-6 group-hover:translate-x-16 group-hover:rotate-12"
-          }`}
+          className={`absolute inset-0 rounded-3xl border border-line-subtle bg-surface-raised shadow-md transition-transform duration-500 ${c.position}`}
         >
-          <div className="flex items-center gap-3 p-5 opacity-60">
-            <span className="h-10 w-10 rounded-full bg-surface-inset" />
-            <span className="space-y-1.5">
-              <span className="block h-2.5 w-24 rounded bg-surface-inset" />
-              <span className="block h-2 w-16 rounded bg-surface-inset" />
-            </span>
+          <div className="flex items-center justify-between px-5 pt-2">
+            <span className="font-mono text-[11px] font-bold text-fg-subtle">{c.course}</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-fg-faint">{c.when}</span>
           </div>
         </div>
       ))}
@@ -38,7 +40,7 @@ export default function TutorMatch() {
       {/* your match */}
       <div className="absolute inset-0 rounded-3xl border border-line-subtle bg-surface-raised p-6 text-left shadow-xl transition-transform duration-500 group-hover:-translate-y-2">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--astar-navy)] font-hand text-2xl font-bold text-white">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--astar-navy)] font-accent text-base font-bold text-white">
             A+
           </span>
           <div>

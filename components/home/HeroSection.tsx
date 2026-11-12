@@ -1,7 +1,7 @@
 import Link from "next/link";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import CountUp from "@/components/shared/CountUp";
-import { RedPenUnderline } from "@/components/shared/fun/RedPen";
+import { Underline } from "@/components/shared/fun/RedPen";
 import { ArrowRight, CalendarRange } from "lucide-react";
 import { SEMESTER_PLAN_HREF, SEMESTER_PLAN_NAME } from "@/lib/semester-plan";
 
@@ -14,11 +14,11 @@ export default function HeroSection() {
         <div className="text-center lg:text-left">
           <h1 className="text-fg mb-6 font-normal tracking-tighter leading-[1.1] text-4xl md:text-6xl lg:text-7xl">
             Unlock your academic potential with{" "}
-            <RedPenUnderline delay={0.9} className="whitespace-nowrap">
+            <Underline delay={0.9} className="whitespace-nowrap">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--astar-red)] to-red-400">
                 A-Star Tutorials.
               </span>
-            </RedPenUnderline>
+            </Underline>
           </h1>
 
           <p className="text-lg md:text-xl text-fg-subtle font-light mb-10 leading-relaxed">

@@ -1,6 +1,5 @@
 import { Users, TrendingUp, Target, Award } from "lucide-react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
-import { RedPenCircle } from "@/components/shared/fun/RedPen";
 
 export default function WhoWeAre() {
   return (
@@ -9,7 +8,7 @@ export default function WhoWeAre() {
         <div className="max-w-xl">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-fg mb-6">Who We Are</h2>
           <p className="text-fg-muted text-lg leading-relaxed">
-            A-Star Tutorials is a <RedPenCircle delay={0.4}>student-driven</RedPenCircle> academic support system built to help tertiary institution students excel. We provide structured tutorials, easy-to-understand guidance, and a supportive learning community.
+            A-Star Tutorials is a student-driven academic support system built to help tertiary institution students excel. We provide structured tutorials, easy-to-understand guidance, and a supportive learning community.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

@@ -244,7 +244,14 @@
   --color-pb-on-dark: var(--pb-on-dark);
 
   --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --font-hand: var(--font-caveat), 'Comic Sans MS', cursive;
+  /* Accent fonts, one per job (picked 2026-11-12). Only the to-do card is
+     handwritten; the user found script fonts whimsical elsewhere.
+     note   = the 100L to-do card
+     accent = a word with personality, e.g. "November" on the ticket
+     mark   = small marked results: testimonial grades, "only 3 left!" */
+  --font-note: var(--font-architects), cursive;
+  --font-accent: var(--font-sans);
+  --font-mark: var(--font-sans);
 }
 
 html {

@@ -122,7 +122,7 @@ const TutorialCard = ({
             {/* Seats */}
             <div className="relative mb-4 md:mb-6">
                 {!fullyBooked && seatsLeft <= 5 && (
-                    <span className="absolute -top-7 right-0 font-hand text-lg font-bold text-[var(--astar-red)] rotate-[-6deg]">
+                    <span className="absolute -top-7 right-0 font-mark text-xs font-bold text-[var(--astar-red)]">
                         only {seatsLeft} left!
                     </span>
                 )}

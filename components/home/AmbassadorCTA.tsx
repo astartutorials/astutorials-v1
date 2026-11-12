@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Megaphone } from "lucide-react";
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/shared/ScrollReveal";
-import { RedPenUnderline } from "@/components/shared/fun/RedPen";
+import { Underline } from "@/components/shared/fun/RedPen";
 import Tilt from "@/components/shared/fun/Tilt";
 import NairaCountUp from "@/components/shared/fun/NairaCountUp";
 import { AMBASSADOR_HREF, AMBASSADOR_COMMISSIONS } from "@/lib/ambassador";
@@ -44,9 +44,9 @@ export default function AmbassadorCTA() {
             </span>
             <h2 className="mt-5 text-3xl md:text-5xl font-bold tracking-tight">
               Get paid for every{" "}
-              <RedPenUnderline delay={0.5}>
+              <Underline delay={0.5}>
                 <span className="text-red-400">referral</span>
-              </RedPenUnderline>
+              </Underline>
             </h2>
             <p className="mt-4 text-base md:text-lg text-on-dark-muted leading-relaxed max-w-xl">
               Earn ₦{AMBASSADOR_COMMISSIONS.group.toLocaleString()} to ₦{AMBASSADOR_COMMISSIONS.private.toLocaleString()} for
@@ -82,7 +82,7 @@ export default function AmbassadorCTA() {
 
                 <div className="px-6 pt-3 pb-6">
                   <div className="flex items-center justify-between">
-                    <p className="font-hand text-3xl font-bold text-[var(--astar-red)] -rotate-2">{MONTH}</p>
+                    <p className="font-accent text-2xl font-bold tracking-tight text-[var(--astar-red)]">{MONTH}</p>
                     <div className="flex items-center">
                       {FRIENDS.map((f, i) => (
                         <motion.span

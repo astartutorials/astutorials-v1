@@ -17,8 +17,12 @@ import { intakeHref } from "@/lib/intakes";
  */
 /** A fresher's to-do list. The last item is the one we want ticked. */
 // By November a fresher has resumed and matriculated (a celebration, not an
-// ordeal); the user picked these on 2026-11-12.
-const DONE = ["Resume at Babcock", "Matriculate 🎉", "Start taking proper notes"];
+// ordeal). Only settling in is done; the rest are still ahead (user, 2026-11-12).
+const TODO = [
+  { item: "Settle in", done: true },
+  { item: "Matriculate 🎉", done: false },
+  { item: "Start taking proper notes", done: false },
+];
 
 function ToDoCard({ href, ticked }: { href: string; ticked: boolean }) {
   const reduce = useReducedMotion();
@@ -26,7 +30,7 @@ function ToDoCard({ href, ticked }: { href: string; ticked: boolean }) {
     <Link href={href} aria-label="Register with A-Star" className="block">
       <Tilt rest={2} max={7}>
         <div
-          className="relative w-72 rounded-2xl bg-[#FFFDF3] dark:bg-[#1d2333] px-7 pt-6 pb-7 shadow-xl shadow-gray-300/40 dark:shadow-black/40 border border-amber-100 dark:border-white/10"
+          className="relative w-[21rem] max-w-[calc(100vw-5rem)] rounded-2xl bg-[#FFFDF3] dark:bg-[#1d2333] px-7 pt-6 pb-7 shadow-xl shadow-gray-300/40 dark:shadow-black/40 border border-amber-100 dark:border-white/10"
           style={{
             backgroundImage:
               "repeating-linear-gradient(to bottom, transparent 0, transparent 31px, rgba(53,94,169,0.12) 31px, rgba(53,94,169,0.12) 32px)",
@@ -35,38 +39,43 @@ function ToDoCard({ href, ticked }: { href: string; ticked: boolean }) {
         >
           {/* tape */}
           <span aria-hidden className="absolute -top-3 left-1/2 h-6 w-20 -translate-x-1/2 rotate-[-3deg] rounded-sm bg-red-200/70 dark:bg-red-400/30" />
-          <p className="font-hand text-2xl font-bold text-fg">My 100L to-do</p>
-          <ul className="mt-2 font-hand text-xl leading-8 text-fg-muted">
-            {DONE.map((item, i) => (
+          <p className="font-note text-xl text-fg">My 100L to-do</p>
+          <ul className="mt-2 font-note text-base leading-8 text-fg-muted">
+            {TODO.map(({ item, done }, i) => (
               <li key={item} className="flex items-center gap-2">
-                <RedPenTick delay={0.3 + i * 0.35} className="h-4 w-4 shrink-0" />
+                <span className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border-2 border-fg-faint">
+                  {done && <RedPenTick delay={0.3 + i * 0.35} className="absolute -top-1.5 left-0 h-5 w-5" />}
+                </span>
                 <span className="relative">
                   {item}
-                  <motion.span
-                    aria-hidden
-                    className="absolute left-0 top-1/2 h-[2px] w-full origin-left bg-fg-faint"
-                    initial={{ scaleX: 0 }}
-                    whileInView={{ scaleX: 1 }}
-                    viewport={{ once: true }}
-                    transition={reduce ? { duration: 0 } : { delay: 0.5 + i * 0.35, duration: 0.4 }}
-                  />
+                  {done && (
+                    <motion.span
+                      aria-hidden
+                      className="absolute left-0 top-1/2 h-[2px] w-full origin-left bg-fg-faint"
+                      initial={{ scaleX: 0 }}
+                      whileInView={{ scaleX: 1 }}
+                      viewport={{ once: true }}
+                      transition={reduce ? { duration: 0 } : { delay: 0.6, duration: 0.4 }}
+                    />
+                  )}
                 </span>
               </li>
             ))}
-            <li className="flex items-center gap-2 font-bold text-fg">
+            <li className="flex items-center gap-2 text-fg">
               <span className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border-2 border-[var(--astar-red)]">
                 {ticked && <RedPenTick className="absolute -top-1.5 left-0 h-5 w-5" />}
               </span>
-              Register with A-Star
+              <span className="whitespace-nowrap">Register with A-Star</span>
+              {/* Points straight at the item it's about. */}
+              <motion.span
+                className="ml-1 whitespace-nowrap text-sm text-[var(--astar-red)]"
+                animate={ticked ? { x: 0 } : { x: [0, 4, 0] }}
+                transition={reduce || ticked ? { duration: 0 } : { repeat: Infinity, duration: 1.4 }}
+              >
+                {ticked ? "done!" : "← 2 mins"}
+              </motion.span>
             </li>
           </ul>
-          <motion.p
-            className="absolute -right-4 bottom-3 font-hand text-lg font-bold text-[var(--astar-red)] rotate-[-8deg]"
-            animate={ticked ? { y: 0 } : { y: [0, -4, 0] }}
-            transition={reduce || ticked ? { duration: 0 } : { repeat: Infinity, duration: 1.6 }}
-          >
-            {ticked ? "done!" : "← 2 mins"}
-          </motion.p>
         </div>
       </Tilt>
     </Link>
