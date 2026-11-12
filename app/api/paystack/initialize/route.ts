@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { upsertPaystackCustomer } from "@/lib/paystack-customer";
 import { SEMESTER_PLANS, isSemesterPlanId } from "@/lib/semester-plan";
+import { checkDiscountCode, normaliseCode } from "@/lib/discount-codes";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,10 +27,39 @@ export async function POST(req: NextRequest) {
   }
 
   // The amount comes from the browser. A semester plan is a large fixed price,
-  // so it is checked against the plan here rather than trusted.
+  // so it is checked against the plan here rather than trusted. A discount code
+  // is checked again here too, and the discount fields are set by the server.
+  let paystackMeta = metadata ?? {};
   if (metadata?.type === "semester-plan") {
     const plan: unknown = metadata.plan;
-    if (!isSemesterPlanId(plan) || amount !== SEMESTER_PLANS[plan].price) {
+    if (!isSemesterPlanId(plan)) {
+      return NextResponse.json({ error: "Invalid plan or amount." }, { status: 400 });
+    }
+
+    // discount_amount is only ever set below, never taken from the browser.
+    const rest = { ...metadata };
+    const discount_code = rest.discount_code;
+    delete rest.discount_code;
+    delete rest.discount_amount;
+    paystackMeta = rest;
+    let expected = SEMESTER_PLANS[plan].price;
+
+    if (normaliseCode(discount_code)) {
+      const discount = await checkDiscountCode(supabase, discount_code, plan);
+      if (!discount.ok) {
+        return NextResponse.json({ error: discount.error }, { status: 400 });
+      }
+      expected = discount.price;
+      const note = `Discount: ${discount.code} (−₦${discount.amountOff.toLocaleString()})`;
+      paystackMeta = {
+        ...rest,
+        discount_code: discount.code,
+        discount_amount: discount.amountOff,
+        notes: rest.notes ? `${rest.notes} | ${note}` : note,
+      };
+    }
+
+    if (amount !== expected) {
       return NextResponse.json({ error: "Invalid plan or amount." }, { status: 400 });
     }
   }
@@ -69,7 +99,7 @@ export async function POST(req: NextRequest) {
       email,
       amount: amount * 100, // Paystack expects kobo
       callback_url: `${baseUrl}/api/paystack/verify`,
-      metadata: metadata ?? {},
+      metadata: paystackMeta,
     }),
   });
 
