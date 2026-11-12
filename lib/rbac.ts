@@ -15,7 +15,7 @@ export interface UserRoleContext {
  * Two kinds of data, and the rule that follows from each:
  *
  *  - ORG DATA carries an org_id: tutorials, bookings, payments, feedback,
- *    student intake, BUCC registrations, invites. Every role below super_admin
+ *    student intake, BUCC registrations, ambassadors, invites. Every role below super_admin
  *    reads and writes it only for their own organisation — the API filters by
  *    ctx.orgId, and getUserRole refuses a non-super_admin with no org.
  *
@@ -37,6 +37,7 @@ export type Permission =
   | 'payments:read'
   | 'feedback:read'
   | 'intake:read'
+  | 'ambassadors:read' | 'ambassadors:manage'
   | 'bucc:read'
   | 'playbooks:read'
   | 'applications:read' | 'applications:update' | 'applications:delete'
@@ -76,6 +77,10 @@ const PERMISSIONS: Record<AppRole, readonly (Permission | '*')[]> = {
     'payments:read',
     'feedback:read',
     'intake:read',
+    // Ambassadors are the org's students promoting it. Approving one assigns a
+    // referral code that earns commission, so managing them is a write of its
+    // own, not part of intake:read. Earnings will also need payments:read.
+    'ambassadors:read', 'ambassadors:manage',
     'bucc:read',
     'invites:create',
     'playbooks:read',
