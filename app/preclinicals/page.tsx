@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PreClinicalsLanding from "@/components/preclinicals/PreClinicalsLanding";
+import { OG_IMAGE } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: "Pre-Clinicals Introductory Online Classes",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Get tutored by distinction students in Anatomy, Histology, Embryology, Physiology & Biochemistry. Daily & weekly quizzes, cash prizes, community. 3rd – 30th August 2026.",
     url: "https://astartutorials.com/preclinicals",
-    images: [{ url: "/logo.png", width: 840, height: 840, alt: "A-Star Tutorials Pre-Clinicals Classes" }],
+    images: [{ ...OG_IMAGE, alt: "A-Star Tutorials Pre-Clinicals Classes" }],
   },
 };
 

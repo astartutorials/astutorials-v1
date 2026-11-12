@@ -5,6 +5,7 @@ import ClientFrame from '@/components/shared/ClientFrame'
 import { ThemeProvider } from '@/components/shared/ThemeProvider'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
+import { OG_IMAGE } from "@/lib/og";
 
 const spaceGrotesk = Space_Grotesk({ 
   subsets: ['latin'], 
@@ -47,21 +48,14 @@ export const metadata: Metadata = {
     title: "A-Star Tutorials | Academic Excellence for Tertiary Students",
     description:
       "Personalized one-on-one and group tutoring for tertiary institution students. Book expert tutors and unlock your academic potential.",
-    images: [
-      {
-        url: "/logo.png",
-        width: 840,
-        height: 840,
-        alt: "A-Star Tutorials – Academic Excellence for Tertiary Students",
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: "A-Star Tutorials | Academic Excellence for Tertiary Students",
     description:
       "Personalized one-on-one and group tutoring for tertiary institution students.",
-    images: ["/logo.png"],
+    images: [OG_IMAGE.url],
   },
   robots: {
     index: true,

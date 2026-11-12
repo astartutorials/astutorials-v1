@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import SemesterPlanLanding from "@/components/semester-plan/SemesterPlanLanding";
+import { OG_IMAGE } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: "Full Semester Plan for 100L Students",
@@ -12,7 +13,9 @@ export const metadata: Metadata = {
       "Your whole first semester, sorted. 50 group sessions for ₦100,000 or 50 private sessions for ₦300,000.",
     url: "https://astartutorials.com/semester-plan",
     type: "website",
+    images: [OG_IMAGE],
   },
+  twitter: { card: "summary_large_image", images: [OG_IMAGE.url] },
 };
 
 export default function SemesterPlanPage() {

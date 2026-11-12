@@ -27,6 +27,16 @@ const RESEND_URL = "https://api.resend.com/emails";
 // Never throws — a failed receipt must not roll back a paid booking. But every
 // failure is logged: silent email loss is undiagnosable, and these carry booking
 // confirmations. Returns whether the message was accepted by Resend.
+/**
+ * The logo at the top of every email. A PNG, because Gmail and most other
+ * clients don't render SVG; 2x pixels for sharp screens. Absolute production
+ * URL, so it also loads in emails sent from development.
+ */
+const EMAIL_LOGO = `
+    <div style="max-width:520px;margin:0 auto;padding:8px 0 20px">
+      <img src="https://astartutorials.com/brand/email-logo.png" width="228" height="42" alt="A-Star Tutorials" style="display:block;border:0;width:228px;height:42px" />
+    </div>`;
+
 async function send(to: string, subject: string, html: string): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
   if (!key) return false; // email is optional — never block the booking flow
@@ -38,7 +48,7 @@ async function send(to: string, subject: string, html: string): Promise<boolean>
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from: FROM, to: [to], subject, html }),
+      body: JSON.stringify({ from: FROM, to: [to], subject, html: EMAIL_LOGO + html }),
     });
 
     if (!res.ok) {
