@@ -37,12 +37,28 @@ export async function POST(req: NextRequest) {
   const courseOfStudy = clean(body.courseOfStudy, 120);
   const level = clean(body.level, 10);
   const motivation = clean(body.motivation, 1500);
-  const socialHandle = clean(body.socialHandle, 200);
   const heardVia = clean(body.heardVia, 60);
+  const institution = clean(body.institution, 120);
+  const matricNumber = clean(body.matricNumber, 40);
+  const callPhone = clean(body.callPhone, 40);
+  const instagram = clean(body.instagramHandle, 100);
+  const tiktok = clean(body.tiktokHandle, 100);
+  const bankName = clean(body.bankName, 80);
+  // NUBAN: ten digits. Spaces and dashes from copy-pasting are dropped.
+  const bankAccountNumber = clean(body.bankAccountNumber, 20)?.replace(/[\s-]/g, "") ?? null;
+  const bankAccountName = clean(body.bankAccountName, 120);
 
   if (!fullName) return NextResponse.json({ error: "Full name is required" }, { status: 400 });
   if (!email || !email.includes("@")) return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
   if (!phone) return NextResponse.json({ error: "WhatsApp number is required" }, { status: 400 });
+  if (!institution) return NextResponse.json({ error: "Institution is required" }, { status: 400 });
+  if (!matricNumber) return NextResponse.json({ error: "Matric number is required" }, { status: 400 });
+  if (!callPhone) return NextResponse.json({ error: "A number for calls is required" }, { status: 400 });
+  if (!bankName) return NextResponse.json({ error: "Bank name is required" }, { status: 400 });
+  if (!bankAccountNumber || !/^\d{10}$/.test(bankAccountNumber)) {
+    return NextResponse.json({ error: "Account number must be 10 digits" }, { status: 400 });
+  }
+  if (!bankAccountName) return NextResponse.json({ error: "Account name is required" }, { status: 400 });
   if (!courseOfStudy) return NextResponse.json({ error: "Department is required" }, { status: 400 });
   if (!level || !(AMBASSADOR_LEVELS as readonly string[]).includes(level)) {
     return NextResponse.json({ error: "Choose your level" }, { status: 400 });
@@ -64,7 +80,14 @@ export async function POST(req: NextRequest) {
     phone,
     course_of_study: courseOfStudy,
     level,
-    social_handle: socialHandle,
+    institution,
+    matric_number: matricNumber,
+    call_phone: callPhone,
+    instagram_handle: instagram,
+    tiktok_handle: tiktok,
+    bank_name: bankName,
+    bank_account_number: bankAccountNumber,
+    bank_account_name: bankAccountName,
     motivation,
     heard_via: heardVia,
   });
@@ -91,7 +114,7 @@ export async function POST(req: NextRequest) {
     posthog.capture({
       distinctId: email,
       event: "ambassador_application_received",
-      properties: { level, course_of_study: courseOfStudy, heard_via: heardVia, has_social: !!socialHandle },
+      properties: { level, course_of_study: courseOfStudy, heard_via: heardVia, has_instagram: !!instagram, has_tiktok: !!tiktok },
     });
     await posthog.shutdown();
   } catch (err) {

@@ -18,7 +18,8 @@ describe('FAQ content', () => {
   // promised a "First Session Guarantee" nobody had agreed to.
   it('makes no refund promise', () => {
     const refund = ALL_FAQS.find((f) => /refund/i.test(f.question));
-    expect(refund?.answer).toMatch(/^No\./);
+    expect(refund?.answer).toMatch(/non-refundable/);
+    expect(refund?.answer).toMatch(/duplicate payment/);
     expect(ALL_FAQS.map((f) => f.answer).join(' ')).not.toMatch(/guarantee/i);
   });
 

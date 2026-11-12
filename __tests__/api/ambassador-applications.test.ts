@@ -38,8 +38,15 @@ const VALID = {
   courseOfStudy: 'Nursing',
   level: '200L',
   motivation: 'My department WhatsApp groups and hostel.',
-  socialHandle: '@ada',
   heardVia: 'WhatsApp',
+  institution: 'Babcock University',
+  matricNumber: '22/1234',
+  callPhone: '08087654321',
+  instagramHandle: '@ada',
+  tiktokHandle: '',
+  bankName: 'Zenith Bank',
+  bankAccountNumber: '1234 567 890',
+  bankAccountName: 'Ada Lovelace',
   turnstileToken: 't',
 };
 
@@ -62,7 +69,20 @@ describe('POST /api/ambassador-applications', () => {
     expect(res.status).toBe(201);
     expect(mockFrom).toHaveBeenCalledWith('ambassador_applications');
     const row = insert.mock.calls[0][0];
-    expect(row).toMatchObject({ org_id: BABCOCK_ORG_ID, email: 'ada@babcock.edu.ng', level: '200L', full_name: 'Ada Lovelace' });
+    expect(row).toMatchObject({
+      org_id: BABCOCK_ORG_ID,
+      email: 'ada@babcock.edu.ng',
+      level: '200L',
+      full_name: 'Ada Lovelace',
+      institution: 'Babcock University',
+      matric_number: '22/1234',
+      call_phone: '08087654321',
+      instagram_handle: '@ada',
+      tiktok_handle: null,
+      bank_name: 'Zenith Bank',
+      bank_account_number: '1234567890',
+      bank_account_name: 'Ada Lovelace',
+    });
     // Status and code are never taken from the browser.
     expect(row.status).toBeUndefined();
     expect(row.referral_code).toBeUndefined();
@@ -89,6 +109,13 @@ describe('POST /api/ambassador-applications', () => {
     ['level', '900L'],
     ['motivation', '  '],
     ['heardVia', 'Carrier pigeon'],
+    ['institution', ''],
+    ['matricNumber', ''],
+    ['callPhone', ''],
+    ['bankName', ''],
+    ['bankAccountNumber', '12345'],
+    ['bankAccountNumber', '12345abcde'],
+    ['bankAccountName', ''],
   ])('returns 400 when %s is %p', async (field, value) => {
     mockInsert();
     expect((await post({ ...VALID, [field]: value })).status).toBe(400);

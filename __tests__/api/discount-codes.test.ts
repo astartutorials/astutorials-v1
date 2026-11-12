@@ -4,8 +4,13 @@ import { NextRequest } from 'next/server';
 let codes: Record<string, { code: string; amount_off: number; max_uses: number; plans: string[]; active: boolean }>;
 let redemptions: { payment_reference: string; code: string }[];
 const mockUpsert = jest.fn();
+const mockReferralUpsert = jest.fn();
+// Lets a describe block add tables without rewriting the base mock.
+let extraFrom: ((table: string) => unknown) | null = null;
 
-function from(table: string) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function from(table: string): any {
+  if (extraFrom) { const f = extraFrom; extraFrom = null; try { return f(table); } finally { extraFrom = f; } }
   if (table === 'discount_codes') {
     return {
       select: () => ({
@@ -30,10 +35,13 @@ function from(table: string) {
       },
     };
   }
+  if (table === 'ambassador_applications') {
+    return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null }) }) }) };
+  }
   throw new Error(`unexpected table ${table}`);
 }
 
-jest.mock('@supabase/supabase-js', () => ({ createClient: jest.fn(() => ({ from })) }));
+jest.mock('@supabase/supabase-js', () => ({ createClient: jest.fn(() => ({ from: (t: string) => from(t) })) }));
 jest.mock('@/lib/turnstile', () => ({ verifyTurnstile: jest.fn().mockResolvedValue(true) }));
 
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
@@ -52,8 +60,8 @@ const req = (url: string, body: object) =>
     body: JSON.stringify(body),
   });
 
-const pay = (amount: number, meta: object) =>
-  initialize(req('/api/paystack/initialize', { email: 'p@example.com', amount, metadata: { type: 'semester-plan', ...meta } }));
+const pay = (amount: number, meta: object, email = 'p@example.com') =>
+  initialize(req('/api/paystack/initialize', { email, amount, metadata: { type: 'semester-plan', ...meta } }));
 
 const paystackBody = () => JSON.parse((global.fetch as jest.Mock).mock.calls.at(-1)[1].body);
 
@@ -61,6 +69,7 @@ beforeEach(() => {
   codes = { ASTAR20K: { code: 'ASTAR20K', amount_off: 20000, max_uses: 2, plans: ['group', 'private'], active: true } };
   redemptions = [];
   mockUpsert.mockClear();
+  mockReferralUpsert.mockClear();
   (global.fetch as jest.Mock).mockReset().mockResolvedValue({
     ok: true,
     json: async () => ({ status: true, data: { authorization_url: 'https://paystack.com/pay/x' } }),
@@ -134,6 +143,81 @@ describe('recordDiscountRedemption', () => {
   it('does nothing without a code or outside the semester plan', async () => {
     await recordDiscountRedemption(supabase, 'ref2', { type: 'semester-plan', plan: 'group' }, 100000);
     await recordDiscountRedemption(supabase, 'ref3', { ...meta, type: 'private' }, 80000);
+    expect(mockUpsert).not.toHaveBeenCalled();
+  });
+});
+
+describe('referral codes', () => {
+  let ambassadors: Record<string, { id: string; email: string; status: string }>;
+  const realFrom = from;
+
+  beforeEach(() => {
+    ambassadors = {
+      TOLU123: { id: 'amb-1', email: 'tolu@x.com', status: 'approved' },
+      PEND456: { id: 'amb-2', email: 'p@x.com', status: 'pending' },
+    };
+    extraFrom = (table: string) => {
+      if (table === 'ambassador_applications') {
+        return {
+          select: () => ({
+            eq: (_c: string, code: string) => ({ maybeSingle: async () => ({ data: ambassadors[code] ?? null }) }),
+          }),
+        };
+      }
+      if (table === 'referral_redemptions') {
+        return {
+          upsert: async (row: { payment_reference: string }) => {
+            mockReferralUpsert(row);
+            return { error: null };
+          },
+        };
+      }
+      return realFrom(table);
+    };
+  });
+
+  afterEach(() => { extraFrom = null; });
+
+  it('gives 10% off each plan with an approved ambassador code', async () => {
+    for (const [plan, price] of [['group', 90000], ['private', 270000]] as const) {
+      const res = await check(req('/api/discount-codes/check', { code: 'tolu123', plan }));
+      expect(res.status).toBe(200);
+      expect(await res.json()).toMatchObject({ code: 'TOLU123', price });
+    }
+  });
+
+  it('refuses a code from an ambassador who is not approved', async () => {
+    expect((await check(req('/api/discount-codes/check', { code: 'PEND456', plan: 'group' }))).status).toBe(400);
+  });
+
+  it("refuses an ambassador's own code", async () => {
+    const res = await pay(90000, { plan: 'group', discount_code: 'TOLU123' }, 'Tolu@X.com');
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/own referral code/);
+  });
+
+  it('charges the referral price and stamps the ambassador into metadata', async () => {
+    const res = await pay(270000, { plan: 'private', discount_code: 'TOLU123', ambassador_id: 'spoofed' });
+    expect(res.status).toBe(200);
+    expect(paystackBody().metadata).toMatchObject({
+      discount_code: 'TOLU123',
+      discount_amount: 30000,
+      code_kind: 'referral',
+      ambassador_id: 'amb-1',
+    });
+  });
+
+  it('records the flat commission for the plan, whatever the discount', async () => {
+    const supabase = (createClient as jest.Mock)();
+    await recordDiscountRedemption(
+      supabase,
+      'ref9',
+      { type: 'semester-plan', plan: 'group', discount_code: 'TOLU123', discount_amount: 10000, code_kind: 'referral', ambassador_id: 'amb-1' },
+      90000
+    );
+    expect(mockReferralUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ payment_reference: 'ref9', ambassador_id: 'amb-1', commission: 5000, amount_paid: 90000 })
+    );
     expect(mockUpsert).not.toHaveBeenCalled();
   });
 });

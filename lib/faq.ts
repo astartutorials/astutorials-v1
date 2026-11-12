@@ -1,11 +1,12 @@
 import { SEMESTER_PLANS, SEMESTER_PLAN_TERM, perSessionPrice } from '@/lib/semester-plan';
-import { AMBASSADOR_COMMISSIONS } from '@/lib/ambassador';
+import { AMBASSADOR_COMMISSIONS, referralDiscount } from '@/lib/ambassador';
 
 /**
  * Every FAQ answer on the site. The homepage shows the ones marked `home`;
  * /faq shows them all, grouped. Facts confirmed by the user and Uche on
  * 2026-11-12: private tutorials are matched by A-Star at ₦6,090 a session,
- * tutorials run both in person and online, and there are no refunds.
+ * tutorials run both in person and online, and payments are non-refundable
+ * except duplicate payments.
  */
 export interface Faq {
   question: string;
@@ -85,8 +86,12 @@ export const FAQ_GROUPS: FaqGroup[] = [
     items: [
       {
         question: 'Can I earn money with A-Star?',
-        answer: `Yes. Become an A-Star Ambassador. Apply at astartutorials.com/ambassador; once you’re approved, you get your own referral code. You earn ${naira(AMBASSADOR_COMMISSIONS.group)} for every Group Semester Plan and ${naira(AMBASSADOR_COMMISSIONS.private)} for every Private Semester Plan bought with it, paid monthly.`,
+        answer: `Yes. Become an A-Star Ambassador. Apply at astartutorials.com/ambassador; once you’re approved, you get your own referral code. Anyone who uses it gets 10% off, and you earn ${naira(AMBASSADOR_COMMISSIONS.group)} for every Group Semester Plan and ${naira(AMBASSADOR_COMMISSIONS.private)} for every Private Semester Plan bought with it, paid monthly.`,
         home: true,
+      },
+      {
+        question: 'I have an ambassador’s referral code. What do I get?',
+        answer: `10% off your Semester Plan (${naira(referralDiscount('group'))} off Group, ${naira(referralDiscount('private'))} off Private). Enter it in the discount or referral code box at checkout. One code per order, so it can’t be combined with another code.`,
       },
       {
         question: 'Can I teach with A-Star?',
@@ -100,7 +105,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
       {
         question: 'Can I get a refund?',
         answer:
-          'No. All payments are final, so if you have any questions, ask us on WhatsApp before you pay.',
+          'Payments for Semester Plans and individual tutorial bookings are non-refundable. The only exception is a duplicate payment: if you were charged twice for the same thing, message us on WhatsApp and we’ll refund the extra payment.',
       },
       {
         question: 'How do I reach you?',
