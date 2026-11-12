@@ -155,14 +155,16 @@ export default function Navbar() {
         }`}
       >
         {/* Mark + wordmark side by side, so the name is legible at nav size
-            (the stacked logo's name came out too small). Phones show the mark
-            only. Both are traced SVGs cropped to the artwork (2026-11-12). */}
-        <Link href="/" className="relative z-10 flex shrink-0 items-center gap-2.5" aria-label="A-Star Tutorials home">
+            (the stacked logo's name came out too small). Phones get a smaller
+            mark so the wordmark fits beside the CTA; tablets drop the wordmark
+            because the links need the room; very narrow phones (<360px) show
+            the mark only. Traced SVGs cropped to the artwork (2026-11-12). */}
+        <Link href="/" className="relative z-10 flex shrink-0 items-center gap-2 lg:gap-2.5" aria-label="A-Star Tutorials home">
           {/* Dark mode swaps in lighter versions: deep red reads poorly on navy. */}
-          <Image src="/brand/astar-mark.svg" alt="" width={1706} height={1425} unoptimized priority className="h-8 w-auto dark:hidden" />
-          <Image src="/brand/astar-mark-on-dark.svg" alt="" width={1706} height={1425} unoptimized priority className="hidden h-8 w-auto dark:block" />
-          <Image src="/brand/astar-wordmark.svg" alt="A-Star Tutorials" width={4230} height={475} unoptimized priority className="hidden h-[15px] w-auto lg:block dark:lg:hidden" />
-          <Image src="/brand/astar-wordmark-on-dark.svg" alt="A-Star Tutorials" width={4230} height={475} unoptimized priority className="hidden h-[15px] w-auto dark:lg:block" />
+          <Image src="/brand/astar-mark.svg" alt="" width={1706} height={1425} unoptimized priority className="h-6 w-auto md:h-8 dark:hidden" />
+          <Image src="/brand/astar-mark-on-dark.svg" alt="" width={1706} height={1425} unoptimized priority className="hidden h-6 w-auto md:h-8 dark:block" />
+          <Image src="/brand/astar-wordmark.svg" alt="A-Star Tutorials" width={4230} height={475} unoptimized priority className="hidden h-[11px] w-auto min-[360px]:block md:hidden lg:block lg:h-[15px] dark:hidden" />
+          <Image src="/brand/astar-wordmark-on-dark.svg" alt="A-Star Tutorials" width={4230} height={475} unoptimized priority className="hidden h-[11px] w-auto lg:h-[15px] dark:min-[360px]:block dark:md:hidden dark:lg:block" />
         </Link>
 
         {/* --- DESKTOP LINKS --- */}
@@ -228,10 +230,11 @@ export default function Navbar() {
             <ThemeToggle />
           </div>
           {/* The Semester Plan leads everywhere (Uche, 2026-11-12). */}
-          <span className="hidden md:inline-flex">
+          {/* The full label needs the room only large screens have. */}
+          <span className="hidden lg:inline-flex">
             <CtaPill href={SEMESTER_PLAN_HREF} label={SEMESTER_PLAN_NAME} />
           </span>
-          <span className="md:hidden">
+          <span className="lg:hidden">
             <CtaPill href={SEMESTER_PLAN_HREF} label="Semester Plan" compact />
           </span>
           <button
