@@ -101,7 +101,7 @@ export default function AmbassadorCTA() {
                       </span>
                     </div>
                   </div>
-                  <p className="mt-1 text-xs text-gray-400">{REFERRALS} coursemates joined with your code</p>
+                  <p className="mt-1 text-xs text-gray-400">{REFERRALS} friends signed up with your code</p>
 
                   <ul className="mt-4 space-y-2 text-sm">
                     {MONTH_ROWS.map((r, i) => (

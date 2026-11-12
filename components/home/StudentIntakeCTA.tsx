@@ -16,7 +16,9 @@ import { intakeHref } from "@/lib/intakes";
  * and the band disappears whenever no 100 level intake is open.
  */
 /** A fresher's to-do list. The last item is the one we want ticked. */
-const DONE = ["Get my admission letter", "Buy new notebooks", "Find my lecture halls"];
+// By November a fresher has resumed and matriculated (a celebration, not an
+// ordeal); the user picked these on 2026-11-12.
+const DONE = ["Resume at Babcock", "Matriculate 🎉", "Start taking proper notes"];
 
 function ToDoCard({ href, ticked }: { href: string; ticked: boolean }) {
   const reduce = useReducedMotion();
