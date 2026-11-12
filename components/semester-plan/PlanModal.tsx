@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { X, ArrowRight, Loader2, CalendarRange, CheckCircle2 } from "lucide-react";
+import { X, ArrowRight, Loader2, CalendarRange, CheckCircle2, Tag } from "lucide-react";
 import posthog from "posthog-js";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
@@ -93,12 +93,19 @@ export default function PlanModal({
   const [sent, setSent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
+  const [codeInput, setCodeInput] = useState("");
+  const [discount, setDiscount] = useState<{ code: string; amountOff: number; plan: SemesterPlanId } | null>(null);
+  const [codeError, setCodeError] = useState("");
+  const [checkingCode, setCheckingCode] = useState(false);
 
   const set = (key: keyof Form, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
 
   // "Undecided" only makes sense when we are about to call; paying needs a plan.
   const payPlan: SemesterPlanId = plan === "undecided" ? "group" : plan;
   const selected = SEMESTER_PLANS[payPlan];
+  // A code is checked against one plan; switching plan means checking it again.
+  const activeDiscount = discount && discount.plan === payPlan ? discount : null;
+  const payAmount = selected.price - (activeDiscount?.amountOff ?? 0);
   const isParent = submittedBy === "parent";
   // The receipt goes to whoever pays.
   const receiptEmail = isParent ? form.parentEmail : form.studentEmail;
@@ -127,6 +134,38 @@ export default function PlanModal({
     return e;
   }
 
+  async function applyCode() {
+    const code = codeInput.trim();
+    if (!code) return;
+    setCodeError("");
+    setCheckingCode(true);
+    try {
+      const res = await fetch("/api/discount-codes/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, plan: payPlan }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setDiscount(null);
+        setCodeError(data.error ?? "That code isn’t valid.");
+        return;
+      }
+      setDiscount({ code: data.code, amountOff: data.amountOff, plan: payPlan });
+      posthog.capture("semester_plan_discount_applied", { code: data.code, plan: payPlan });
+    } catch {
+      setCodeError("Couldn’t check that code. Please try again.");
+    } finally {
+      setCheckingCode(false);
+    }
+  }
+
+  function removeCode() {
+    setDiscount(null);
+    setCodeInput("");
+    setCodeError("");
+  }
+
   async function pay() {
     const notes = [
       `Plan: ${selected.name}`,
@@ -145,7 +184,7 @@ export default function PlanModal({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: receiptEmail,
-        amount: selected.price,
+        amount: payAmount,
         turnstileToken,
         metadata: {
           type: "semester-plan",
@@ -154,6 +193,7 @@ export default function PlanModal({
           phone: form.studentPhone,
           course: semesterPlanCourseLabel(payPlan),
           notes,
+          ...(activeDiscount ? { discount_code: activeDiscount.code } : {}),
         },
       }),
     });
@@ -168,7 +208,8 @@ export default function PlanModal({
     posthog.capture("semester_plan_checkout_initiated", {
       plan: payPlan,
       paid_by: submittedBy,
-      price: selected.price,
+      price: payAmount,
+      discount_code: activeDiscount?.code ?? null,
     });
     window.location.href = data.authorization_url;
   }
@@ -455,6 +496,67 @@ export default function PlanModal({
                 />
               </Field>
 
+              {mode === "pay" && (
+                <div>
+                  <label htmlFor="discount-code" className="text-sm font-semibold text-fg-muted block mb-1.5">
+                    Discount code <span className="text-fg-faint font-normal">(optional)</span>
+                  </label>
+                  {activeDiscount ? (
+                    <div className="flex items-center justify-between rounded-xl border border-green-600/40 bg-green-50 dark:bg-green-950/30 px-4 py-3">
+                      <span className="inline-flex items-center gap-2 text-sm font-semibold text-green-700 dark:text-green-400">
+                        <Tag size={16} />
+                        {activeDiscount.code}: ₦{activeDiscount.amountOff.toLocaleString()} off
+                      </span>
+                      <button
+                        type="button"
+                        onClick={removeCode}
+                        className="text-xs font-semibold text-fg-subtle hover:text-fg underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        id="discount-code"
+                        type="text"
+                        autoCapitalize="characters"
+                        placeholder="Enter code"
+                        value={codeInput}
+                        onChange={(e) => {
+                          setCodeInput(e.target.value);
+                          setCodeError("");
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            applyCode();
+                          }
+                        }}
+                        className={`${inputClass} uppercase`}
+                      />
+                      <button
+                        type="button"
+                        onClick={applyCode}
+                        disabled={checkingCode || !codeInput.trim()}
+                        className="shrink-0 rounded-xl border border-line px-5 text-sm font-semibold text-fg hover:bg-surface-sunken transition-colors disabled:opacity-50"
+                      >
+                        {checkingCode ? <Loader2 size={16} className="animate-spin" /> : "Apply"}
+                      </button>
+                    </div>
+                  )}
+                  {discount && !activeDiscount && (
+                    <p className="mt-1 text-xs text-fg-subtle">
+                      Plan changed.{" "}
+                      <button type="button" onClick={() => { setCodeInput(discount.code); setDiscount(null); }} className="underline font-semibold">
+                        Re-apply {discount.code}
+                      </button>
+                    </p>
+                  )}
+                  {codeError && <p className="mt-1 text-xs text-red-500">{codeError}</p>}
+                </div>
+              )}
+
               <Turnstile
                 ref={turnstileRef}
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA"}
@@ -477,7 +579,11 @@ export default function PlanModal({
                   </>
                 ) : mode === "pay" ? (
                   <>
-                    Pay ₦{selected.price.toLocaleString()} <ArrowRight size={18} />
+                    Pay{" "}
+                    {activeDiscount && (
+                      <s className="font-semibold opacity-70">₦{selected.price.toLocaleString()}</s>
+                    )}{" "}
+                    ₦{payAmount.toLocaleString()} <ArrowRight size={18} />
                   </>
                 ) : (
                   <>

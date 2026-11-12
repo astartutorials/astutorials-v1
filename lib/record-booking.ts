@@ -9,6 +9,7 @@ import {
 } from '@/lib/email';
 import { programmeOrgId } from '@/lib/programme-org';
 import { SEMESTER_PLANS, isSemesterPlanId } from '@/lib/semester-plan';
+import { recordDiscountRedemption } from '@/lib/discount-codes';
 
 export interface PaystackTransaction {
   reference: string;
@@ -18,6 +19,8 @@ export interface PaystackTransaction {
   metadata?: {
     type?: string;
     plan?: string;
+    discount_code?: string;
+    discount_amount?: number;
     tutorial_id?: string;
     org_id?: string;
     full_name?: string;
@@ -57,7 +60,10 @@ export async function recordBookingFromTransaction(
     .eq('payment_reference', reference)
     .maybeSingle();
 
-  if (existing) return { outcome: 'already_recorded', reference };
+  if (existing) {
+    await recordDiscountRedemption(supabase, reference, meta, amountPaid);
+    return { outcome: 'already_recorded', reference };
+  }
 
   // Group bookings hang off a tutorial, which also supplies the org scope.
   let tutorialForEmail: { title: string; date: string | null; time: string } | null = null;
@@ -96,6 +102,8 @@ export async function recordBookingFromTransaction(
   if (!isPrivate && meta.tutorial_id) {
     await supabase.rpc('increment_seats_booked', { tid: meta.tutorial_id });
   }
+
+  await recordDiscountRedemption(supabase, reference, meta, amountPaid);
 
   if (sendEmails) {
     await sendNewBookingNotification({

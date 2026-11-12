@@ -4,6 +4,7 @@ import { sendGroupBookingConfirmation, sendPrivateBookingReceipt, sendPreClinica
 import { getPostHogClient } from "@/lib/posthog-server";
 import { programmeOrgId } from "@/lib/programme-org";
 import { SEMESTER_PLANS, isSemesterPlanId } from "@/lib/semester-plan";
+import { recordDiscountRedemption } from "@/lib/discount-codes";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -107,6 +108,8 @@ export async function GET(req: NextRequest) {
       await supabase.rpc("increment_seats_booked", { tid: meta.tutorial_id });
     }
   }
+
+  await recordDiscountRedemption(supabase, reference, meta, amountPaid);
 
   const posthog = getPostHogClient();
   posthog.capture({
