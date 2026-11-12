@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Stamped once per build and inlined into server and client bundles alike,
+  // so "was this programme open at build time?" has one answer on both sides
+  // of hydration. See lib/build-time.ts.
+  env: { NEXT_PUBLIC_BUILD_TIME: String(Date.now()) },
   async rewrites() {
     return [
       {

@@ -32,6 +32,7 @@ import {
   perSessionPrice,
   type SemesterPlanId,
 } from "@/lib/semester-plan";
+import Words from "@/components/shared/Words";
 
 /**
  * The same page in two voices. Students land on /semester-plan; the "Send to my
@@ -167,18 +168,9 @@ const fade = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
 };
 
-function Reveal({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      variants={fade}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
+/** CSS scroll reveal (`.reveal` in globals.css): no JS, nothing hidden while hydrating. */
+function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`reveal ${className}`}>{children}</div>;
 }
 
 function SectionHead({ eyebrow, title }: { eyebrow?: string; title: string }) {
@@ -187,7 +179,7 @@ function SectionHead({ eyebrow, title }: { eyebrow?: string; title: string }) {
       {eyebrow && (
         <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-brand-ink">{eyebrow}</p>
       )}
-      <h2 className="mt-2.5 text-3xl md:text-4xl font-bold tracking-tight text-fg">{title}</h2>
+      <h2 className="reveal-words mt-2.5 text-3xl md:text-4xl font-bold tracking-tight text-fg"><Words text={title} /></h2>
     </div>
   );
 }

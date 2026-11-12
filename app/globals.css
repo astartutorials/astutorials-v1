@@ -331,3 +331,48 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   .animate-\[shine_3\.5s_ease-in-out_infinite\] { animation: none; }
 }
+
+/* ── Scroll reveals, CSS only ────────────────────────────────────────────
+   Sections (.reveal) rise and fade in as they enter the viewport; heading
+   words (.reveal-words) do the same one after another. Scroll-driven, so no
+   JavaScript and no waiting on hydration. Unsupported browsers and reduced
+   motion get the content as-is. (2026-11-12)
+   Gotcha: view() follows the nearest scroll container, and overflow:hidden
+   makes one. Wrap reveals in overflow-clip / overflow-x-clip instead, or the
+   animation silently never runs. */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes word-up {
+  from { opacity: 0; transform: translateY(0.35em); }
+  to { opacity: 1; transform: none; }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      /* A fixed distance, so tall sections are not left half-faded. */
+      animation-range: entry 0px entry 240px;
+    }
+    .reveal-words > span {
+      display: inline-block;
+      animation: word-up linear both;
+      animation-timeline: view();
+      /* Each word starts a little later in the entry, so they arrive in order. */
+      animation-range: entry calc(20% + var(--i) * 6%) entry calc(60% + var(--i) * 6%);
+    }
+  }
+}
+
+/* The hero headline is on screen at load, so it plays once on a timer instead,
+   and quickly: it is the first thing people read (and part of what Google
+   times as loaded). */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-words > span {
+    display: inline-block;
+    animation: word-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i) * 45ms);
+  }
+}

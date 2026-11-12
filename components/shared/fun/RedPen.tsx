@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, type ReactNode } from "react";
+import { useRef, type CSSProperties, type ReactNode } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 
 /**
@@ -10,14 +10,14 @@ import { motion, useInView, useReducedMotion } from "framer-motion";
  *
  * Markup is identical on server and client; reduced motion only changes timing.
  */
-export function Underline({ children, delay = 0.3, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
+export function Underline({ children, delay = 0.3, className = "", style }: { children: ReactNode; delay?: number; className?: string; style?: CSSProperties }) {
   const reduce = useReducedMotion();
   // Watch the words, not the bar: a bar scaled to zero width has no area, and
   // the browser never reports it as visible.
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
   return (
-    <span ref={ref} className={`relative inline-block ${className}`}>
+    <span ref={ref} style={style} className={`relative inline-block ${className}`}>
       {children}
       <motion.span
         aria-hidden

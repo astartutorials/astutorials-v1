@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import { HOME_FAQS, type Faq } from "@/lib/faq";
+import Words from "@/components/shared/Words";
 
 export const WHATSAPP_URL =
   "https://api.whatsapp.com/send/?phone=2349160465678&text=Hello, I have a question about A-Star Tutorials.&type=phone_number&app_absent=0";
@@ -51,7 +52,7 @@ export default function FAQ() {
     <ScrollReveal id="faq" className="w-full max-w-6xl mx-auto px-6 py-16 mb-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
         <div className="lg:col-span-5 lg:sticky lg:top-28">
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-fg">Got questions?</h2>
+          <h2 className="reveal-words text-3xl md:text-5xl font-bold tracking-tight text-fg"><Words text="Got questions?" /></h2>
           <p className="mt-4 text-fg-subtle leading-relaxed">
             Start with the common ones. If yours isn&apos;t here, ask us on WhatsApp. A real person replies.
           </p>

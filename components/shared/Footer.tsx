@@ -134,6 +134,20 @@ export default function Footer() {
           <p>Built for academic excellence.</p>
         </div>
       </div>
+
+      {/* The name, edge to edge, sinking off the bottom of the page. Reuses
+          the wordmark SVG the navbar already loaded, so it costs nothing. */}
+      <div aria-hidden className="pointer-events-none select-none overflow-hidden px-4 md:px-6">
+        <Image
+          src="/brand/astar-wordmark-on-dark.svg"
+          alt=""
+          width={4230}
+          height={475}
+          unoptimized
+          loading="lazy"
+          className="mx-auto w-full max-w-[1440px] h-auto translate-y-[22%] opacity-[0.92]"
+        />
+      </div>
     </footer>
   );
 }

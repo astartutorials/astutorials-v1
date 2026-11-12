@@ -1,7 +1,4 @@
-'use client';
-
-import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -9,17 +6,17 @@ interface ScrollRevealProps {
   className?: string;
 }
 
+/**
+ * Fades a section up as it scrolls into view, in CSS alone (`.reveal` in
+ * globals.css, a scroll-driven animation). No JavaScript, so nothing waits on
+ * hydration, and browsers without scroll-driven animations simply show the
+ * content. Replaced a Framer Motion version that kept every section, the hero
+ * included, invisible until JS ran, which held LCP back by seconds (2026-11-12).
+ */
 export default function ScrollReveal({ children, id, className = "" }: ScrollRevealProps) {
   return (
-    <motion.div
-      id={id}
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      className={className}
-    >
+    <div id={id} className={`reveal ${className}`}>
       {children}
-    </motion.div>
+    </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useRef, useEffect } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
+import Words from "@/components/shared/Words";
 
 const testimonials = [
   {
@@ -79,8 +80,8 @@ export default function Testimonials() {
           <span className="text-[10px] font-bold tracking-widest uppercase text-brand-ink mb-2 block">
             Student Success Stories
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-fg">
-            Real students. Real results.
+          <h2 className="reveal-words text-3xl md:text-4xl font-bold tracking-tight text-fg">
+            <Words text="Real students. Real results." />
           </h2>
         </div>
         <div className="hidden md:flex gap-2 shrink-0">

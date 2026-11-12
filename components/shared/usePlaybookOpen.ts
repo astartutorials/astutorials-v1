@@ -1,6 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from "react";
+import { BUILD_TIME } from "@/lib/build-time";
 import { PLAYBOOKS, isPlaybookOpen, type Playbook } from "@/lib/playbooks";
 
 // The registration window never changes mid-session, so there is nothing to
@@ -20,7 +21,7 @@ export function usePlaybookOpen(playbook: Playbook): boolean {
   return useSyncExternalStore(
     subscribe,
     () => isPlaybookOpen(playbook),
-    () => true
+    () => isPlaybookOpen(playbook, BUILD_TIME)
   );
 }
 
@@ -45,6 +46,9 @@ function openSnapshot(): Playbook[] {
  * snapshot is all of them, for the same hydration reason as above; any that
  * have already run drop out on the client.
  */
+// Open at build time: the same array on server and client, computed once.
+const OPEN_AT_BUILD = PLAYBOOKS.filter((p) => isPlaybookOpen(p, BUILD_TIME));
+
 export function useOpenPlaybooks(): Playbook[] {
-  return useSyncExternalStore(subscribe, openSnapshot, () => PLAYBOOKS);
+  return useSyncExternalStore(subscribe, openSnapshot, () => OPEN_AT_BUILD);
 }

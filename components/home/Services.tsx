@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import Tilt from "@/components/shared/fun/Tilt";
+import Words from "@/components/shared/Words";
 
 export default function Services() {
   const services = [
@@ -39,7 +40,7 @@ export default function Services() {
   return (
     <ScrollReveal id="services" className="w-full px-6 py-10 md:py-16 max-w-[1440px] mx-auto bg-surface-raised/55 rounded-[3rem] my-8">
       <div className="text-center max-w-3xl mx-auto mb-10">
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-fg mb-6">Our Academic Services</h2>
+        <h2 className="reveal-words text-3xl md:text-5xl font-bold tracking-tight text-fg mb-6"><Words text="Our Academic Services" /></h2>
         <p className="text-fg-subtle text-lg font-light">Comprehensive tutorial programs designed to fit your learning style and schedule.</p>
       </div>
 
