@@ -45,6 +45,7 @@ const ROUTE_PERMISSIONS: { href: string; permission: Permission | null }[] = [
   { href: '/admin/intake',            permission: 'intake:read' },
   { href: '/admin/semester-plan',     permission: 'intake:read' },
   { href: '/admin/tfa',               permission: 'intake:read' },
+  { href: '/admin/ambassadors',       permission: 'ambassadors:read' },
   { href: '/admin/careers',           permission: 'careers:read' },
   { href: '/admin/applications',      permission: 'applications:read' },
   { href: '/admin/audit-logs',        permission: 'audit:read' },

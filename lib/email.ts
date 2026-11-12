@@ -9,6 +9,7 @@ import {
 } from "@/lib/bucc";
 import type { Playbook } from "@/lib/playbooks";
 import { SEMESTER_PLAN_NAME, SEMESTER_PLAN_TERM } from "@/lib/semester-plan";
+import { AMBASSADOR_PROGRAMME_NAME, AMBASSADOR_COMMISSIONS } from "@/lib/ambassador";
 import {
   TFA_EVENT_NAME,
   TFA_THEME,
@@ -758,4 +759,56 @@ export async function sendTfaRegistrationConfirmation(opts: { to: string; fullNa
   `;
 
   await send(to, `You're in — ${TFA_EVENT_NAME}, ${TFA_DATE_LABEL}`, html);
+}
+
+const EMAIL_FOOTER = `
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        Please do not reply to this email.<br/>
+        For help, WhatsApp us on <strong>0916 046 5678</strong> or email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>`;
+
+export async function sendAmbassadorApplicationReceived(opts: { to: string; fullName: string }) {
+  const { to, fullName } = opts;
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">Application received</h2>
+      <p style="margin-top:0;color:#666">Hi ${escapeHtml(fullName)}, thanks for applying to become one of the ${AMBASSADOR_PROGRAMME_NAME}.</p>
+      <p style="font-size:14px;line-height:1.6">
+        Our team will review your application. If you're approved, we'll email you your personal referral code
+        and how to start earning.
+      </p>
+      ${EMAIL_FOOTER}
+    </div>
+  `;
+  await send(to, `We've got your ${AMBASSADOR_PROGRAMME_NAME} application`, html);
+}
+
+export async function sendAmbassadorApproved(opts: { to: string; fullName: string; referralCode: string }) {
+  const { to, fullName, referralCode } = opts;
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">You're an A-Star Ambassador 🎉</h2>
+      <p style="margin-top:0;color:#666">Hi ${escapeHtml(fullName)}, your application has been approved.</p>
+
+      <p style="font-size:14px;margin:24px 0 8px">Your referral code:</p>
+      <p style="margin:0 0 24px;font-family:monospace;font-size:28px;font-weight:700;letter-spacing:3px;background:#FDFAF6;border:1px dashed #D93025;border-radius:10px;padding:14px;text-align:center">
+        ${escapeHtml(referralCode)}
+      </p>
+
+      <table style="width:100%;border-collapse:collapse;margin:0 0 24px;font-size:14px">
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888;width:60%">Each Group Semester Plan</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">₦${AMBASSADOR_COMMISSIONS.group.toLocaleString()}</td></tr>
+        <tr><td style="padding:10px 0;color:#888">Each Private Semester Plan</td>
+            <td style="padding:10px 0;font-weight:600">₦${AMBASSADOR_COMMISSIONS.private.toLocaleString()}</td></tr>
+      </table>
+
+      <p style="font-size:14px;line-height:1.6">
+        Share your code with students and parents. When someone pays for a ${SEMESTER_PLAN_NAME} with it, you earn the
+        commission above. Commissions are paid at the end of each month.
+      </p>
+      ${EMAIL_FOOTER}
+    </div>
+  `;
+  await send(to, `Welcome to the ${AMBASSADOR_PROGRAMME_NAME}: your code is ${referralCode}`, html);
 }

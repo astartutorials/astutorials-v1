@@ -21,6 +21,8 @@ const MATRIX: Record<Permission, [boolean, boolean, boolean, boolean, boolean]> 
   'payments:read':        [true,  true,  true,  false, true ],
   'feedback:read':        [true,  true,  true,  true,  true ],
   'intake:read':          [true,  true,  false, false, false],
+  'ambassadors:read':     [true,  true,  false, false, false],
+  'ambassadors:manage':   [true,  true,  false, false, false],
   'bucc:read':            [true,  true,  false, false, false],
   'playbooks:read':       [true,  true,  false, false, false],
   'applications:read':    [true,  true,  false, false, false],
