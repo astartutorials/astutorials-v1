@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Space_Grotesk, Caveat } from 'next/font/google'
+import { Space_Grotesk, Architects_Daughter } from 'next/font/google'
 import './globals.css'
 import ClientFrame from '@/components/shared/ClientFrame'
 import { ThemeProvider } from '@/components/shared/ThemeProvider'
@@ -12,11 +12,11 @@ const spaceGrotesk = Space_Grotesk({
   variable: '--font-space-grotesk' 
 })
 
-// Handwriting for red-pen notes on the CTAs (tickets, checklists, grades).
-const caveat = Caveat({
+// Neat print handwriting, only for the 100L to-do card (picked 2026-11-12).
+const architectsDaughter = Architects_Daughter({
   subsets: ['latin'],
-  weight: ['500', '700'],
-  variable: '--font-caveat',
+  weight: '400',
+  variable: '--font-architects',
 })
 
 export const metadata: Metadata = {
@@ -78,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${caveat.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${spaceGrotesk.variable} ${architectsDaughter.variable}`} suppressHydrationWarning>
       <head>
         {/*
           Runs before first paint, so the page is never painted light and then

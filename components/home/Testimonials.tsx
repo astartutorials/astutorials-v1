@@ -123,7 +123,7 @@ export default function Testimonials() {
                   </div>
                 </div>
                 {/* The result, marked in red pen like a graded script. */}
-                <span className="inline-block -rotate-2 rounded-md border-2 border-[var(--astar-red)] px-2.5 py-0.5 font-hand text-lg font-bold leading-snug text-[var(--astar-red)] transition-transform duration-300 group-hover:rotate-0 group-hover:scale-105">
+                <span className="inline-block rounded-md border-2 border-[var(--astar-red)] px-2.5 py-0.5 font-mark text-xs font-bold leading-snug text-[var(--astar-red)]">
                   {t.badge}
                 </span>
               </div>

@@ -2,7 +2,6 @@ import { Wallet, Percent, Tag, Presentation, Shirt, Rocket, Users, Briefcase, Me
 import AmbassadorApplyForm from "./AmbassadorApplyForm";
 import Tilt from "@/components/shared/fun/Tilt";
 import NairaCountUp from "@/components/shared/fun/NairaCountUp";
-import { RedPenCircle } from "@/components/shared/fun/RedPen";
 import {
   AMBASSADOR_PROGRAMME_NAME,
   AMBASSADOR_COMMISSIONS,
@@ -86,11 +85,9 @@ export default function AmbassadorLanding() {
           <ol className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {AMBASSADOR_STEPS.map((step, i) => (
               <li key={step.title}>
-                <RedPenCircle delay={0.3 + i * 0.25}>
-                  <span className="flex h-10 w-10 items-center justify-center font-hand text-3xl font-bold text-white">
-                    {i + 1}
-                  </span>
-                </RedPenCircle>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--astar-red)] font-bold">
+                  {i + 1}
+                </span>
                 <p className="mt-4 font-bold text-lg">{step.title}</p>
                 <p className="mt-1 text-sm text-white/70 leading-relaxed">{step.desc}</p>
               </li>
