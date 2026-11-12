@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Space_Grotesk, Architects_Daughter } from 'next/font/google'
+import { Space_Grotesk, Caveat } from 'next/font/google'
 import './globals.css'
 import ClientFrame from '@/components/shared/ClientFrame'
 import { ThemeProvider } from '@/components/shared/ThemeProvider'
@@ -12,11 +12,12 @@ const spaceGrotesk = Space_Grotesk({
   variable: '--font-space-grotesk' 
 })
 
-// Neat print handwriting, only for the 100L to-do card (picked 2026-11-12).
-const architectsDaughter = Architects_Daughter({
+// Handwriting for the 100L to-do card and "only N left!". The user tried
+// Architects Daughter and went back to Caveat (2026-11-12).
+const caveat = Caveat({
   subsets: ['latin'],
-  weight: '400',
-  variable: '--font-architects',
+  weight: ['500', '700'],
+  variable: '--font-caveat',
 })
 
 export const metadata: Metadata = {
@@ -78,7 +79,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${architectsDaughter.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${spaceGrotesk.variable} ${caveat.variable}`} suppressHydrationWarning>
       <head>
         {/*
           Runs before first paint, so the page is never painted light and then

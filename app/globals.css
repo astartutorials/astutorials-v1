@@ -249,7 +249,7 @@
      note   = the 100L to-do card and "only N left!" on tutorial cards
      accent = a word with personality, e.g. "November" on the ticket
      mark   = small marked results: testimonial grades */
-  --font-note: var(--font-architects), cursive;
+  --font-note: var(--font-caveat), cursive;
   --font-accent: var(--font-sans);
   --font-mark: var(--font-sans);
 }
