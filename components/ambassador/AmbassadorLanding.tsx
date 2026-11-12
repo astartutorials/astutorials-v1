@@ -21,11 +21,11 @@ export default function AmbassadorLanding() {
               {AMBASSADOR_PROGRAMME_NAME}
             </p>
             <h1 className="mt-4 text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-brand-ink leading-[1.05]">
-              Become an A-Star Ambassador
+              Get paid for every referral
             </h1>
             <p className="mt-6 max-w-xl text-base md:text-lg text-fg-subtle leading-relaxed">
-              Help your coursemates get the support they need to excel, and earn for every student
-              you bring to A-Star.
+              Earn ₦{AMBASSADOR_COMMISSIONS.group.toLocaleString()} to ₦{AMBASSADOR_COMMISSIONS.private.toLocaleString()} for
+              every student who joins A-Star&apos;s Semester Plan with your code.
             </p>
 
             <div className="mt-8 grid grid-cols-2 gap-3 max-w-md">
