@@ -1,6 +1,10 @@
 'use client';
 
 import { Calendar, Clock, MapPin } from 'lucide-react';
+import Tilt from "@/components/shared/fun/Tilt";
+
+/** Up to this many seats, show a seat map; beyond it the squares get too small. */
+const SEAT_MAP_MAX = 60;
 
 interface TutorialCardProps {
     id: string;
@@ -75,9 +79,10 @@ const TutorialCard = ({
     const colors = colorMap[colorScheme] || colorMap.blue;
 
     return (
+        <Tilt max={fullyBooked ? 0 : 6} className="h-full [&>div]:h-full">
         <div
             onClick={fullyBooked ? undefined : onBook}
-            className={`relative bg-surface-raised rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-line-subtle flex flex-col h-full transition-shadow ${fullyBooked ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-md cursor-pointer'}`}
+            className={`group relative bg-surface-raised rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-line-subtle flex flex-col h-full transition-shadow ${fullyBooked ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-md cursor-pointer'}`}
         >
             {/* Course Code + Price */}
             <div className="flex items-center justify-between mb-2">
@@ -115,7 +120,12 @@ const TutorialCard = ({
             </div>
 
             {/* Seats */}
-            <div className="mb-4 md:mb-6">
+            <div className="relative mb-4 md:mb-6">
+                {!fullyBooked && seatsLeft <= 5 && (
+                    <span className="absolute -top-7 right-0 font-hand text-lg font-bold text-[var(--astar-red)] rotate-[-6deg]">
+                        only {seatsLeft} left!
+                    </span>
+                )}
                 <div className="flex justify-between items-end mb-2">
                     <span className={`text-[10px] md:text-xs font-bold uppercase ${statusColor}`}>
                         {statusText}
@@ -124,12 +134,35 @@ const TutorialCard = ({
                         {seatsTaken}/{seatsTotal}
                     </span>
                 </div>
-                <div className="w-full bg-surface-inset h-1.5 rounded-full overflow-hidden">
-                    <div
-                        className="h-full bg-red-600 rounded-full"
-                        style={{ width: `${percentageTaken}%` }}
-                    />
-                </div>
+                {seatsTotal <= SEAT_MAP_MAX ? (
+                    // A little classroom: one square per seat. On hover, the next
+                    // free seat lights up as "yours".
+                    <div className="flex flex-wrap gap-1" aria-hidden>
+                        {Array.from({ length: seatsTotal }, (_, i) => {
+                            const taken = i < seatsTaken;
+                            const yours = !taken && i === seatsTaken;
+                            return (
+                                <span
+                                    key={i}
+                                    className={`h-2.5 w-2.5 rounded-[3px] transition-all duration-300 ${
+                                        taken
+                                            ? 'bg-red-600'
+                                            : yours
+                                            ? 'bg-surface-inset group-hover:bg-[var(--astar-navy)] dark:group-hover:bg-white group-hover:scale-125 group-hover:animate-pulse'
+                                            : 'bg-surface-inset'
+                                    }`}
+                                />
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="w-full bg-surface-inset h-1.5 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-red-600 rounded-full"
+                            style={{ width: `${percentageTaken}%` }}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* CTA */}
@@ -137,6 +170,7 @@ const TutorialCard = ({
                 {fullyBooked ? 'Fully Booked' : 'Reserve Spot'}
             </div>
         </div>
+        </Tilt>
     );
 };
 

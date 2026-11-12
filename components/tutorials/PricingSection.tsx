@@ -4,6 +4,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import EmailModal from "@/components/tutorials/EmailModal";
+import TutorMatch from "@/components/tutorials/TutorMatch";
+import { RedPenCircle } from "@/components/shared/fun/RedPen";
 
 interface PricingSectionProps {
     orgId?: string;
@@ -30,7 +32,9 @@ export default function PricingSection({ orgId }: PricingSectionProps) {
                 </p>
 
                 <div className="flex items-baseline justify-center gap-2 mb-8">
-                    <span className="text-4xl md:text-5xl font-bold text-[#335C98]">₦6,090</span>
+                    <RedPenCircle delay={0.6}>
+                        <span className="text-4xl md:text-5xl font-bold text-[#335C98]">₦6,090</span>
+                    </RedPenCircle>
                     <span className="text-fg-subtle text-lg">/ session</span>
                 </div>
 
@@ -41,6 +45,10 @@ export default function PricingSection({ orgId }: PricingSectionProps) {
                     Request Private Tutorial <ArrowRight size={20} />
                 </button>
             </motion.div>
+
+            <div className="mt-14">
+                <TutorMatch />
+            </div>
 
             {modalOpen && <EmailModal onClose={() => setModalOpen(false)} orgId={orgId} />}
         </section>

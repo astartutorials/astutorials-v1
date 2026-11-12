@@ -29,7 +29,14 @@ export default function HowItWorks() {
 
                 <div className="relative">
                     {/* Connecting Line - Only visible on md+ screens */}
-                    <div className="hidden md:block absolute top-[40px] left-[16%] right-[16%] h-0.5 bg-blue-500/25 z-0"></div>
+                    <motion.div
+                        aria-hidden
+                        initial={{ scaleX: 0 }}
+                        whileInView={{ scaleX: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
+                        className="hidden md:block absolute top-[32px] left-[16%] right-[16%] h-0 origin-left border-t-[3px] border-dashed border-[var(--astar-red)]/50 z-0"
+                    />
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
                         {steps.map((step, index) => (

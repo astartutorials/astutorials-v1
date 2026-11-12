@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
 import { usePrograms } from "@/components/shared/programmes";
 import ThemeToggle from "@/components/shared/ThemeToggle";
+import { SEMESTER_PLAN_HREF, SEMESTER_PLAN_NAME } from "@/lib/semester-plan";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -205,8 +206,9 @@ export default function Navbar() {
         <div className="flex items-center gap-2 md:gap-3">
           <ThemeToggle />
 
-          <Link href="/tutorials" className="hidden md:block btn-primary px-5 lg:px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:shadow-lg hover:shadow-red-500/20 transform hover:-translate-y-0.5 transition-all">
-            Book a Tutorial
+          {/* The Semester Plan leads everywhere, Book a Tutorial second (Uche, 2026-11-12). */}
+          <Link href={SEMESTER_PLAN_HREF} className="hidden md:block btn-primary px-5 lg:px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:shadow-lg hover:shadow-red-500/20 transform hover:-translate-y-0.5 transition-all">
+            {SEMESTER_PLAN_NAME}
           </Link>
 
           {/* Mobile "Join" (Visible only when menu is closed) */}
@@ -326,9 +328,16 @@ export default function Navbar() {
 
           <div className="pt-2 pb-2">
             <Link
-              href="/tutorials"
+              href={SEMESTER_PLAN_HREF}
               onClick={() => setIsMobileMenuOpen(false)}
               className="block w-full btn-primary text-center px-6 py-3.5 rounded-full text-base font-semibold hover:shadow-lg hover:shadow-red-500/20 transition-all"
+            >
+              {SEMESTER_PLAN_NAME}
+            </Link>
+            <Link
+              href="/tutorials"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="mt-2 block w-full text-center px-6 py-3.5 rounded-full border border-line text-base font-semibold text-fg hover:border-[var(--astar-red)] transition-all"
             >
               Book a Tutorial
             </Link>
