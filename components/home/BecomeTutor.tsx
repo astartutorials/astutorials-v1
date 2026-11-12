@@ -6,14 +6,15 @@ import { Check } from "lucide-react";
  * Deep wine, picked by the user (2026-11-12) over navy and light. It replaced
  * a bright A-Star red band where the blue "A-Star Tutorials" and the pale pink
  * text were hard to read. Keeps the warmth of red without the glare, and
- * doesn't repeat the navy of the ambassador band and footer.
+ * doesn't repeat the navy of the ambassador band and footer. The brand name is
+ * blush pink, matching the accents (the user found light blue out of character).
  */
 const t = {
   section: "bg-gradient-to-br from-[#3A0B10] via-[#4E1117] to-[#2A080C] text-white",
   eyebrow: "text-[#F4A9A3]",
   heading: "text-white",
   underline: "decoration-[#F4A9A3]",
-  brand: "text-[#9DBBF0]",
+  brand: "text-[#F4A9A3]",
   body: "text-white/70",
   checkWrap: "bg-white/10 text-[#F4A9A3]",
   item: "text-white/90",
