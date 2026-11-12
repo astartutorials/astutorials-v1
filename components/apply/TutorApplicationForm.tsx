@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Send, CheckCircle2, AlertCircle, Loader2, Info } from "lucide-react";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 const EDUCATION_LEVELS = ["Secondary", "Undergraduate", "Postgraduate", "PhD", "Professional Certification"];

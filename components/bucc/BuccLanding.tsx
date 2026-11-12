@@ -27,7 +27,7 @@ import {
   Quote,
   Terminal,
 } from "lucide-react";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 import RegisterModal from "./RegisterModal";
 import { useBuccOpen } from "@/components/shared/useBuccOpen";
 import {

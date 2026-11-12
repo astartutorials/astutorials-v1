@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2 } from "lucide-react";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { validateBookingForm } from "@/lib/validate";
 import {

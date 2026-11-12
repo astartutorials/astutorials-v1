@@ -12,7 +12,7 @@ import { Info, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import { formatDay, formatPrice } from '@/lib/format';
-import posthog from 'posthog-js';
+import posthog from '@/lib/analytics';
 
 type Tutorial = {
     id: string;

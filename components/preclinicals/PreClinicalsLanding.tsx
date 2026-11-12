@@ -32,7 +32,7 @@ import {
   GraduationCap,
   Quote,
 } from "lucide-react";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 import RegisterModal from "./RegisterModal";
 import { PRECLINICALS_DATE_RANGE } from "@/lib/preclinicals";
 import { usePreClinicalsOpen } from "@/components/shared/usePreClinicalsOpen";

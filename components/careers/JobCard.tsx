@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, MapPin, Clock } from "lucide-react";
 import JobApplicationModal from "./JobApplicationModal";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 
 export interface JobPosition {
     id: string;

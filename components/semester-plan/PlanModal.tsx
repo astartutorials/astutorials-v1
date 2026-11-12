@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { X, ArrowRight, Loader2, CalendarRange, CheckCircle2, Tag } from "lucide-react";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   SEMESTER_PLANS,
