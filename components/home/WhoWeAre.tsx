@@ -1,12 +1,13 @@
 import { Users, TrendingUp, Target, Award } from "lucide-react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
+import Words from "@/components/shared/Words";
 
 export default function WhoWeAre() {
   return (
     <ScrollReveal id="about" className="w-full px-6 py-10 md:py-16 max-w-[1440px] mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
         <div className="max-w-xl">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-fg mb-6">Who We Are</h2>
+          <h2 className="reveal-words text-4xl md:text-5xl font-bold tracking-tight text-fg mb-6"><Words text="Who We Are" /></h2>
           <p className="text-fg-muted text-lg leading-relaxed">
             A-Star Tutorials is a student-driven academic support system built to help tertiary institution students excel. We provide structured tutorials, easy-to-understand guidance, and a supportive learning community.
           </p>

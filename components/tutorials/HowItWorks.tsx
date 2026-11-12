@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Words from "@/components/shared/Words";
 
 const steps = [
     {
@@ -24,7 +25,7 @@ export default function HowItWorks() {
     return (
         <section className="bg-[#EEF2FF] dark:bg-blue-500/10 border border-transparent dark:border-blue-400/15 py-12 rounded-3xl mx-4 md:mx-8">
             <div className="max-w-5xl mx-auto text-center px-4">
-                <h2 className="text-3xl font-bold text-fg mb-3">How It Works</h2>
+                <h2 className="reveal-words text-3xl font-bold text-fg mb-3"><Words text="How It Works" /></h2>
                 <p className="text-fg-muted mb-10">Three simple steps to start your private learning journey</p>
 
                 <div className="relative">

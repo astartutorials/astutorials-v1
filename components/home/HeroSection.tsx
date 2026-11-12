@@ -1,20 +1,23 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
-import ScrollReveal from "@/components/shared/ScrollReveal";
 import CountUp from "@/components/shared/CountUp";
+import HeroVideo from "@/components/home/HeroVideo";
 import { Underline } from "@/components/shared/fun/RedPen";
 import { ArrowRight, CalendarRange } from "lucide-react";
 import { SEMESTER_PLAN_HREF, SEMESTER_PLAN_NAME } from "@/lib/semester-plan";
+import Words from "@/components/shared/Words";
 
 export default function HeroSection() {
   return (
-    <ScrollReveal id="home" className="w-full max-w-7xl mx-auto px-4 md:px-6 relative">
+    <section id="home" className="w-full max-w-7xl mx-auto px-4 md:px-6 relative">
       {/* Hero grid: text left, video right */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center mb-12 md:mb-16">
         {/* Left: text */}
         <div className="text-center lg:text-left">
-          <h1 className="text-fg mb-6 font-normal tracking-tighter leading-[1.1] text-4xl md:text-6xl lg:text-7xl">
-            Unlock your academic potential with{" "}
-            <Underline delay={0.9} className="whitespace-nowrap">
+          {/* Words arrive on load, quickly (about half a second in all). */}
+          <h1 className="hero-words text-fg mb-6 font-normal tracking-tighter leading-[1.1] text-4xl md:text-6xl lg:text-7xl">
+            <Words text="Unlock your academic potential with" />{" "}
+            <Underline delay={0.45} className="whitespace-nowrap" style={{ "--i": 5 } as CSSProperties}>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-[var(--astar-red)] to-red-400">
                 A-Star Tutorials.
               </span>
@@ -53,14 +56,7 @@ export default function HeroSection() {
         {/* Right: hero video */}
         <div className="relative flex justify-center lg:justify-end">
           <div className="relative w-full max-w-lg aspect-square rounded-3xl overflow-hidden shadow-2xl shadow-gray-200/60 border border-line-subtle">
-            <video
-              src="/hero.mp4"
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="w-full h-full object-cover"
-            />
+            <HeroVideo />
           </div>
         </div>
       </div>
@@ -88,6 +84,6 @@ export default function HeroSection() {
           ))}
         </div>
       </div>
-    </ScrollReveal>
+    </section>
   );
 }

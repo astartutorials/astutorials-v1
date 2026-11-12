@@ -9,6 +9,7 @@ import {
   AMBASSADOR_STEPS,
   AMBASSADOR_ROLE,
 } from "@/lib/ambassador";
+import Words from "@/components/shared/Words";
 
 const BENEFIT_ICONS = [Wallet, Percent, Tag, Presentation, Shirt, Rocket, Users, Briefcase];
 
@@ -81,7 +82,7 @@ export default function AmbassadorLanding() {
       {/* ── HOW IT WORKS ────────────────────────────────────── */}
       <section className="bg-[var(--astar-navy)] text-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 md:py-16">
-          <h2 className="text-center text-2xl md:text-3xl font-bold tracking-tight">How it works</h2>
+          <h2 className="reveal-words text-center text-2xl md:text-3xl font-bold tracking-tight"><Words text="How it works" /></h2>
           <ol className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {AMBASSADOR_STEPS.map((step, i) => (
               <li key={step.title}>
@@ -98,7 +99,7 @@ export default function AmbassadorLanding() {
 
       {/* ── BENEFITS ────────────────────────────────────────── */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14 md:py-16">
-        <h2 className="text-center text-2xl md:text-3xl font-bold tracking-tight text-fg">What you get</h2>
+        <h2 className="reveal-words text-center text-2xl md:text-3xl font-bold tracking-tight text-fg"><Words text="What you get" /></h2>
         <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {AMBASSADOR_BENEFITS.map(({ title, desc }, i) => {
             const Icon = BENEFIT_ICONS[i] ?? Megaphone;

@@ -9,6 +9,7 @@ import { RedPenTick } from "@/components/shared/fun/RedPen";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import { useOpenIntake } from "@/components/shared/useOpenIntake";
 import { intakeHref } from "@/lib/intakes";
+import Words from "@/components/shared/Words";
 
 /**
  * Homepage band for the 100 level intake. Reads the session from the intake
@@ -96,7 +97,7 @@ export default function StudentIntakeCTA() {
 
   return (
     <ScrollReveal className="w-full px-6 my-8 max-w-[1440px] mx-auto">
-      <div className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-line-subtle bg-surface-raised">
+      <div className="relative overflow-clip rounded-[2rem] md:rounded-[3rem] border border-line-subtle bg-surface-raised">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-32 -right-24 w-[26rem] h-[26rem] rounded-full bg-[var(--astar-red)] opacity-10 blur-3xl"
@@ -107,8 +108,8 @@ export default function StudentIntakeCTA() {
               <GraduationCap size={14} />
               {intake.session} session · 100 Level
             </span>
-            <h2 className="mt-5 text-3xl md:text-5xl font-bold tracking-tight text-fg">
-              Just got into university?
+            <h2 className="reveal-words mt-5 text-3xl md:text-5xl font-bold tracking-tight text-fg">
+              <Words text="Just got into university?" />
             </h2>
             <p className="mt-4 text-fg-subtle text-base md:text-lg leading-relaxed max-w-xl">
               Register with A-Star as a new 100 level student. We&apos;ll keep you posted on

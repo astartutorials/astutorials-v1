@@ -1,6 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from "react";
+import { BUILD_TIME } from "@/lib/build-time";
 import { isBuccOpen } from "@/lib/bucc";
 
 // The registration window never changes mid-session, so there is nothing to subscribe to.
@@ -12,13 +13,13 @@ const subscribe = () => () => {};
  * statically rendered, so a server-side answer would be frozen into the HTML
  * until the next deploy.
  *
- * The server snapshot is `true` so the band is present in the static HTML and
- * hydration matches; a closed window disappears on the client.
+ * The server snapshot is the answer at build time (lib/build-time.ts), so
+ * a programme that had closed before the build is not in the HTML at all.
  */
 export function useBuccOpen(): boolean {
   return useSyncExternalStore(
     subscribe,
     () => isBuccOpen(),
-    () => true
+    () => isBuccOpen(BUILD_TIME)
   );
 }

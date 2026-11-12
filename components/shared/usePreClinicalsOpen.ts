@@ -1,6 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from "react";
+import { BUILD_TIME } from "@/lib/build-time";
 import { isPreClinicalsOpen } from "@/lib/preclinicals";
 
 // The cohort window never changes mid-session, so there is nothing to subscribe to.
@@ -19,6 +20,6 @@ export function usePreClinicalsOpen(): boolean {
   return useSyncExternalStore(
     subscribe,
     () => isPreClinicalsOpen(),
-    () => true
+    () => isPreClinicalsOpen(BUILD_TIME)
   );
 }

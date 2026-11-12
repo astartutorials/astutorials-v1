@@ -1,6 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from "react";
+import { BUILD_TIME } from "@/lib/build-time";
 import { isBuccClassesOpen } from "@/lib/bucc-classes";
 
 // The cohort window never changes mid-session, so there is nothing to subscribe to.
@@ -19,6 +20,6 @@ export function useBuccClassesOpen(): boolean {
   return useSyncExternalStore(
     subscribe,
     () => isBuccClassesOpen(),
-    () => true
+    () => isBuccClassesOpen(BUILD_TIME)
   );
 }
