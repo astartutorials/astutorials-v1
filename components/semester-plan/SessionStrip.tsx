@@ -8,7 +8,7 @@ import { motion, useInView, useReducedMotion } from "framer-motion";
  * the exams when the card scrolls into view. Replaced a 50-square grid that
  * made the plan cards busy (2026-11-12).
  */
-const MILESTONES = ["First lecture", "Tests", "Exams"];
+const MILESTONES = ["First lecture", "Midsemesters", "Exams"];
 
 export default function SessionStrip({ sessions, onDark = false }: { sessions: number; onDark?: boolean }) {
   const reduce = useReducedMotion();
@@ -33,8 +33,13 @@ export default function SessionStrip({ sessions, onDark = false }: { sessions: n
           />
         ))}
       </div>
-      <div className={`mt-2 flex justify-between text-[10px] font-semibold uppercase tracking-wider ${muted}`}>
-        {MILESTONES.map((m) => <span key={m}>{m}</span>)}
+      {/* Each label sits under its own dot: the ends align to the edges, the
+          middle one is centred on the midpoint (justify-between drifted it
+          off-centre because the end labels differ in width). */}
+      <div className={`relative mt-2 h-3 text-[10px] font-semibold uppercase tracking-wider ${muted}`}>
+        <span className="absolute left-0">{MILESTONES[0]}</span>
+        <span className="absolute left-1/2 -translate-x-1/2">{MILESTONES[1]}</span>
+        <span className="absolute right-0">{MILESTONES[2]}</span>
       </div>
     </div>
   );
