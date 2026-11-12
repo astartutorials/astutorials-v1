@@ -154,8 +154,15 @@ export default function Navbar() {
             : "border-[var(--nav-border)] bg-[var(--nav-bg)] shadow-sm"
         }`}
       >
-        <Link href="/" className="relative z-10 flex shrink-0 items-center" aria-label="A-Star Tutorials home">
-          <Image src="/logo.png" alt="A-Star Logo" width={120} height={132} className="h-9 w-auto object-contain md:h-10" priority />
+        {/* Mark + wordmark side by side, so the name is legible at nav size
+            (the stacked logo's name came out too small). Phones show the mark
+            only. Both are traced SVGs cropped to the artwork (2026-11-12). */}
+        <Link href="/" className="relative z-10 flex shrink-0 items-center gap-2.5" aria-label="A-Star Tutorials home">
+          {/* Dark mode swaps in lighter versions: deep red reads poorly on navy. */}
+          <Image src="/brand/astar-mark.svg" alt="" width={1706} height={1425} unoptimized priority className="h-8 w-auto dark:hidden" />
+          <Image src="/brand/astar-mark-on-dark.svg" alt="" width={1706} height={1425} unoptimized priority className="hidden h-8 w-auto dark:block" />
+          <Image src="/brand/astar-wordmark.svg" alt="A-Star Tutorials" width={4230} height={475} unoptimized priority className="hidden h-[15px] w-auto lg:block dark:lg:hidden" />
+          <Image src="/brand/astar-wordmark-on-dark.svg" alt="A-Star Tutorials" width={4230} height={475} unoptimized priority className="hidden h-[15px] w-auto dark:lg:block" />
         </Link>
 
         {/* --- DESKTOP LINKS --- */}
