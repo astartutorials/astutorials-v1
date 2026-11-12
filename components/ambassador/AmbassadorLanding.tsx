@@ -1,5 +1,8 @@
 import { Wallet, Ticket, CalendarCheck, Megaphone, CheckCircle2 } from "lucide-react";
 import AmbassadorApplyForm from "./AmbassadorApplyForm";
+import Tilt from "@/components/shared/fun/Tilt";
+import NairaCountUp from "@/components/shared/fun/NairaCountUp";
+import { RedPenCircle } from "@/components/shared/fun/RedPen";
 import {
   AMBASSADOR_PROGRAMME_NAME,
   AMBASSADOR_COMMISSIONS,
@@ -28,15 +31,26 @@ export default function AmbassadorLanding() {
               every student who joins A-Star&apos;s Semester Plan with your code.
             </p>
 
-            <div className="mt-8 grid grid-cols-2 gap-3 max-w-md">
+            {/* Two mini tickets: what one sign-up of each plan earns. */}
+            <div className="mt-8 grid grid-cols-2 gap-4 max-w-md">
               {([
-                ["Group Semester Plan", AMBASSADOR_COMMISSIONS.group],
-                ["Private Semester Plan", AMBASSADOR_COMMISSIONS.private],
-              ] as const).map(([label, amount]) => (
-                <div key={label} className="rounded-2xl bg-surface-raised border border-line-subtle shadow-sm p-4">
-                  <p className="text-2xl sm:text-3xl font-extrabold text-brand-ink">₦{amount.toLocaleString()}</p>
-                  <p className="mt-1 text-xs sm:text-sm text-fg-muted">per {label}</p>
-                </div>
+                ["Group Semester Plan", AMBASSADOR_COMMISSIONS.group, -3],
+                ["Private Semester Plan", AMBASSADOR_COMMISSIONS.private, 2],
+              ] as const).map(([label, amount, rest]) => (
+                <Tilt key={label} rest={rest} max={10}>
+                  <div className="relative overflow-hidden rounded-2xl bg-surface-raised border border-line-subtle shadow-lg">
+                    <div className="px-4 pt-4 pb-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-fg-faint">You earn</p>
+                      <NairaCountUp value={amount} delay={0.4} className="block mt-1 text-2xl sm:text-3xl font-extrabold text-brand-ink tabular-nums" />
+                    </div>
+                    <div className="relative h-4">
+                      <span className="absolute -left-2 top-0 h-4 w-4 rounded-full bg-[var(--astar-bg)] border border-line-subtle" />
+                      <span className="absolute -right-2 top-0 h-4 w-4 rounded-full bg-[var(--astar-bg)] border border-line-subtle" />
+                      <span className="absolute left-3 right-3 top-1/2 border-t border-dashed border-line" />
+                    </div>
+                    <p className="px-4 pt-2 pb-4 text-xs sm:text-sm text-fg-muted">per {label}</p>
+                  </div>
+                </Tilt>
               ))}
             </div>
             <p className="mt-3 text-xs text-fg-faint">Paid at the end of every month.</p>
@@ -72,9 +86,11 @@ export default function AmbassadorLanding() {
           <ol className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {AMBASSADOR_STEPS.map((step, i) => (
               <li key={step.title}>
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--astar-red)] font-bold">
-                  {i + 1}
-                </span>
+                <RedPenCircle delay={0.3 + i * 0.25}>
+                  <span className="flex h-10 w-10 items-center justify-center font-hand text-3xl font-bold text-white">
+                    {i + 1}
+                  </span>
+                </RedPenCircle>
                 <p className="mt-4 font-bold text-lg">{step.title}</p>
                 <p className="mt-1 text-sm text-white/70 leading-relaxed">{step.desc}</p>
               </li>

@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import posthog from "posthog-js";
 import { RedPenCircle, RedPenUnderline } from "@/components/shared/fun/RedPen";
+import SessionStrip from "./SessionStrip";
 import PlanModal, { type Audience, type PlanModalMode } from "./PlanModal";
 import {
   SEMESTER_PLANS,
@@ -331,6 +332,7 @@ export default function SemesterPlanLanding({ audience }: { audience: Audience }
                 <p className={`mt-1 text-sm font-semibold ${featured ? "text-red-300" : "text-brand-ink"}`}>
                   {p.sessions} sessions · about ₦{perSessionPrice(p).toLocaleString()} each
                 </p>
+                <SessionStrip sessions={p.sessions} onDark={featured} />
 
                 <ul className="mt-6 space-y-3 flex-1">
                   {p.features.map((f) => (
