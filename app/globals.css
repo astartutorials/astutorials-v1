@@ -244,6 +244,7 @@
   --color-pb-on-dark: var(--pb-on-dark);
 
   --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-hand: var(--font-caveat), 'Comic Sans MS', cursive;
 }
 
 html {
@@ -313,4 +314,13 @@ body::after {
   .nav-link {
     @apply text-sm font-medium text-fg-muted hover:text-fg-strong transition-colors cursor-pointer;
   }
+}
+
+/* A light sweep across the primary hero button, every few seconds. */
+@keyframes shine {
+  0%, 60% { transform: translateX(0) skewX(-20deg); }
+  100% { transform: translateX(450%) skewX(-20deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[shine_3\.5s_ease-in-out_infinite\] { animation: none; }
 }
