@@ -68,14 +68,10 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="md:col-span-5 flex flex-col gap-5">
-            <Link href="/" className="w-fit">
-              <Image
-                src="/logo.png"
-                alt="A-Star Tutorials"
-                width={120}
-                height={132}
-                className="h-16 md:h-24 w-auto object-contain"
-              />
+            {/* The footer is always dark, so it always uses the on-dark logos. */}
+            <Link href="/" className="flex w-fit items-center gap-3" aria-label="A-Star Tutorials home">
+              <Image src="/brand/astar-mark-on-dark.svg" alt="" width={1706} height={1425} unoptimized className="h-11 w-auto md:h-14" />
+              <Image src="/brand/astar-wordmark-on-dark.svg" alt="A-Star Tutorials" width={4230} height={475} unoptimized className="h-[18px] w-auto md:h-[22px]" />
             </Link>
             <p className="text-gray-400 leading-relaxed max-w-sm text-sm">
               Empowering tertiary institution students to achieve academic excellence through structured guidance and community support.
