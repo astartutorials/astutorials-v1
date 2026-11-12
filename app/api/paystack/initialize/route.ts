@@ -36,25 +36,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid plan or amount." }, { status: 400 });
     }
 
-    // discount_amount is only ever set below, never taken from the browser.
+    // The discount fields are only ever set below, never taken from the browser.
     const rest = { ...metadata };
     const discount_code = rest.discount_code;
     delete rest.discount_code;
     delete rest.discount_amount;
+    delete rest.code_kind;
+    delete rest.ambassador_id;
     paystackMeta = rest;
     let expected = SEMESTER_PLANS[plan].price;
 
     if (normaliseCode(discount_code)) {
-      const discount = await checkDiscountCode(supabase, discount_code, plan);
+      const discount = await checkDiscountCode(supabase, discount_code, plan, email);
       if (!discount.ok) {
         return NextResponse.json({ error: discount.error }, { status: 400 });
       }
       expected = discount.price;
-      const note = `Discount: ${discount.code} (−₦${discount.amountOff.toLocaleString()})`;
+      const label = discount.kind === "referral" ? "Referral" : "Discount";
+      const note = `${label}: ${discount.code} (−₦${discount.amountOff.toLocaleString()})`;
       paystackMeta = {
         ...rest,
         discount_code: discount.code,
         discount_amount: discount.amountOff,
+        code_kind: discount.kind,
+        ...(discount.ambassadorId ? { ambassador_id: discount.ambassadorId } : {}),
         notes: rest.notes ? `${rest.notes} | ${note}` : note,
       };
     }

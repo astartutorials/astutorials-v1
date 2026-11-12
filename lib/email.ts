@@ -804,8 +804,9 @@ export async function sendAmbassadorApproved(opts: { to: string; fullName: strin
       </table>
 
       <p style="font-size:14px;line-height:1.6">
-        Share your code with students and parents. When someone pays for a ${SEMESTER_PLAN_NAME} with it, you earn the
-        commission above. Commissions are paid at the end of each month.
+        Share your code with students and parents. Anyone who uses it gets 10% off their ${SEMESTER_PLAN_NAME}, and you
+        earn the commission above. Commissions are paid at the end of each month. Your own code can't be used on your
+        own subscription.
       </p>
       ${EMAIL_FOOTER}
     </div>

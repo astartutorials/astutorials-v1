@@ -21,6 +21,8 @@ export interface PaystackTransaction {
     plan?: string;
     discount_code?: string;
     discount_amount?: number;
+    code_kind?: string;
+    ambassador_id?: string;
     tutorial_id?: string;
     org_id?: string;
     full_name?: string;

@@ -1,4 +1,4 @@
-import { Wallet, Ticket, CalendarCheck, Megaphone, CheckCircle2 } from "lucide-react";
+import { Wallet, Percent, Tag, Presentation, Shirt, Rocket, Users, Briefcase, Megaphone, CheckCircle2 } from "lucide-react";
 import AmbassadorApplyForm from "./AmbassadorApplyForm";
 import Tilt from "@/components/shared/fun/Tilt";
 import NairaCountUp from "@/components/shared/fun/NairaCountUp";
@@ -11,7 +11,7 @@ import {
   AMBASSADOR_ROLE,
 } from "@/lib/ambassador";
 
-const BENEFIT_ICONS = [Wallet, Ticket, CalendarCheck];
+const BENEFIT_ICONS = [Wallet, Percent, Tag, Presentation, Shirt, Rocket, Users, Briefcase];
 
 export default function AmbassadorLanding() {
   return (
@@ -102,7 +102,7 @@ export default function AmbassadorLanding() {
       {/* ── BENEFITS ────────────────────────────────────────── */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14 md:py-16">
         <h2 className="text-center text-2xl md:text-3xl font-bold tracking-tight text-fg">What you get</h2>
-        <div className="mt-8 grid sm:grid-cols-3 gap-4">
+        <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {AMBASSADOR_BENEFITS.map(({ title, desc }, i) => {
             const Icon = BENEFIT_ICONS[i] ?? Megaphone;
             return (

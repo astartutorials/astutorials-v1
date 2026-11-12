@@ -143,7 +143,7 @@ export default function PlanModal({
       const res = await fetch("/api/discount-codes/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, plan: payPlan }),
+        body: JSON.stringify({ code, plan: payPlan, email: receiptEmail }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -499,7 +499,7 @@ export default function PlanModal({
               {mode === "pay" && (
                 <div>
                   <label htmlFor="discount-code" className="text-sm font-semibold text-fg-muted block mb-1.5">
-                    Discount code <span className="text-fg-faint font-normal">(optional)</span>
+                    Discount or referral code <span className="text-fg-faint font-normal">(optional, one per order)</span>
                   </label>
                   {activeDiscount ? (
                     <div className="flex items-center justify-between rounded-xl border border-green-600/40 bg-green-50 dark:bg-green-950/30 px-4 py-3">

@@ -25,6 +25,7 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test_service_role_key';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { GET } from '@/app/api/admin/ambassadors/route';
 import { PATCH } from '@/app/api/admin/ambassadors/[id]/route';
+import { POST as PAYOUT } from '@/app/api/admin/ambassadors/[id]/payout/route';
 
 function mockAuth(user: object | null) {
   jest.mocked(createSupabaseServerClient).mockResolvedValue({
@@ -40,10 +41,10 @@ function asRole(role: string, orgId: string | null = 'org-1') {
 /** Chainable, awaitable query; records eq calls. */
 function chain(result: { data?: unknown; error?: unknown }) {
   const c: Record<string, jest.Mock> & { then?: unknown } = {
-    eq: jest.fn(), order: jest.fn(), select: jest.fn(), update: jest.fn(),
+    eq: jest.fn(), order: jest.fn(), select: jest.fn(), update: jest.fn(), in: jest.fn(), is: jest.fn(),
     maybeSingle: jest.fn().mockResolvedValue(result),
   };
-  for (const k of ['eq', 'order', 'select', 'update']) c[k].mockReturnValue(c);
+  for (const k of ['eq', 'order', 'select', 'update', 'in', 'is']) c[k].mockReturnValue(c);
   c.then = (r: (v: unknown) => void) => r(result);
   return c;
 }
@@ -81,11 +82,24 @@ describe('GET /api/admin/ambassadors', () => {
     expect(q.eq).toHaveBeenCalledWith('org_id', 'org-1');
 
     asRole('super_admin', null);
-    q = chain({ data: [{ id: 'x' }], error: null });
-    mockFrom.mockReturnValue(q);
+    q = chain({ data: [{ id: 'x' }, { id: 'y' }], error: null });
+    const redemptions = chain({
+      data: [
+        { ambassador_id: 'x', commission: 5000, paid_out_at: null },
+        { ambassador_id: 'x', commission: 15000, paid_out_at: '2026-11-01' },
+        { ambassador_id: 'x', commission: 5000, paid_out_at: null },
+      ],
+      error: null,
+    });
+    mockFrom.mockReturnValueOnce(q).mockReturnValueOnce(redemptions);
     const res = await GET();
-    expect(await res.json()).toEqual([{ id: 'x' }]);
+    expect(await res.json()).toEqual([
+      { id: 'x', earnings: { referrals: 3, owed: 10000, paid: 15000 } },
+      { id: 'y', earnings: { referrals: 0, owed: 0, paid: 0 } },
+    ]);
     expect(q.eq).not.toHaveBeenCalledWith('org_id', expect.anything());
+    // Both roles that read ambassadors also read payments, so bank details are selected.
+    expect(q.select).toHaveBeenCalledWith(expect.stringContaining('bank_account_number'));
   });
 });
 
@@ -157,5 +171,32 @@ describe('PATCH /api/admin/ambassadors/[id]', () => {
     expect(update.update).toHaveBeenCalledWith(expect.objectContaining({ status: 'rejected' }));
     expect(mockSendApproved).not.toHaveBeenCalled();
     expect(mockAudit).toHaveBeenCalledWith(expect.objectContaining({ action: 'ambassador.rejected' }));
+  });
+});
+
+describe('POST /api/admin/ambassadors/[id]/payout', () => {
+  beforeEach(() => jest.clearAllMocks());
+  const payout = () => PAYOUT(new Request('http://localhost/x', { method: 'POST' }), { params: Promise.resolve({ id: 'a1' }) });
+
+  it.each(['tutor_manager', 'tutor', 'viewer'])('returns 403 for %s', async (role) => {
+    asRole(role);
+    expect((await payout()).status).toBe(403);
+  });
+
+  it("hides another org's ambassador from org_admin", async () => {
+    asRole('org_admin', 'org-2');
+    mockFrom.mockReturnValue(chain({ data: null }));
+    expect((await payout()).status).toBe(404);
+  });
+
+  it('marks only unpaid commissions as paid and logs the total', async () => {
+    asRole('org_admin');
+    const update = chain({ data: [{ commission: 5000 }, { commission: 15000 }], error: null });
+    mockFrom.mockReturnValueOnce(chain({ data: { id: 'a1', full_name: 'Tolu Ade', org_id: 'org-1' } })).mockReturnValueOnce(update);
+    const res = await payout();
+    expect(await res.json()).toEqual({ success: true, referrals: 2, amount: 20000 });
+    expect(update.is).toHaveBeenCalledWith('paid_out_at', null);
+    expect(update.update).toHaveBeenCalledWith(expect.objectContaining({ paid_out_by: 'u1' }));
+    expect(mockAudit).toHaveBeenCalledWith(expect.objectContaining({ action: 'ambassador.paid_out', details: { referrals: 2, amount: 20000 } }));
   });
 });

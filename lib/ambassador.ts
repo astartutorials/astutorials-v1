@@ -7,21 +7,33 @@ import { SEMESTER_PLANS } from '@/lib/semester-plan';
  * and they earn a commission on every Full Semester Plan bought with it. Brief
  * from Uche, 2026-11-12. Babcock is the test market.
  *
- * Not built yet: crediting referrals at checkout, an earnings view for admins,
- * and a dashboard for ambassadors themselves. Payouts are manual and monthly.
+ * A student who pays with an ambassador's code gets 10% off; the ambassador
+ * earns a flat commission per plan, whatever the discount. One code per
+ * checkout, and an ambassador can't use their own (Uche, 2026-11-12).
+ * Payouts are manual and monthly. Not built yet: a dashboard for ambassadors.
  */
 export const AMBASSADOR_PROGRAMME_NAME = 'A-Star Ambassadors';
 export const AMBASSADOR_HREF = '/ambassador';
 
-/** 5% of the plan price, rounded to the naira. */
-export const AMBASSADOR_COMMISSION_RATE = 0.05;
-
+/**
+ * Flat commission per referred plan. Uche described it as 5% of the list
+ * price, but confirmed it stays flat when the student pays less.
+ */
 export const AMBASSADOR_COMMISSIONS = {
-  group: Math.round(SEMESTER_PLANS.group.price * AMBASSADOR_COMMISSION_RATE),
-  private: Math.round(SEMESTER_PLANS.private.price * AMBASSADOR_COMMISSION_RATE),
+  group: 5000,
+  private: 15000,
 } as const;
 
+/** What a student saves by paying with an ambassador's referral code. */
+export const REFERRAL_DISCOUNT_RATE = 0.1;
+
+export function referralDiscount(plan: keyof typeof SEMESTER_PLANS): number {
+  return Math.round(SEMESTER_PLANS[plan].price * REFERRAL_DISCOUNT_RATE);
+}
+
 export const AMBASSADOR_LEVELS = ['100L', '200L', '300L', '400L', '500L', '600L'] as const;
+
+export const AMBASSADOR_INSTITUTIONS = ['Babcock University'] as const;
 
 export const AMBASSADOR_HEARD_OPTIONS = [
   "The Freshers' Advantage",
@@ -54,27 +66,44 @@ export const AMBASSADOR_ROLE = [
   `Get students signed up for the Full Semester Plan with your code`,
 ];
 
-/**
- * Benefits. Only what's been agreed so far; Uche is sending the full list
- * (2026-11-12), which replaces or extends this.
- */
+/** Benefits, from Uche's list (2026-11-12). */
 export const AMBASSADOR_BENEFITS = [
   {
-    title: 'Earn on every sign-up',
-    desc: `₦${AMBASSADOR_COMMISSIONS.group.toLocaleString()} for each Group Semester Plan and ₦${AMBASSADOR_COMMISSIONS.private.toLocaleString()} for each Private Semester Plan bought with your code.`,
+    title: 'Commission on every referral',
+    desc: `Up to ₦${AMBASSADOR_COMMISSIONS.private.toLocaleString()} per sign-up: ₦${AMBASSADOR_COMMISSIONS.group.toLocaleString()} for each Group Semester Plan and ₦${AMBASSADOR_COMMISSIONS.private.toLocaleString()} for each Private Semester Plan bought with your code. Paid monthly.`,
   },
   {
-    title: 'Your own referral code',
-    desc: 'A personal code that credits every sign-up to you. Share it in class, on WhatsApp, anywhere.',
+    title: 'Your friends save 10%',
+    desc: 'Anyone who uses your code gets 10% off their Semester Plan, so it’s an easy yes.',
   },
   {
-    title: 'Paid monthly',
-    desc: 'Commissions are added up and paid out at the end of every month.',
+    title: 'Discount on your own semester',
+    desc: 'Ambassadors get a discount on their own Semester Plan subscription.',
+  },
+  {
+    title: 'Sales & marketing training',
+    desc: 'Learn how to pitch, sell and build an audience, skills that last beyond university.',
+  },
+  {
+    title: 'A-Star merch',
+    desc: 'A-Star Tutorials branded merchandise to rep on campus.',
+  },
+  {
+    title: 'Early access',
+    desc: 'Be first to try new A-Star Tutorials products before anyone else.',
+  },
+  {
+    title: 'Ambassadors’ community',
+    desc: 'An exclusive community of ambassadors across departments.',
+  },
+  {
+    title: 'Internship opportunity',
+    desc: 'Top ambassadors can be considered for an internship at A-Star Tutorials.',
   },
 ];
 
 export const AMBASSADOR_STEPS = [
-  { title: 'Apply', desc: 'Fill in the short form on this page. It takes two minutes.' },
+  { title: 'Apply', desc: 'Fill in the form on this page, including where to pay your commission.' },
   { title: 'Get approved', desc: 'Our team reviews your application and emails you your referral code.' },
   { title: 'Share your code', desc: 'Tell coursemates and parents about A-Star and give them your code.' },
   { title: 'Earn', desc: 'Every Semester Plan paid for with your code earns you commission.' },

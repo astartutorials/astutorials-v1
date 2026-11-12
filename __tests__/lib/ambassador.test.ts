@@ -1,4 +1,4 @@
-import { proposeReferralCode, AMBASSADOR_COMMISSIONS } from '@/lib/ambassador';
+import { proposeReferralCode, AMBASSADOR_COMMISSIONS, referralDiscount } from '@/lib/ambassador';
 
 describe('proposeReferralCode', () => {
   it('uses the first name in capitals plus three digits', () => {
@@ -12,8 +12,10 @@ describe('proposeReferralCode', () => {
   });
 });
 
-describe('commission', () => {
-  it("matches Uche's figures: 5% of each plan", () => {
+describe('commission and referral discount', () => {
+  it("matches Uche's figures: a flat 5k / 15k commission, 10% off for the student", () => {
     expect(AMBASSADOR_COMMISSIONS).toEqual({ group: 5000, private: 15000 });
+    expect(referralDiscount('group')).toBe(10000);
+    expect(referralDiscount('private')).toBe(30000);
   });
 });

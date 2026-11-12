@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from "react";
-import { Search, Loader2, Megaphone, Check, X, Copy } from "lucide-react";
+import { Search, Loader2, Megaphone, Check, X, Copy, Banknote } from "lucide-react";
 import { useAdminUser } from "@/lib/admin-context";
 import { can } from "@/lib/rbac";
 import type { AmbassadorStatus } from "@/lib/ambassador";
@@ -14,6 +14,15 @@ type Application = {
   course_of_study: string;
   level: string;
   social_handle: string | null;
+  call_phone: string | null;
+  institution: string | null;
+  matric_number: string | null;
+  instagram_handle: string | null;
+  tiktok_handle: string | null;
+  bank_name?: string | null;
+  bank_account_number?: string | null;
+  bank_account_name?: string | null;
+  earnings?: { referrals: number; owed: number; paid: number };
   motivation: string;
   heard_via: string | null;
   status: AmbassadorStatus;
@@ -36,6 +45,7 @@ function waLink(phone: string) {
 export default function AdminAmbassadorsPage() {
   const { role } = useAdminUser();
   const canManage = !!role && can(role, "ambassadors:manage");
+  const canPayOut = canManage && !!role && can(role, "payments:read");
 
   const [rows, setRows] = useState<Application[] | null>(null);
   const [fetchError, setFetchError] = useState("");
@@ -102,6 +112,32 @@ export default function AdminAmbassadorsPage() {
         (prev ?? []).map((r) =>
           r.id === app.id
             ? { ...r, status: data.status, referral_code: data.referralCode ?? null, reviewed_at: new Date().toISOString() }
+            : r
+        )
+      );
+    } catch {
+      setActionError("Network error. Please try again.");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function markPaid(app: Application) {
+    const owed = app.earnings?.owed ?? 0;
+    if (!confirm(`Mark ₦${owed.toLocaleString()} as paid to ${app.full_name}? Do this after you've sent the transfer.`)) return;
+    setActionError("");
+    setBusyId(app.id);
+    try {
+      const res = await fetch(`/api/admin/ambassadors/${app.id}/payout`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setActionError(data.error ?? "Something went wrong.");
+        return;
+      }
+      setRows((prev) =>
+        (prev ?? []).map((r) =>
+          r.id === app.id && r.earnings
+            ? { ...r, earnings: { ...r.earnings, owed: 0, paid: r.earnings.paid + data.amount } }
             : r
         )
       );
@@ -187,7 +223,11 @@ export default function AdminAmbassadorsPage() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-bold text-[#0B1120] text-sm">{r.full_name}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{r.course_of_study} · {r.level}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {r.course_of_study} · {r.level}
+                    {r.institution && <> · {r.institution}</>}
+                    {r.matric_number && <> · Matric {r.matric_number}</>}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full capitalize ${STATUS_STYLES[r.status]}`}>
@@ -203,7 +243,14 @@ export default function AdminAmbassadorsPage() {
                 <a href={waLink(r.phone)} target="_blank" rel="noopener noreferrer" className="hover:text-[#D93025]">
                   <span className="text-gray-400">WhatsApp:</span> {r.phone}
                 </a>
+                {r.call_phone && (
+                  <a href={`tel:${r.call_phone.replace(/[^\d+]/g, "")}`} className="hover:text-[#D93025]">
+                    <span className="text-gray-400">Calls:</span> {r.call_phone}
+                  </a>
+                )}
                 <a href={`mailto:${r.email}`} className="hover:text-[#D93025]">{r.email}</a>
+                {r.instagram_handle && <span><span className="text-gray-400">IG:</span> {r.instagram_handle}</span>}
+                {r.tiktok_handle && <span><span className="text-gray-400">TikTok:</span> {r.tiktok_handle}</span>}
                 {r.social_handle && <span><span className="text-gray-400">Socials:</span> {r.social_handle}</span>}
                 {r.heard_via && <span><span className="text-gray-400">Heard via:</span> {r.heard_via}</span>}
               </div>
@@ -211,6 +258,29 @@ export default function AdminAmbassadorsPage() {
               <p className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 whitespace-pre-line">
                 <span className="text-gray-400">How they&apos;d spread the word:</span> {r.motivation}
               </p>
+
+              {r.bank_account_number && (
+                <p className="mt-3 text-xs text-gray-600">
+                  <span className="text-gray-400">Pay to:</span> {r.bank_name} · <span className="font-mono">{r.bank_account_number}</span> · {r.bank_account_name}
+                </p>
+              )}
+
+              {r.status === "approved" && r.earnings && (
+                <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl bg-gray-50 px-4 py-3 text-xs">
+                  <span><span className="text-gray-400">Referrals:</span> <strong className="text-[#0B1120]">{r.earnings.referrals}</strong></span>
+                  <span><span className="text-gray-400">Owed:</span> <strong className="text-[#D93025]">₦{r.earnings.owed.toLocaleString()}</strong></span>
+                  <span><span className="text-gray-400">Paid so far:</span> <strong className="text-[#0B1120]">₦{r.earnings.paid.toLocaleString()}</strong></span>
+                  {canPayOut && r.earnings.owed > 0 && (
+                    <button
+                      onClick={() => markPaid(r)}
+                      disabled={busyId === r.id}
+                      className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-[#0B1120] px-3 py-1.5 font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                    >
+                      <Banknote size={14} /> Mark ₦{r.earnings.owed.toLocaleString()} paid
+                    </button>
+                  )}
+                </div>
+              )}
 
               {(r.referral_code || (canManage && r.status !== "approved")) && (
                 <div className="mt-4 flex flex-wrap items-center gap-2">
