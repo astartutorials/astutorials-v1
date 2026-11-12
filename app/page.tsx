@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import HeroSection from "@/components/home/HeroSection";
 import TfaCTA from "@/components/home/TfaCTA";
 import StudentIntakeCTA from "@/components/home/StudentIntakeCTA";
+import AmbassadorCTA from "@/components/home/AmbassadorCTA";
 import BuccClassesCTA from "@/components/home/BuccClassesCTA";
 import PlaybookSeriesCTA from "@/components/home/PlaybookSeriesCTA";
 import BuccCTA from "@/components/home/BuccCTA";
@@ -32,6 +33,8 @@ export default function Home() {
         <TfaCTA />
 
         <StudentIntakeCTA />
+
+        <AmbassadorCTA />
 
         <BuccClassesCTA />
 
