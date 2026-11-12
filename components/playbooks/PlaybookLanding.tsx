@@ -17,7 +17,7 @@ import {
   MoveRight,
   CircleHelp,
 } from "lucide-react";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 import RegisterModal from "./RegisterModal";
 import HeroMotif from "./HeroMotif";
 import { usePlaybookOpen } from "@/components/shared/usePlaybookOpen";

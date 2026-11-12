@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import posthog from 'posthog-js';
+import posthog from '@/lib/analytics';
 
 interface TutorialToggleProps {
   activeType: 'group' | 'private';

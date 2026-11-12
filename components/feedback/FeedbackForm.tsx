@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { Star, Send, ThumbsUp, Loader2 } from "lucide-react";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 export default function FeedbackForm() {

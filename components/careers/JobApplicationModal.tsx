@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, FileText, CheckCircle, AlertCircle, ArrowRight, MapPin, Clock } from "lucide-react";
 import { JobPosition } from "./JobCard";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 
 interface JobApplicationModalProps {
     isOpen: boolean;

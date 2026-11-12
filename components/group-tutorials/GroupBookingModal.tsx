@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { X, Calendar, Clock, MapPin, Users, ArrowRight, Loader2 } from "lucide-react";
 import { validateBookingForm } from "@/lib/validate";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 interface GroupBookingModalProps {

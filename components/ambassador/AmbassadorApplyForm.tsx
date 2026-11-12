@@ -3,7 +3,7 @@
 import { useState, useRef, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2, Lock } from "lucide-react";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { validateBookingForm } from "@/lib/validate";
 import { AMBASSADOR_LEVELS, AMBASSADOR_HEARD_OPTIONS, AMBASSADOR_INSTITUTIONS } from "@/lib/ambassador";

@@ -19,7 +19,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 import { Underline } from "@/components/shared/fun/RedPen";
 import SessionStrip from "./SessionStrip";
 import PlanModal, { type Audience, type PlanModalMode } from "./PlanModal";

@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Loader2, GraduationCap } from "lucide-react";
-import posthog from "posthog-js";
+import posthog from "@/lib/analytics";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { useOpenIntake } from "@/components/shared/useOpenIntake";
 import { MONTHS, daysInMonth, type IntakeLevel } from "@/lib/intakes";
