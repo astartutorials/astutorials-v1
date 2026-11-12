@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PlaybookLanding from "@/components/playbooks/PlaybookLanding";
 import { PLAYBOOKS, getPlaybook } from "@/lib/playbooks";
+import { OG_IMAGE } from "@/lib/og";
 
 /**
  * One route for the whole Playbook series. Adding a fourth webinar is a config
@@ -35,11 +36,13 @@ export async function generateMetadata({
       description: playbook.ogDescription,
       url,
       type: "website",
+      images: [OG_IMAGE],
     },
     twitter: {
       card: "summary_large_image",
       title: `${playbook.name} | A-Star Tutorials`,
       description: playbook.ogDescription,
+      images: [OG_IMAGE.url],
     },
   };
 }

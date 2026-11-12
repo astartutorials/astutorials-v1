@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import StudentRegistrationForm from "@/components/register/StudentRegistrationForm";
 import { INTAKE_LEVELS, intakeSlug, levelFromSlug } from "@/lib/intakes";
+import { OG_IMAGE } from "@/lib/og";
 
 /**
  * One route per entry level, e.g. /register/100-level. The URL stays the same
@@ -28,7 +29,8 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical: `/register/${intakeSlug(level)}` },
-    openGraph: { title: `${title} | A-Star Tutorials`, description, type: "website" },
+    openGraph: { title: `${title} | A-Star Tutorials`, description, type: "website", images: [OG_IMAGE] },
+    twitter: { card: "summary_large_image", images: [OG_IMAGE.url] },
   };
 }
 

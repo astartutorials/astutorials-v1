@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import SemesterPlanLanding from "@/components/semester-plan/SemesterPlanLanding";
+import { OG_IMAGE } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: "Full Semester Plan: For Parents",
@@ -12,7 +13,9 @@ export const metadata: Metadata = {
       "One payment covers your child's whole first semester of tutorials. Group ₦100,000 or one-on-one ₦300,000.",
     url: "https://astartutorials.com/semester-plan/parents",
     type: "website",
+    images: [OG_IMAGE],
   },
+  twitter: { card: "summary_large_image", images: [OG_IMAGE.url] },
 };
 
 export default function SemesterPlanParentsPage() {
