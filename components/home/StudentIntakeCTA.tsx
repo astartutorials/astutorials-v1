@@ -21,7 +21,9 @@ import { intakeHref } from "@/lib/intakes";
 const BEFORE = [{ item: "Settle in", done: true }];
 const AFTER = [
   { item: "Matriculate 🎉", done: false },
-  { item: "Thrive academically", done: false },
+  // Getting a first class / 5.0 CGPA was one of the most asked questions at
+  // The Freshers' Advantage (15 of 134 submitted questions).
+  { item: "Achieve a 5.0", done: false },
 ];
 
 function ToDoItem({ item, done, delay, reduce }: { item: string; done: boolean; delay: number; reduce: boolean }) {
