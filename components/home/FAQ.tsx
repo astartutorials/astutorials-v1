@@ -1,35 +1,19 @@
 "use client"
 import { useState } from "react";
 import { ChevronDown, MessageCircle, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import ScrollReveal from "@/components/shared/ScrollReveal";
+import { HOME_FAQS, type Faq } from "@/lib/faq";
 
-const WHATSAPP_URL =
+export const WHATSAPP_URL =
   "https://api.whatsapp.com/send/?phone=2349160465678&text=Hello, I have a question about A-Star Tutorials.&type=phone_number&app_absent=0";
 
-const faqs = [
-  {
-    question: "How do I register for a tutorial?",
-    answer: "Registration is simple. Click on the 'Book a Tutorial Session' button at the top of the page, select your course code, and choose a tutor that fits your schedule."
-  },
-  {
-    question: "Are the tutors qualified?",
-    answer: "Yes, absolutely. All our tutors are high-performing students who have achieved an 'A' grade in the specific courses they teach and have passed our thorough vetting process."
-  },
-  {
-    question: "Can I get a refund if I'm not satisfied?",
-    answer: "We offer a 'First Session Guarantee'. If you are not satisfied after your first tutorial session, we will either pair you with a different tutor or provide a full refund."
-  },
-  {
-    question: "Do you offer online tutorials?",
-    answer: "Yes, we offer flexible learning options. You can choose between physical meetups or virtual sessions via Zoom/Google Meet depending on your preference."
-  }
-];
 
-function Accordion() {
+export function Accordion({ items }: { items: Faq[] }) {
   const [active, setActive] = useState<number | null>(null);
   return (
     <div className="space-y-4">
-      {faqs.map((faq, index) => (
+      {items.map((faq, index) => (
         <div
           key={index}
           className="bg-surface-raised border border-line-subtle rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md"
@@ -96,7 +80,10 @@ export default function FAQ() {
         </div>
 
         <div className="lg:col-span-7">
-          <Accordion />
+          <Accordion items={HOME_FAQS} />
+          <Link href="/faq" className="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-brand-ink hover:underline">
+            See all questions <ArrowRight size={15} />
+          </Link>
         </div>
       </div>
     </ScrollReveal>
