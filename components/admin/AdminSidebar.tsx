@@ -58,28 +58,28 @@ const NAV_GROUPS: { label: string | null; items: NavMeta[] }[] = [
     items: [{ name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard }],
   },
   {
-    label: "Tutorials",
+    label: "Tutoring",
     items: [
-      { name: "Tutorials", href: "/admin/tutorials", icon: GraduationCap, alsoActive: ["/admin/create-tutorial"] },
-      { name: "Feedback",  href: "/admin/feedback",  icon: MessageSquare },
+      { name: "Tutorials",     href: "/admin/tutorials",     icon: GraduationCap, alsoActive: ["/admin/create-tutorial"] },
+      { name: "Semester Plan", href: "/admin/semester-plan", icon: CalendarRange },
+      { name: "Feedback",      href: "/admin/feedback",      icon: MessageSquare },
     ],
   },
   {
-    label: "Programmes",
+    label: "Events",
     items: [
-      { name: "Semester Plan",       href: "/admin/semester-plan", icon: CalendarRange },
-      { name: "Freshers' Advantage", href: "/admin/tfa",           icon: Ticket        },
-      { name: "BUCC Advantage",      href: "/admin/bucc",          icon: Sparkles      },
-      { name: "Playbook Series",     href: "/admin/playbooks",     icon: BookOpen      },
-      { name: "Student Intake",      href: "/admin/intake",        icon: UserPlus      },
+      { name: "Freshers' Advantage", href: "/admin/tfa",       icon: Ticket   },
+      { name: "BUCC Advantage",      href: "/admin/bucc",      icon: Sparkles },
+      { name: "Playbook Series",     href: "/admin/playbooks", icon: BookOpen },
     ],
   },
   {
     label: "People",
     items: [
-      { name: "Ambassadors",        href: "/admin/ambassadors",  icon: Megaphone },
-      { name: "Tutor Applications", href: "/admin/applications", icon: Users     },
-      { name: "Careers",            href: "/admin/careers",      icon: Briefcase },
+      { name: "Registered Students", href: "/admin/intake",       icon: UserPlus  },
+      { name: "Ambassadors",         href: "/admin/ambassadors",  icon: Megaphone },
+      { name: "Tutor Applications",  href: "/admin/applications", icon: Users     },
+      { name: "Careers",             href: "/admin/careers",      icon: Briefcase },
     ],
   },
   {

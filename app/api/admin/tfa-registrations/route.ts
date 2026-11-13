@@ -18,7 +18,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Same people, same data as Student Intake: freshers and their parents'
+  // Same people, same data as Registered Students: freshers and their parents'
   // contact details, scoped to an org. So it reuses intake:read rather than
   // adding a grant.
   const ctx = await getUserRole(authClient, user.id, user.user_metadata as Record<string, unknown>);
