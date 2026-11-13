@@ -44,7 +44,7 @@ export default function AdminDashboardLayout({
           </header>
 
           {/* Page content */}
-          <main className="flex-1 p-5 md:p-8">{children}</main>
+          <main id="main-content" tabIndex={-1} className="flex-1 p-5 md:p-8 outline-none">{children}</main>
         </div>
       </div>
     </AdminProvider>

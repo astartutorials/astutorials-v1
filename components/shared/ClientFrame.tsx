@@ -11,12 +11,17 @@ export default function ClientFrame({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const isAdmin = pathname?.startsWith("/admin") ?? false;
   const hideChrome = pathname?.startsWith("/tutorials/payment") || pathname?.startsWith("/admin") || pathname?.startsWith("/group-tutorials") || pathname?.startsWith("/preclinicals/success") || pathname?.startsWith("/bucc/success") || pathname?.startsWith("/bucc/advantage/success") || pathname?.startsWith("/tfa/success") || /^\/playbooks\/[^/]+\/success/.test(pathname ?? "");
 
   return (
     <>
+      {/* First thing a keyboard user reaches: jump past the navbar. */}
+      <a href="#main-content" className="skip-link">Skip to content</a>
       {!hideChrome && <Navbar />}
-      <main>{children}</main>
+      {/* The admin layout has its own <main id="main-content">; wrapping it
+          here too would nest two mains with the same id. */}
+      {isAdmin ? children : <main id="main-content" tabIndex={-1} className="outline-none">{children}</main>}
       {!hideChrome && <Footer />}
       {/* The public site only: the admin is for signed-in staff, not visitors. */}
       {!pathname?.startsWith("/admin") && <CookieNotice />}
