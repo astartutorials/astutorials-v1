@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { getMfaStatus, mfaGate } from './mfa';
 
 export type AppRole = 'super_admin' | 'org_admin' | 'tutor_manager' | 'tutor' | 'viewer';
 
@@ -120,7 +121,27 @@ export function can(role: AppRole, action: Permission): boolean {
   return perms.includes('*') || perms.includes(action);
 }
 
+/**
+ * The signed-in user's role and org, or null if they may not use the admin.
+ *
+ * Also enforces two-step sign-in (lib/mfa.ts): a session that still owes its
+ * code, or a required role with no authenticator yet, gets null, so every API
+ * route that checks access here refuses it. Only the middleware and the login
+ * route pass `{ mfa: false }`, because they are what send the user to
+ * /admin/mfa to finish signing in.
+ */
 export async function getUserRole(
+  supabase: SupabaseClient,
+  userId: string,
+  userMetadata?: Record<string, unknown>,
+  opts: { mfa?: boolean } = {}
+): Promise<UserRoleContext | null> {
+  const ctx = await resolveRole(supabase, userId, userMetadata);
+  if (!ctx || opts.mfa === false) return ctx;
+  return mfaGate(ctx.role, await getMfaStatus(supabase)) === 'ok' ? ctx : null;
+}
+
+async function resolveRole(
   supabase: SupabaseClient,
   userId: string,
   userMetadata?: Record<string, unknown>

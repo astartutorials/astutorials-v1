@@ -70,6 +70,7 @@ export const UNGATED_ADMIN_PATHS = [
   '/admin/invite',
   '/admin/forgot-password',
   '/admin/reset-password',
+  '/admin/mfa',
 ];
 
 /** Segment-wise prefix match; `*` in the route matches any one segment. */
