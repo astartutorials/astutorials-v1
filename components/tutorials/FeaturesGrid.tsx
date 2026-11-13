@@ -1,56 +1,52 @@
-"use client";
+import { CalendarClock, GraduationCap, MessagesSquare, Target } from "lucide-react";
+import Words from "@/components/shared/Words";
 
-import { motion } from "framer-motion";
-import { GraduationCap, SlidersHorizontal, Calendar, TrendingUp } from "lucide-react";
-
+/**
+ * Why go private: four cards in the same style as How it works below them
+ * (2026-11-13). Replaced generic cards with four different icon colours and
+ * claims that weren't specific to A-Star ("Faster Progress").
+ */
 const features = [
     {
         icon: GraduationCap,
-        title: "Dedicated Tutor",
-        description: "Work with a tutor selected specifically for your subject needs, ensuring specialized attention.",
-        color: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+        title: "A tutor who did well in your course",
+        description: "We match you with a student who excelled in the same course at Babcock and knows what your lecturer tests.",
     },
     {
-        icon: SlidersHorizontal,
-        title: "Personalized Learning",
-        description: "We adapt to your learning style. Focus heavily on topics you find difficult and breeze through what you know.",
-        color: "bg-brand-soft text-red-600 dark:text-red-400",
+        icon: Target,
+        title: "Your weak spots first",
+        description: "Spend the session on the topics you find hard, not the ones you already know.",
     },
     {
-        icon: Calendar,
-        title: "Flexible Schedule",
-        description: "Book sessions at times that work best for you, including weekends and evenings, to fit your busy life.",
-        color: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
+        icon: CalendarClock,
+        title: "Around your timetable",
+        description: "Sessions are set at times that suit you, including evenings and weekends, and agreed on WhatsApp.",
     },
     {
-        icon: TrendingUp, // Using TrendingUp as a proxy for "Faster Progress"
-        title: "Faster Progress",
-        description: "Cover more ground in less time with direct feedback, immediate corrections, and goal-oriented lessons.",
-        color: "bg-green-500/10 text-green-600 dark:text-green-400",
+        icon: MessagesSquare,
+        title: "Ask anything",
+        description: "One-on-one, so you can stop and ask, get corrected on the spot, and leave knowing what to do next.",
     },
 ];
 
 export default function FeaturesGrid() {
     return (
         <section className="max-w-6xl mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {features.map((feature, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: index * 0.1 }}
-                        className="bg-surface-raised p-8 rounded-2xl border border-line-subtle shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow"
-                    >
-                        <div className={`p-3 rounded-full ${feature.color} shrink-0`}>
-                            <feature.icon size={24} />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-lg text-fg mb-2">{feature.title}</h3>
-                            <p className="text-fg-muted text-sm leading-relaxed">{feature.description}</p>
-                        </div>
-                    </motion.div>
+            <div className="max-w-2xl mb-8 md:mb-10">
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-ink mb-3">Why go private</p>
+                <h2 className="reveal-words text-3xl md:text-4xl font-bold tracking-tight text-fg">
+                    <Words text="Built around one student: you." />
+                </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {features.map(({ icon: Icon, title, description }) => (
+                    <div key={title} className="reveal flex flex-col rounded-3xl border border-line-subtle bg-surface-raised p-6">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-soft text-brand-ink">
+                            <Icon size={20} />
+                        </span>
+                        <h3 className="mt-5 text-lg font-bold leading-snug text-fg">{title}</h3>
+                        <p className="mt-2 text-sm leading-relaxed text-fg-subtle">{description}</p>
+                    </div>
                 ))}
             </div>
         </section>
