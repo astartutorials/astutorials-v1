@@ -129,9 +129,13 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-white/5 px-6 py-5">
-        <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600">
+        <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
           <p>© 2026 A-Star Tutorials. All rights reserved.</p>
-          <p>Built for academic excellence.</p>
+          <nav aria-label="Policies" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/refund-policy" className="hover:text-white transition-colors">Refund Policy</Link>
+          </nav>
         </div>
       </div>
     </footer>
