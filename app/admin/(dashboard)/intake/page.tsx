@@ -126,7 +126,7 @@ export default function AdminIntakePage() {
     <div>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-[#0B1120]">Student Intake</h1>
+          <h1 className="text-2xl font-bold text-[#0B1120]">Registered Students</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             New students who registered with A-Star, by the session they joined in.
           </p>
