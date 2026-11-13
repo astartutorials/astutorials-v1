@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import PlaybookLanding from "@/components/playbooks/PlaybookLanding";
 import { PLAYBOOKS, getPlaybook } from "@/lib/playbooks";
 import { OG_IMAGE } from "@/lib/og";
+import { EventJsonLd, after } from "@/lib/event-jsonld";
 
 /**
  * One route for the whole Playbook series. Adding a fourth webinar is a config
@@ -56,5 +57,22 @@ export default async function PlaybookPage({
   const playbook = getPlaybook(slug);
   if (!playbook) notFound();
 
-  return <PlaybookLanding playbook={playbook} />;
+  return (
+    <>
+      <EventJsonLd
+        event={{
+          name: `${playbook.name}: ${playbook.tagline}`,
+          description: playbook.metaDescription,
+          path: `/playbooks/${playbook.slug}`,
+          // closesAt is the webinar's start; each runs 90 minutes.
+          start: playbook.closesAt,
+          end: after(playbook.closesAt, 90),
+          images: [OG_IMAGE.url],
+          online: true,
+          platform: playbook.platform,
+        }}
+      />
+      <PlaybookLanding playbook={playbook} />
+    </>
+  );
 }

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import BuccLanding from "@/components/bucc/BuccLanding";
+import { BUCC_EVENT_NAME, BUCC_TAGLINE, BUCC_CLOSES_AT, BUCC_PLATFORM } from "@/lib/bucc";
+import { EventJsonLd, after } from "@/lib/event-jsonld";
 
 export const metadata: Metadata = {
   title: "The BUCC Advantage — Your Blueprint for Thriving in 200 Level",
@@ -31,5 +33,22 @@ export const metadata: Metadata = {
 };
 
 export default function BuccPage() {
-  return <BuccLanding />;
+  return (
+    <>
+      <EventJsonLd
+        event={{
+          name: `${BUCC_EVENT_NAME}: ${BUCC_TAGLINE}`,
+          description: String(metadata.description),
+          path: "/bucc/advantage",
+          // Registration closes as the webinar starts; it runs 90 minutes.
+          start: BUCC_CLOSES_AT,
+          end: after(BUCC_CLOSES_AT, 90),
+          images: ["/bucc/og.jpg"],
+          online: true,
+          platform: BUCC_PLATFORM,
+        }}
+      />
+      <BuccLanding />
+    </>
+  );
 }
