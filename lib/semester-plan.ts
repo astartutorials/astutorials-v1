@@ -42,12 +42,15 @@ export const SEMESTER_PLANS: Record<SemesterPlanId, SemesterPlan> = {
     instalment: 55000,
     sessions: 50,
     blurb: "Small-group classes with coursemates, all semester long.",
+    // Benefits from Uche, 2026-11-13.
     features: [
       "50 group tutorial sessions",
-      "Taught by distinction-level tutors",
-      "Focused on your 100L courses",
-      "Exam and test revision built in",
-      "Study community with your coursemates",
+      "5 core courses",
+      "Mock exam sessions",
+      "Question banks",
+      "Quizzes",
+      "Private community",
+      "Monthly mentorship sessions",
     ],
   },
   private: {
@@ -57,12 +60,17 @@ export const SEMESTER_PLANS: Record<SemesterPlanId, SemesterPlan> = {
     instalment: 165000,
     sessions: 50,
     blurb: "One-on-one sessions built around one student.",
+    // Benefits from Uche, 2026-11-13.
     features: [
-      "50 one-on-one sessions",
-      "A dedicated tutor matched to the student",
-      "Scheduled around the student’s timetable",
-      "Paced to the student’s strengths and gaps",
-      "Exam and test revision built in",
+      "50 private tutorial sessions (one-on-one)",
+      "5 core courses",
+      "Mock exam sessions",
+      "Question banks",
+      "Quizzes",
+      "Private community",
+      "Monthly mentorship sessions",
+      "Flexible scheduling: you choose the time and venue",
+      "Flexible learning: physical or virtual sessions",
     ],
   },
 };

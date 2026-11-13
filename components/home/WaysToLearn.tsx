@@ -60,12 +60,12 @@ export default function WaysToLearn() {
               <div className="rounded-2xl bg-white/10 p-4">
                 <p className="text-xs text-white/70">Group</p>
                 <p className="mt-1 text-2xl font-bold">₦{g.price.toLocaleString()}</p>
-                <p className="text-xs text-white/70">or ₦{g.instalment.toLocaleString()} × 2</p>
+                <p className="text-xs text-white/70">or 2 instalments of ₦{g.instalment.toLocaleString()}</p>
               </div>
               <div className="rounded-2xl bg-white/10 p-4">
                 <p className="text-xs text-white/70">Private</p>
                 <p className="mt-1 text-2xl font-bold">₦{p.price.toLocaleString()}</p>
-                <p className="text-xs text-white/70">or ₦{p.instalment.toLocaleString()} × 2</p>
+                <p className="text-xs text-white/70">or 2 instalments of ₦{p.instalment.toLocaleString()}</p>
               </div>
             </div>
 

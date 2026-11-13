@@ -296,7 +296,7 @@ export async function sendSemesterPlanReceipt(opts: {
 
       <table style="width:100%;border-collapse:collapse;margin:24px 0;font-size:14px">
         <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888;width:40%">Plan</td>
-            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${planName}${first || second ? " (paying in 2)" : ""}</td></tr>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${planName}${first || second ? " (paying in 2 instalments)" : ""}</td></tr>
         <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Semester</td>
             <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${SEMESTER_PLAN_TERM}</td></tr>
         <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Amount paid</td>

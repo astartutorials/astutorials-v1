@@ -256,7 +256,7 @@ describe('paying in 2', () => {
       const body = paystackBody();
       expect(body.amount).toBe(amount * 100);
       expect(body.metadata).toMatchObject({ payment_option: 'split', instalment: 1 });
-      expect(body.metadata.notes).toBe('Plan: X | Paying in 2: instalment 1 of 2');
+      expect(body.metadata.notes).toBe('Plan: X | Paying in 2 instalments: 1 of 2');
     }
   });
 

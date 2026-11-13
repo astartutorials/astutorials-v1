@@ -38,11 +38,11 @@ import {
 
 const dayMonth = (iso: string) => formatDueDate(iso).replace(/^\w+ /, "");
 
-/** Facts about paying in 2, shared by both FAQ lists. */
+/** Facts about paying in 2 instalments, shared by both FAQ lists. */
 const PAY_IN_2_ANSWER =
   `Yes. Pay ₦${SEMESTER_PLANS.group.instalment.toLocaleString()} now and ₦${SEMESTER_PLANS.group.instalment.toLocaleString()} by ${dayMonth(SPLIT_DUE_DATE)} ` +
   `(₦${SEMESTER_PLANS.private.instalment.toLocaleString()} twice for private). If you join after 30 November, you get two weeks for the second payment. ` +
-  `Paying in 2 costs 10% more than paying in full, discount codes don't apply, and it's open until ${dayMonth(SPLIT_LAST_DAY)}.`;
+  `Paying in 2 instalments costs 10% more than paying in full, discount codes don't apply, and it's open until ${dayMonth(SPLIT_LAST_DAY)}.`;
 import Words from "@/components/shared/Words";
 
 /**
@@ -150,12 +150,12 @@ const FAQS: Record<Audience, { q: string; a: string }[]> = {
       a: "Tap “Send to my parents”. It opens WhatsApp with a short message and a page written for them, where they can pay directly or ask for a call.",
     },
     {
-      q: "Can I pay in two parts?",
+      q: "Can I pay in 2 instalments?",
       a: PAY_IN_2_ANSWER,
     },
     {
       q: "Which courses are covered?",
-      a: "Your 100L first-semester courses. We confirm your exact courses with you on WhatsApp once you sign up.",
+      a: "Five core 100L first-semester courses. We confirm your exact courses with you on WhatsApp once you sign up.",
     },
   ],
   parent: [
@@ -172,7 +172,7 @@ const FAQS: Record<Audience, { q: string; a: string }[]> = {
       a: "Yes. Choose a plan, select “Parent / guardian”, and pay securely on Paystack. The receipt comes to your email.",
     },
     {
-      q: "Can I pay in two parts?",
+      q: "Can I pay in 2 instalments?",
       a: PAY_IN_2_ANSWER,
     },
     {
@@ -340,6 +340,9 @@ export default function SemesterPlanLanding({ audience }: { audience: Audience }
                   </span>
                   <span className={featured ? "text-on-dark-muted" : "text-fg-faint"}>/ semester</span>
                 </div>
+                <p className={`mt-1 text-sm ${featured ? "text-on-dark-muted" : "text-fg-subtle"}`}>
+                  or 2 instalments of ₦{p.instalment.toLocaleString()}
+                </p>
                 <p className={`mt-1 text-sm font-semibold ${featured ? "text-red-300" : "text-brand-ink"}`}>
                   {p.sessions} sessions · about ₦{perSessionPrice(p).toLocaleString()} each
                 </p>

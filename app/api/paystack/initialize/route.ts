@@ -53,14 +53,14 @@ export async function POST(req: NextRequest) {
 
     if (split && !isSplitOpen()) {
       return NextResponse.json(
-        { error: "Paying in 2 has closed for this semester. Please pay in full." },
+        { error: "Paying in 2 instalments has closed for this semester. Please pay in full." },
         { status: 400 }
       );
     }
     if (split) {
       rest.payment_option = "split";
       rest.instalment = 1;
-      rest.notes = rest.notes ? `${rest.notes} | Paying in 2: instalment 1 of 2` : "Paying in 2: instalment 1 of 2";
+      rest.notes = rest.notes ? `${rest.notes} | Paying in 2 instalments: 1 of 2` : "Paying in 2 instalments: 1 of 2";
     }
     paystackMeta = rest;
     let expected = split ? SEMESTER_PLANS[plan].instalment : SEMESTER_PLANS[plan].price;
