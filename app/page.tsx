@@ -12,6 +12,7 @@ import Testimonials from "@/components/home/Testimonials";
 import BecomeTutor from "@/components/home/BecomeTutor";
 import FAQ from "@/components/home/FAQ";
 import ClosingCTA from "@/components/home/ClosingCTA";
+import { SUPPORT_EMAIL } from "@/lib/faq";
 
 export const metadata: Metadata = {
   title: "A-Star Tutorials | Academic Excellence for Tertiary Students",
@@ -22,9 +23,33 @@ export const metadata: Metadata = {
   },
 };
 
+/** Tells search engines who A-Star is: name, logo, contact and social profiles. */
+const organisationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  name: "A-Star Tutorials",
+  url: "https://astartutorials.com",
+  logo: "https://astartutorials.com/brand/icon-512.png",
+  email: SUPPORT_EMAIL,
+  telephone: "+2349160465678",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Babcock University",
+    addressLocality: "Ilishan-Remo",
+    addressRegion: "Ogun State",
+    addressCountry: "NG",
+  },
+  sameAs: [
+    "https://instagram.com/astartutorialshq",
+    "https://tiktok.com/@astartutorialshq",
+    "https://linkedin.com/company/astartutorials",
+  ],
+};
+
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-[var(--astar-bg)] font-sans selection:bg-[var(--astar-red)] selection:text-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organisationJsonLd) }} />
 
       <section className="flex-grow flex flex-col items-center pt-24 md:pt-32 overflow-x-clip">
 
