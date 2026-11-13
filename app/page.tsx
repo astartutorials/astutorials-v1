@@ -7,11 +7,11 @@ import BuccClassesCTA from "@/components/home/BuccClassesCTA";
 import PlaybookSeriesCTA from "@/components/home/PlaybookSeriesCTA";
 import BuccCTA from "@/components/home/BuccCTA";
 import PreClinicalsCTA from "@/components/home/PreClinicalsCTA";
-import WhoWeAre from "@/components/home/WhoWeAre";
-import Services from "@/components/home/Services";
+import WaysToLearn from "@/components/home/WaysToLearn";
 import Testimonials from "@/components/home/Testimonials";
 import BecomeTutor from "@/components/home/BecomeTutor";
 import FAQ from "@/components/home/FAQ";
+import ClosingCTA from "@/components/home/ClosingCTA";
 
 export const metadata: Metadata = {
   title: "A-Star Tutorials | Academic Excellence for Tertiary Students",
@@ -44,15 +44,15 @@ export default function Home() {
 
         <PreClinicalsCTA />
 
-        <WhoWeAre />
-
-        <Services />
+        <WaysToLearn />
 
         <Testimonials />
 
         <BecomeTutor />
 
         <FAQ />
+
+        <ClosingCTA />
 
       </section>
     </div>
