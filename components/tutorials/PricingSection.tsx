@@ -21,17 +21,16 @@ export default function PricingSection({ orgId }: PricingSectionProps) {
                 transition={{ duration: 0.5 }}
             >
                 <h2 className="text-3xl md:text-4xl font-bold text-fg mb-6">
-                    Tailored One-on-One Excellence
+                    A private tutor for your course
                 </h2>
 
                 <p className="text-fg-muted mb-8 leading-relaxed text-lg">
-                    Accelerate your academic journey with a dedicated tutor. Focus on
-                    specific problem areas or advance at your own speed with a
-                    curriculum designed just for you.
+                    One-on-one sessions with a Babcock student who did well in the
+                    course you&apos;re taking. You pick the topics and the pace.
                 </p>
 
                 <div className="flex items-baseline justify-center gap-2 mb-8">
-                    <span className="text-4xl md:text-5xl font-bold text-[#335C98]">₦6,090</span>
+                    <span className="text-4xl md:text-5xl font-bold text-fg">₦6,090</span>
                     <span className="text-fg-subtle text-lg">/ session</span>
                 </div>
 
