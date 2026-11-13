@@ -6,6 +6,7 @@ import { getPostHogClient } from "@/lib/posthog-server";
 import { recordHeartbeat } from "@/lib/health";
 import { programmeOrgId } from "@/lib/programme-org";
 import { recordDiscountRedemption } from "@/lib/discount-codes";
+import { recordSplitPayment } from "@/lib/semester-plan-balances";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,8 +21,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  type PaystackMetadata = { plan?: string; discount_code?: string; discount_amount?: number; code_kind?: string; ambassador_id?: string; full_name?: string; org_id?: string; type?: string; tutorial_id?: string; phone?: string; course?: string; notes?: string };
-  type PaystackTxData = { metadata?: PaystackMetadata; reference?: string; customer?: { email?: string; first_name?: string }; amount?: number };
+  type PaystackMetadata = { payment_option?: string; instalment?: number | string; balance_id?: string; plan?: string; discount_code?: string; discount_amount?: number; code_kind?: string; ambassador_id?: string; full_name?: string; org_id?: string; type?: string; tutorial_id?: string; phone?: string; course?: string; notes?: string };
+  type PaystackTxData = { metadata?: PaystackMetadata; reference?: string; paid_at?: string; customer?: { email?: string; first_name?: string }; amount?: number };
   let event: { event: string; data: PaystackTxData };
   try {
     event = JSON.parse(rawBody);
@@ -102,6 +103,14 @@ export async function POST(req: NextRequest) {
   }
 
   await recordDiscountRedemption(supabase, reference, meta, amountPaid);
+  await recordSplitPayment(supabase, {
+    reference,
+    meta,
+    email,
+    fullName,
+    phone: meta.phone ?? null,
+    paidAt: tx.paid_at ?? null,
+  });
 
   const posthog = getPostHogClient();
   posthog.capture({

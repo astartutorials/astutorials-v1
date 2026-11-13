@@ -3,9 +3,16 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2, CheckCircle2, ArrowRight } from "lucide-react";
-import { SEMESTER_PLAN_NAME, SEMESTER_PLAN_TERM } from "@/lib/semester-plan";
+import {
+  SEMESTER_PLAN_NAME,
+  SEMESTER_PLAN_TERM,
+  balancePaymentHref,
+  formatDueDate,
+} from "@/lib/semester-plan";
 
 const WHATSAPP_PHONE = "2349160465678";
+
+type Balance = { amountDue: number; dueDate: string; paid: boolean };
 
 type Booking = {
   full_name: string;
@@ -15,9 +22,11 @@ type Booking = {
   notes: string | null;
 };
 
-function buildWhatsAppUrl(b: Booking, ref: string) {
+function buildWhatsAppUrl(b: Booking, ref: string, split: boolean) {
   const lines = [
-    `Hello! We just paid for the ${SEMESTER_PLAN_NAME} (${SEMESTER_PLAN_TERM}).`,
+    split
+      ? `Hello! We just made the first payment for the ${SEMESTER_PLAN_NAME} (${SEMESTER_PLAN_TERM}), paying in 2.`
+      : `Hello! We just paid for the ${SEMESTER_PLAN_NAME} (${SEMESTER_PLAN_TERM}).`,
     "",
     `Student: ${b.full_name}`,
     b.phone ? `Phone: ${b.phone}` : "",
@@ -34,9 +43,20 @@ function buildWhatsAppUrl(b: Booking, ref: string) {
 function SuccessContent() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref") ?? "";
+  const balanceId = searchParams.get("balance");
+  const secondPayment = searchParams.get("instalment") === "2";
 
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loadError, setLoadError] = useState(!ref);
+  const [balance, setBalance] = useState<Balance | null>(null);
+
+  useEffect(() => {
+    if (!balanceId) return;
+    fetch(`/api/semester-plan/balances/${balanceId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setBalance(d))
+      .catch(() => {});
+  }, [balanceId]);
 
   useEffect(() => {
     if (!ref) return;
@@ -73,7 +93,8 @@ function SuccessContent() {
     );
   }
 
-  const whatsappUrl = buildWhatsAppUrl(booking, ref);
+  const whatsappUrl = buildWhatsAppUrl(booking, ref, Boolean(balanceId));
+  const firstName = booking.full_name.split(" ")[0];
 
   return (
     <div className="min-h-screen bg-[var(--astar-bg)] flex items-center justify-center px-4 py-16">
@@ -86,7 +107,11 @@ function SuccessContent() {
             </span>
           </div>
           <h1 className="text-white text-2xl font-bold">
-            {booking.full_name.split(" ")[0]}&apos;s semester is sorted! 🎉
+            {secondPayment
+              ? `${firstName}'s semester is paid in full! 🎉`
+              : balanceId
+              ? `${firstName}'s semester has started! 🎉`
+              : `${firstName}'s semester is sorted! 🎉`}
           </h1>
           <p className="text-red-100 text-sm mt-1">
             {booking.course ?? SEMESTER_PLAN_NAME}
@@ -94,6 +119,24 @@ function SuccessContent() {
         </div>
 
         <div className="px-8 py-7 space-y-5">
+          {balance && !balance.paid && balanceId && (
+            <div className="rounded-xl border border-line-subtle bg-surface-sunken px-4 py-3 text-sm text-fg-muted leading-relaxed">
+              Second payment: <span className="font-semibold text-fg">₦{balance.amountDue.toLocaleString()}</span> by{" "}
+              <span className="font-semibold text-fg">{formatDueDate(balance.dueDate)}</span>. We&apos;ve emailed you
+              the link, and we&apos;ll remind you a week before.{" "}
+              <a href={balancePaymentHref(balanceId)} className="font-semibold text-brand-ink underline">
+                Pay it now
+              </a>
+            </div>
+          )}
+
+          {secondPayment ? (
+            <p className="text-fg-muted text-sm leading-relaxed">
+              Both payments are in. Thank you! There&apos;s nothing more to pay this semester. A receipt has
+              been sent to <span className="font-semibold text-fg">{booking.email}</span>.
+            </p>
+          ) : (
+          <>
           <p className="text-fg-muted text-sm leading-relaxed">
             One last step: tap below to message us on WhatsApp so we can confirm the courses, match
             a tutor and share the timetable. A receipt has also been sent to{" "}
@@ -106,6 +149,8 @@ function SuccessContent() {
           >
             Continue on WhatsApp <ArrowRight size={18} />
           </a>
+          </>
+          )}
 
           <p className="text-center text-[11px] text-fg-faint">
             Reference: <span className="font-mono">{ref}</span>

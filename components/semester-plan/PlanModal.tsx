@@ -9,6 +9,11 @@ import {
   SEMESTER_PLAN_IDS,
   SEMESTER_PLAN_TERM,
   semesterPlanCourseLabel,
+  isSplitOpen,
+  secondPaymentDueDate,
+  formatDueDate,
+  splitTotal,
+  type PaymentOption,
   type SemesterPlanId,
 } from "@/lib/semester-plan";
 
@@ -58,8 +63,8 @@ function Field({
 }
 
 /**
- * One form, two exits: pay the full plan now on Paystack, or leave details and
- * have the team call. Either the student or a parent may fill it in, and the
+ * One form, two exits: pay now on Paystack (in full, or in 2 while that is
+ * open), or leave details and have the team call. Either the student or a parent may fill it in, and the
  * labels follow whoever is filling it.
  */
 export default function PlanModal({
@@ -94,7 +99,14 @@ export default function PlanModal({
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
   const [codeInput, setCodeInput] = useState("");
-  const [discount, setDiscount] = useState<{ code: string; amountOff: number; plan: SemesterPlanId } | null>(null);
+  const [discount, setDiscount] = useState<{
+    code: string;
+    amountOff: number;
+    plan: SemesterPlanId;
+    option: PaymentOption;
+  } | null>(null);
+  const splitOpen = isSplitOpen();
+  const [paymentOption, setPaymentOption] = useState<PaymentOption>("full");
   const [codeError, setCodeError] = useState("");
   const [checkingCode, setCheckingCode] = useState(false);
 
@@ -103,9 +115,13 @@ export default function PlanModal({
   // "Undecided" only makes sense when we are about to call; paying needs a plan.
   const payPlan: SemesterPlanId = plan === "undecided" ? "group" : plan;
   const selected = SEMESTER_PLANS[payPlan];
-  // A code is checked against one plan; switching plan means checking it again.
-  const activeDiscount = discount && discount.plan === payPlan ? discount : null;
-  const payAmount = selected.price - (activeDiscount?.amountOff ?? 0);
+  const option: PaymentOption = splitOpen ? paymentOption : "full";
+  const split = option === "split";
+  const dueDate = secondPaymentDueDate();
+  // A code is checked against one plan and payment option; switching either
+  // means checking it again.
+  const activeDiscount = discount && discount.plan === payPlan && discount.option === option ? discount : null;
+  const payAmount = split ? selected.instalment : selected.price - (activeDiscount?.amountOff ?? 0);
   const isParent = submittedBy === "parent";
   // The receipt goes to whoever pays.
   const receiptEmail = isParent ? form.parentEmail : form.studentEmail;
@@ -143,7 +159,7 @@ export default function PlanModal({
       const res = await fetch("/api/discount-codes/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, plan: payPlan, email: receiptEmail }),
+        body: JSON.stringify({ code, plan: payPlan, email: receiptEmail, paymentOption: option }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -151,8 +167,8 @@ export default function PlanModal({
         setCodeError(data.error ?? "That code isn’t valid.");
         return;
       }
-      setDiscount({ code: data.code, amountOff: data.amountOff, plan: payPlan });
-      posthog.capture("semester_plan_discount_applied", { code: data.code, plan: payPlan });
+      setDiscount({ code: data.code, amountOff: data.amountOff, plan: payPlan, option });
+      posthog.capture("semester_plan_discount_applied", { code: data.code, plan: payPlan, payment_option: option });
     } catch {
       setCodeError("Couldn’t check that code. Please try again.");
     } finally {
@@ -193,6 +209,7 @@ export default function PlanModal({
           phone: form.studentPhone,
           course: semesterPlanCourseLabel(payPlan),
           notes,
+          ...(split ? { payment_option: "split" } : {}),
           ...(activeDiscount ? { discount_code: activeDiscount.code } : {}),
         },
       }),
@@ -209,6 +226,7 @@ export default function PlanModal({
       plan: payPlan,
       paid_by: submittedBy,
       price: payAmount,
+      payment_option: option,
       discount_code: activeDiscount?.code ?? null,
     });
     window.location.href = data.authorization_url;
@@ -360,6 +378,49 @@ export default function PlanModal({
               )}
             </div>
 
+            {/* Pay in full / Pay in 2 */}
+            {mode === "pay" && splitOpen && (
+              <div>
+                <p className="text-sm font-semibold text-fg-muted mb-1.5">How would you like to pay?</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentOption("full")}
+                    aria-pressed={!split}
+                    className={`text-left rounded-xl border px-4 py-3 transition-all ${
+                      !split ? "border-[var(--astar-red)] bg-brand-soft" : "border-line-subtle hover:border-line"
+                    }`}
+                  >
+                    <span className="block text-sm font-semibold text-fg">Pay in full</span>
+                    <span className="block text-base font-extrabold text-brand-ink">₦{selected.price.toLocaleString()}</span>
+                    <span className="block text-xs text-fg-faint">Best price. Discount codes apply.</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentOption("split")}
+                    aria-pressed={split}
+                    className={`text-left rounded-xl border px-4 py-3 transition-all ${
+                      split ? "border-[var(--astar-red)] bg-brand-soft" : "border-line-subtle hover:border-line"
+                    }`}
+                  >
+                    <span className="block text-sm font-semibold text-fg">Pay in 2</span>
+                    <span className="block text-base font-extrabold text-brand-ink">
+                      ₦{selected.instalment.toLocaleString()} <span className="text-xs font-semibold text-fg-subtle">today</span>
+                    </span>
+                    <span className="block text-xs text-fg-faint">
+                      Then ₦{selected.instalment.toLocaleString()} by {formatDueDate(dueDate)}
+                    </span>
+                  </button>
+                </div>
+                {split && (
+                  <p className="mt-2 text-xs text-fg-subtle leading-relaxed">
+                    ₦{splitTotal(payPlan).toLocaleString()} in total, which is ₦{(splitTotal(payPlan) - selected.price).toLocaleString()} more than paying in full.
+                    Discount codes don&apos;t apply. We&apos;ll email you a link for the second payment and a reminder a week before it&apos;s due.
+                  </p>
+                )}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Who's filling it in */}
               <div>
@@ -499,13 +560,16 @@ export default function PlanModal({
               {mode === "pay" && (
                 <div>
                   <label htmlFor="discount-code" className="text-sm font-semibold text-fg-muted block mb-1.5">
-                    Discount or referral code <span className="text-fg-faint font-normal">(optional, one per order)</span>
+                    {split ? "Referral code" : "Discount or referral code"}{" "}
+                    <span className="text-fg-faint font-normal">(optional, one per order)</span>
                   </label>
                   {activeDiscount ? (
                     <div className="flex items-center justify-between rounded-xl border border-green-600/40 bg-green-50 dark:bg-green-950/30 px-4 py-3">
                       <span className="inline-flex items-center gap-2 text-sm font-semibold text-green-700 dark:text-green-400">
                         <Tag size={16} />
-                        {activeDiscount.code}: ₦{activeDiscount.amountOff.toLocaleString()} off
+                        {activeDiscount.amountOff > 0
+                          ? `${activeDiscount.code}: ₦${activeDiscount.amountOff.toLocaleString()} off`
+                          : `${activeDiscount.code} applied`}
                       </span>
                       <button
                         type="button"
@@ -547,7 +611,7 @@ export default function PlanModal({
                   )}
                   {discount && !activeDiscount && (
                     <p className="mt-1 text-xs text-fg-subtle">
-                      Plan changed.{" "}
+                      {discount.plan !== payPlan ? "Plan changed." : "Payment option changed."}{" "}
                       <button type="button" onClick={() => { setCodeInput(discount.code); setDiscount(null); }} className="underline font-semibold">
                         Re-apply {discount.code}
                       </button>
@@ -580,10 +644,10 @@ export default function PlanModal({
                 ) : mode === "pay" ? (
                   <>
                     Pay{" "}
-                    {activeDiscount && (
+                    {activeDiscount && activeDiscount.amountOff > 0 && (
                       <s className="font-semibold opacity-70">₦{selected.price.toLocaleString()}</s>
                     )}{" "}
-                    ₦{payAmount.toLocaleString()} <ArrowRight size={18} />
+                    ₦{payAmount.toLocaleString()}{split && " now"} <ArrowRight size={18} />
                   </>
                 ) : (
                   <>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Search, Loader2, Download, PhoneCall } from "lucide-react";
 import { SEMESTER_PLANS, isSemesterPlanId } from "@/lib/semester-plan";
+import SemesterPlanTabs from "@/components/admin/SemesterPlanTabs";
 
 type Enquiry = {
   id: string;
@@ -61,7 +62,7 @@ function downloadCsv(rows: Enquiry[]) {
 
 /**
  * Full Semester Plan enquiries: students or parents who left details instead of
- * paying. Paid plans are bookings and show under Payments.
+ * paying. Paid plans are under the Payments tab.
  */
 export default function AdminSemesterPlanPage() {
   const [rows, setRows] = useState<Enquiry[] | null>(null);
@@ -115,11 +116,12 @@ export default function AdminSemesterPlanPage() {
 
   return (
     <div>
+      <SemesterPlanTabs />
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-[#0B1120]">Semester Plan Enquiries</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Students and parents who asked to be contacted about the Full Semester Plan. Paid plans are under Payments.
+            Students and parents who asked to be contacted about the Full Semester Plan. Paid plans are under the Payments tab.
           </p>
         </div>
         <button
