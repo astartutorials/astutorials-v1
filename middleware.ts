@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { getUserRole } from '@/lib/rbac';
 import { canAccessAdminPath, UNGATED_ADMIN_PATHS } from '@/lib/admin-routes';
+import { getMfaStatus, mfaGate } from '@/lib/mfa';
 
 const VALID_ROLES = ['super_admin', 'org_admin', 'tutor_manager', 'tutor', 'viewer'];
 
@@ -53,7 +54,8 @@ export async function middleware(request: NextRequest) {
     const ctx = await getUserRole(
       supabase,
       user.id,
-      user.user_metadata as Record<string, unknown>
+      user.user_metadata as Record<string, unknown>,
+      { mfa: false }
     );
 
     if (!ctx || !VALID_ROLES.includes(ctx.role)) {
@@ -61,6 +63,22 @@ export async function middleware(request: NextRequest) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = '/admin/login';
       return NextResponse.redirect(loginUrl);
+    }
+
+    // Two-step sign-in. Until it's done, /admin/mfa (and the password reset
+    // pages) are the only admin pages this session may open.
+    const isMfaPage = pathname === '/admin/mfa';
+    const gate = mfaGate(ctx.role, await getMfaStatus(supabase));
+    if (gate !== 'ok' && !isMfaPage && !isPasswordResetPage) {
+      const mfaUrl = request.nextUrl.clone();
+      mfaUrl.pathname = '/admin/mfa';
+      mfaUrl.search = '';
+      return NextResponse.redirect(mfaUrl);
+    }
+    if (gate === 'ok' && isMfaPage) {
+      const dashboardUrl = request.nextUrl.clone();
+      dashboardUrl.pathname = '/admin/dashboard';
+      return NextResponse.redirect(dashboardUrl);
     }
 
     // Default-deny: every dashboard page must name the roles that may open it in
