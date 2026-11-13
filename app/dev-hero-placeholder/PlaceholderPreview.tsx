@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { RotateCcw } from "lucide-react";
+import TutorMatch from "@/components/tutorials/TutorMatch";
 
-type Option = "brand" | "week" | "current";
+type Option = "brand" | "week" | "matched" | "codes" | "quote" | "duotone" | "gradient" | "current";
 
 /** Option 1: warm brand panel with soft shapes and the A-Star mark. Pure CSS + one small SVG. */
 function BrandPanel() {
@@ -60,6 +61,106 @@ function WeekCard() {
   );
 }
 
+function WarmShapes() {
+  return (
+    <>
+      <div aria-hidden className="absolute inset-0 bg-[#F9DCD6] dark:bg-[#3A0B10]" />
+      <div aria-hidden className="absolute -top-24 -right-20 h-80 w-80 rounded-full bg-[var(--astar-red)]/85" />
+      <div aria-hidden className="absolute -bottom-28 -left-16 h-96 w-96 rounded-full bg-[#F2B8AE] dark:bg-[#5A1A20]" />
+    </>
+  );
+}
+
+/** Option 3: the MATCHED tutor card from the private tutorials page. */
+function Matched() {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      <WarmShapes />
+      <div className="absolute inset-0 flex items-center justify-center pb-8">
+        <TutorMatch />
+      </div>
+    </div>
+  );
+}
+
+const CODES = ["GEDS 126", "PHY 102", "IFT 212", "CHM 108", null, "BIO 108", "GST 111", "COS 201", "CHM 101"];
+
+/** Option 4: a wall of real Babcock course codes on navy, the mark in the middle. */
+function CourseCodes() {
+  return (
+    <div className="absolute inset-0 bg-[var(--astar-navy)] p-8 flex items-center justify-center">
+      <div className="grid w-full max-w-sm grid-cols-3 gap-3">
+        {CODES.map((c, i) =>
+          c ? (
+            <div key={c} className={`flex aspect-square items-center justify-center rounded-2xl border text-center font-mono text-sm font-bold ${i === 1 ? "border-[var(--astar-red)] bg-[var(--astar-red)] text-white" : "border-white/10 bg-white/[0.04] text-white/70"}`}>
+              {c}
+            </div>
+          ) : (
+            <div key="mark" className="flex aspect-square items-center justify-center rounded-2xl bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/astar-mark.svg" alt="" className="h-10 w-auto" />
+            </div>
+          )
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Option 5: one real testimonial, with its result badge. */
+function Quote() {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      <WarmShapes />
+      <div className="absolute inset-0 flex items-center justify-center p-8">
+        <figure className="w-full max-w-[20rem] rounded-3xl bg-surface-raised p-6 shadow-2xl shadow-black/15 border border-line-subtle">
+          <span aria-hidden className="block text-4xl leading-none font-bold text-[var(--astar-red)]">&ldquo;</span>
+          <blockquote className="mt-1 text-[15px] leading-relaxed text-fg">
+            PHY 102 pulled my CGPA down in 100L. I retook it with a tutor from week one. Not week twelve. Finished with an A.
+          </blockquote>
+          <figcaption className="mt-5 flex items-center justify-between gap-3 border-t border-line-subtle pt-4">
+            <span>
+              <span className="block text-sm font-bold text-fg">Itoro Edidiong</span>
+              <span className="block text-[11px] text-fg-subtle">300L Computer Science</span>
+            </span>
+            <span className="rounded-lg border-2 border-[var(--astar-red)] px-2 py-0.5 text-[11px] font-bold text-brand-ink">F to A</span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  );
+}
+
+/** Option 6: the class photo in a brand-red duotone, so it reads as artwork, not a paused frame. */
+function Duotone() {
+  return (
+    <div className="absolute inset-0 bg-[var(--astar-navy)]">
+      <Image src="/become-tutor.jpg" alt="" fill sizes="512px" className="object-cover grayscale contrast-125 opacity-60" />
+      <div aria-hidden className="absolute inset-0 bg-[var(--astar-red)] mix-blend-multiply" />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#3A0B10]/80 via-transparent to-transparent" />
+      <div className="absolute bottom-6 left-6">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/astar-wordmark-on-dark.svg" alt="" className="h-7 w-auto" />
+      </div>
+    </div>
+  );
+}
+
+/** Option 7: a slow-moving brand gradient with the wordmark: alive, but clearly not a video. */
+function Gradient() {
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-[var(--astar-navy)]">
+      <style>{`@keyframes ph-drift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-12%,8%) scale(1.15); } }`}</style>
+      <div aria-hidden className="absolute -top-1/4 -left-1/4 h-[90%] w-[90%] rounded-full bg-[var(--astar-red)] blur-3xl opacity-80" style={{ animation: "ph-drift 9s ease-in-out infinite" }} />
+      <div aria-hidden className="absolute -bottom-1/4 -right-1/4 h-[80%] w-[80%] rounded-full bg-[#4E1117] blur-3xl" style={{ animation: "ph-drift 11s ease-in-out infinite reverse" }} />
+      <div className="absolute inset-0 flex items-center justify-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/astar-wordmark-on-dark.svg" alt="" className="h-10 w-auto" />
+      </div>
+    </div>
+  );
+}
+
 /** Today's: a frame of the video. */
 function CurrentFrame() {
   return <Image src="/hero/hero-poster.jpg" alt="" fill priority sizes="512px" className="object-cover" />;
@@ -95,16 +196,21 @@ function HeroBox({ placeholder }: { placeholder: ReactNode }) {
   );
 }
 
-const OPTIONS: { id: Option; label: string }[] = [
-  { id: "brand", label: "1 · Brand panel" },
-  { id: "week", label: "2 · This week card" },
-  { id: "current", label: "Today: video frame" },
+const OPTIONS: { id: Option; label: string; render: () => ReactNode }[] = [
+  { id: "brand", label: "1 · Brand panel", render: () => <BrandPanel /> },
+  { id: "week", label: "2 · This week card", render: () => <WeekCard /> },
+  { id: "matched", label: "3 · Matched card", render: () => <Matched /> },
+  { id: "codes", label: "4 · Course codes", render: () => <CourseCodes /> },
+  { id: "quote", label: "5 · Student quote", render: () => <Quote /> },
+  { id: "duotone", label: "6 · Red duotone photo", render: () => <Duotone /> },
+  { id: "gradient", label: "7 · Moving gradient", render: () => <Gradient /> },
+  { id: "current", label: "Today: video frame", render: () => <CurrentFrame /> },
 ];
 
 export default function PlaceholderPreview() {
   const [option, setOption] = useState<Option>("brand");
   const [run, setRun] = useState(0);
-  const placeholder = option === "brand" ? <BrandPanel /> : option === "week" ? <WeekCard /> : <CurrentFrame />;
+  const placeholder = OPTIONS.find((o) => o.id === option)!.render();
 
   return (
     <div className="min-h-screen bg-[var(--astar-bg)] pt-28 pb-16 px-4">
