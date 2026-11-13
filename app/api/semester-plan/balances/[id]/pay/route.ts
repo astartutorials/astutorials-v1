@@ -47,7 +47,7 @@ export async function POST(
       full_name: balance.full_name,
       phone: balance.phone,
       course: semesterPlanCourseLabel(balance.plan),
-      notes: `Plan: ${SEMESTER_PLANS[balance.plan].name} | Paying in 2: instalment 2 of 2 | First payment: ${balance.first_reference}`,
+      notes: `Plan: ${SEMESTER_PLANS[balance.plan].name} | Paying in 2 instalments: 2 of 2 | First payment: ${balance.first_reference}`,
       // Carried over so the ambassador's commission is recorded now.
       ...(referral
         ? {

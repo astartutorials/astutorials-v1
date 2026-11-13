@@ -103,7 +103,7 @@ export default function AdminSemesterPlanPaymentsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#0B1120]">Semester Plan Payments</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          Who has paid in full and who is paying in 2.
+          Who has paid in full and who is paying in 2 instalments.
           {outstanding > 0 && (
             <> Still to collect: <span className="font-semibold text-[#0B1120]">{naira(outstanding)}</span>.</>
           )}
@@ -164,7 +164,7 @@ export default function AdminSemesterPlanPaymentsPage() {
                 <div className="min-w-0">
                   <p className="font-bold text-[#0B1120] text-sm">{r.fullName}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    {planLabel(r.plan)} · {r.option === "split" ? "Paying in 2" : "Paid at once"}
+                    {planLabel(r.plan)} · {r.option === "split" ? "Paying in 2 instalments" : "Paid at once"}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">

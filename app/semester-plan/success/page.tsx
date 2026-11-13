@@ -25,7 +25,7 @@ type Booking = {
 function buildWhatsAppUrl(b: Booking, ref: string, split: boolean) {
   const lines = [
     split
-      ? `Hello! We just made the first payment for the ${SEMESTER_PLAN_NAME} (${SEMESTER_PLAN_TERM}), paying in 2.`
+      ? `Hello! We just made the first payment for the ${SEMESTER_PLAN_NAME} (${SEMESTER_PLAN_TERM}), paying in 2 instalments.`
       : `Hello! We just paid for the ${SEMESTER_PLAN_NAME} (${SEMESTER_PLAN_TERM}).`,
     "",
     `Student: ${b.full_name}`,

@@ -4,10 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 /**
- * The hero video, without the cost up front. The poster paints immediately
- * as a priority image; the video loads only after the page has finished loading, at a
+ * The hero video, without the cost up front. A designed placeholder paints
+ * immediately; the video loads only after the page has finished loading, at a
  * size picked for the screen (480px for phones, 640px otherwise), and not at
  * all when the visitor has data saver on.
+ *
+ * The placeholder is the class photo in a brand-red duotone with the wordmark,
+ * picked by the user from a preview (PR #74, 2026-11-13). It replaced a frame
+ * of the video, which looked like a paused video and made the site feel slow.
  *
  * It used to be a 10 MB file that autoplayed with no poster on every visit
  * (2026-11-12). Re-encode with ffmpeg: crop to the visible square, drop the
@@ -40,19 +44,25 @@ export default function HeroVideo() {
     };
   }, []);
 
-  // The poster is a real, high-priority image: it is the largest thing on
-  // screen at load (what Google times as LCP), and a <video poster> is fetched
-  // late, at low priority. The video fades in over it once it is playing.
+  // The placeholder photo is a real, high-priority image: it is the largest
+  // thing on screen at load (what Google times as LCP). The video fades in
+  // over it once it is playing.
   return (
     <>
-      <Image
-        src="/hero/hero-poster.jpg"
-        alt=""
-        fill
-        priority
-        sizes="(min-width: 1024px) 512px, 100vw"
-        className="object-cover"
-      />
+      <div className="absolute inset-0 bg-[var(--astar-navy)]">
+        <Image
+          src="/become-tutor.jpg"
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 1024px) 512px, 100vw"
+          className="object-cover grayscale contrast-125 opacity-60"
+        />
+        <div aria-hidden className="absolute inset-0 bg-[var(--astar-red)] mix-blend-multiply" />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#3A0B10]/80 via-transparent to-transparent" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/astar-wordmark-on-dark.svg" alt="" className="absolute bottom-6 left-6 h-7 w-auto" />
+      </div>
       <video
         ref={ref}
         muted

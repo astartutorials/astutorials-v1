@@ -89,10 +89,10 @@ describe('GET /api/admin/semester-plan-payments', () => {
     const eqCalls = mockTables({
       bookings: [
         booking('full', '2026-11-14T10:00:00Z', 100000),
-        booking('s1a', '2026-11-15T10:00:00Z', 55000, 'Paying in 2: instalment 1 of 2'),
+        booking('s1a', '2026-11-15T10:00:00Z', 55000, 'Paying in 2 instalments: 1 of 2'),
         booking('s1b', '2026-12-10T10:00:00Z', 55000),
-        booking('s2a', '2026-11-16T10:00:00Z', 55000, 'Paying in 2: instalment 1 of 2'),
-        booking('s3a', '2026-12-10T10:00:00Z', 55000, 'Paying in 2: instalment 1 of 2'),
+        booking('s2a', '2026-11-16T10:00:00Z', 55000, 'Paying in 2 instalments: 1 of 2'),
+        booking('s3a', '2026-12-10T10:00:00Z', 55000, 'Paying in 2 instalments: 1 of 2'),
       ],
       semester_plan_balances: [
         { id: 'b1', first_reference: 's1a', paid_reference: 's1b', paid_at: '2026-12-10T10:00:00Z', plan: 'group', full_name: 'A', email: 'a@x.com', phone: null, amount_due: 55000, due_date: '2026-12-14', created_at: '2026-11-15T10:00:00Z' },

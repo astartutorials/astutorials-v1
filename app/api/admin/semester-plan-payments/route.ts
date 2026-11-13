@@ -122,6 +122,7 @@ export async function GET() {
     if (splitRefs.has(b.payment_reference)) continue;
     // A split payment whose balance row is missing (e.g. recorded before the
     // migration ran): still part paid, with no due date on record.
+    // Matches both "Paying in 2: …" (first notes) and "Paying in 2 instalments: …".
     const orphanSplit = b.notes?.includes("Paying in 2") ?? false;
     rows.push({
       key: b.payment_reference,

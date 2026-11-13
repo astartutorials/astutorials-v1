@@ -378,7 +378,7 @@ export default function PlanModal({
               )}
             </div>
 
-            {/* Pay in full / Pay in 2 */}
+            {/* Pay in full / Pay in 2 instalments */}
             {mode === "pay" && splitOpen && (
               <div>
                 <p className="text-sm font-semibold text-fg-muted mb-1.5">How would you like to pay?</p>
@@ -403,7 +403,7 @@ export default function PlanModal({
                       split ? "border-[var(--astar-red)] bg-brand-soft" : "border-line-subtle hover:border-line"
                     }`}
                   >
-                    <span className="block text-sm font-semibold text-fg">Pay in 2</span>
+                    <span className="block text-sm font-semibold text-fg">Pay in 2 instalments</span>
                     <span className="block text-base font-extrabold text-brand-ink">
                       ₦{selected.instalment.toLocaleString()} <span className="text-xs font-semibold text-fg-subtle">today</span>
                     </span>
