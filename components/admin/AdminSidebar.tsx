@@ -7,7 +7,6 @@ import { useState } from "react";
 import {
   LayoutDashboard,
   GraduationCap,
-  PlusCircle,
   MessageSquare,
   Briefcase,
   CreditCard,
@@ -18,7 +17,6 @@ import {
   Loader2,
   X,
   BarChart2,
-  ExternalLink,
   ClipboardList,
   Sparkles,
   BookOpen,
@@ -36,41 +34,71 @@ interface AdminSidebarProps {
   onClose?: () => void;
 }
 
-type NavItem = {
+type NavMeta = {
   name: string;
   href: string;
   icon: typeof LayoutDashboard;
-  roles: AppRole[];
+  /** Other paths that should light this entry up (pages with no link of their own). */
+  alsoActive?: string[];
 };
 
+type NavItem = NavMeta & { roles: AppRole[] };
+
 /**
- * Label and icon only — who may see each entry comes from ADMIN_ROUTES, the
- * same map the middleware gates on, so the sidebar can no longer offer a link
- * that redirects (or hide one that is actually reachable).
+ * Label, icon and grouping only — who may see each entry comes from
+ * ADMIN_ROUTES, the same map the middleware gates on, so the sidebar can no
+ * longer offer a link that redirects (or hide one that is actually reachable).
+ *
+ * Schedule Tutorial has no entry: it is a button on the Tutorials page and the
+ * dashboard, and lights up Tutorials. Settings lives in the footer.
  */
-const NAV_META: { name: string; href: string; icon: typeof LayoutDashboard }[] = [
-  { name: "Dashboard",         href: "/admin/dashboard",       icon: LayoutDashboard },
-  { name: "Organisations",     href: "/admin/orgs",            icon: Building2       },
-  { name: "Tutorials",         href: "/admin/tutorials",       icon: GraduationCap   },
-  { name: "Schedule Tutorial", href: "/admin/create-tutorial", icon: PlusCircle      },
-  { name: "Feedback",          href: "/admin/feedback",        icon: MessageSquare   },
-  { name: "BUCC Advantage",    href: "/admin/bucc",            icon: Sparkles        },
-  { name: "Playbook Series",   href: "/admin/playbooks",       icon: BookOpen        },
-  { name: "Student Intake",    href: "/admin/intake",          icon: UserPlus        },
-  { name: "Semester Plan",     href: "/admin/semester-plan",   icon: CalendarRange   },
-  { name: "Freshers' Advantage", href: "/admin/tfa",          icon: Ticket          },
-  { name: "Ambassadors",       href: "/admin/ambassadors",     icon: Megaphone       },
-  { name: "Careers",           href: "/admin/careers",         icon: Briefcase       },
-  { name: "Applications",      href: "/admin/applications",    icon: Users           },
-  { name: "Payments",          href: "/admin/payments",        icon: CreditCard      },
-  { name: "Activity Log",      href: "/admin/audit-logs",      icon: ClipboardList   },
-  { name: "Settings",          href: "/admin/settings",        icon: Settings        },
+const NAV_GROUPS: { label: string | null; items: NavMeta[] }[] = [
+  {
+    label: null,
+    items: [{ name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard }],
+  },
+  {
+    label: "Tutorials",
+    items: [
+      { name: "Tutorials", href: "/admin/tutorials", icon: GraduationCap, alsoActive: ["/admin/create-tutorial"] },
+      { name: "Feedback",  href: "/admin/feedback",  icon: MessageSquare },
+    ],
+  },
+  {
+    label: "Programmes",
+    items: [
+      { name: "Semester Plan",       href: "/admin/semester-plan", icon: CalendarRange },
+      { name: "Freshers' Advantage", href: "/admin/tfa",           icon: Ticket        },
+      { name: "BUCC Advantage",      href: "/admin/bucc",          icon: Sparkles      },
+      { name: "Playbook Series",     href: "/admin/playbooks",     icon: BookOpen      },
+      { name: "Student Intake",      href: "/admin/intake",        icon: UserPlus      },
+    ],
+  },
+  {
+    label: "People",
+    items: [
+      { name: "Ambassadors",        href: "/admin/ambassadors",  icon: Megaphone },
+      { name: "Tutor Applications", href: "/admin/applications", icon: Users     },
+      { name: "Careers",            href: "/admin/careers",      icon: Briefcase },
+    ],
+  },
+  {
+    label: "Admin",
+    items: [
+      { name: "Payments",      href: "/admin/payments",   icon: CreditCard    },
+      { name: "Organisations", href: "/admin/orgs",       icon: Building2     },
+      { name: "Activity Log",  href: "/admin/audit-logs", icon: ClipboardList },
+    ],
+  },
 ];
 
-const NAV_ITEMS: NavItem[] = NAV_META.map((item) => ({
+const withRoles = (item: NavMeta): NavItem => ({
   ...item,
   roles: ADMIN_ROUTES.find((r) => r.href === item.href)?.roles ?? [],
-}));
+});
+
+const GROUPS = NAV_GROUPS.map((g) => ({ ...g, items: g.items.map(withRoles) }));
+const SETTINGS = withRoles({ name: "Settings", href: "/admin/settings", icon: Settings });
 
 const ROLE_LABELS: Record<AppRole, string> = {
   super_admin: 'Super Admin',
@@ -99,9 +127,14 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const isActive = (path: string) =>
     pathname === path || pathname?.startsWith(`${path}/`);
 
-  const visibleItems = role
-    ? NAV_ITEMS.filter(item => item.roles.includes(role))
-    : NAV_ITEMS;
+  const canSee = (item: NavItem) => !role || item.roles.includes(role);
+  const itemActive = (item: NavItem) =>
+    isActive(item.href) || (item.alsoActive ?? []).some(isActive);
+
+  // Groups a role can't see anything in disappear, label and all.
+  const visibleGroups = GROUPS
+    .map((g) => ({ ...g, items: g.items.filter(canSee) }))
+    .filter((g) => g.items.length > 0);
 
   return (
     <>
@@ -137,45 +170,41 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-6 px-3 space-y-0.5 overflow-y-auto">
-          {visibleItems.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all relative ${
-                  active
-                    ? "bg-white/10 text-white font-semibold"
-                    : "text-white/50 hover:text-white/90 hover:bg-white/5"
-                }`}
-              >
-                <item.icon size={18} className="flex-shrink-0" />
-                <span className="text-sm">{item.name}</span>
-                {active && (
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#D93025]" />
-                )}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 py-4 px-3 overflow-y-auto">
+          {visibleGroups.map((group) => (
+            <div key={group.label ?? "top"} className={group.label ? "mt-5" : undefined}>
+              {group.label && (
+                <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+                  {group.label}
+                </p>
+              )}
+              <div className="space-y-0.5">
+                {group.items.map((item) => {
+                  const active = itemActive(item);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={onClose}
+                      aria-current={active ? "page" : undefined}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                        active
+                          ? "bg-white/10 text-white font-semibold"
+                          : "text-white/50 hover:text-white/90 hover:bg-white/5"
+                      }`}
+                    >
+                      <item.icon size={16} className="flex-shrink-0" />
+                      <span className="text-sm">{item.name}</span>
+                      {active && (
+                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#D93025]" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
-
-        {/* PostHog analytics link — super_admin only */}
-        {role === 'super_admin' && (
-          <div className="px-3 pb-4">
-            <a
-              href="https://app.posthog.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/50 hover:text-white/90 hover:bg-white/5 transition-all"
-            >
-              <BarChart2 size={18} className="flex-shrink-0" />
-              <span className="text-sm">Analytics</span>
-              <ExternalLink size={12} className="ml-auto opacity-50" />
-            </a>
-          </div>
-        )}
 
         {/* Bottom user + logout */}
         <div className="border-t border-white/10 p-3 space-y-1">
@@ -190,18 +219,52 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             </div>
           </div>
 
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className="flex items-center gap-3 px-3 py-2.5 w-full text-left text-white/50 hover:text-white/90 hover:bg-white/5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoggingOut ? (
-              <Loader2 size={18} className="animate-spin flex-shrink-0" />
-            ) : (
-              <LogOut size={18} className="flex-shrink-0" />
+          <div className="flex items-center gap-1">
+            {canSee(SETTINGS) && (
+              <Link
+                href={SETTINGS.href}
+                onClick={onClose}
+                aria-current={itemActive(SETTINGS) ? "page" : undefined}
+                className={`flex-1 flex items-center justify-center gap-2 px-2 py-2 rounded-lg text-xs transition-all ${
+                  itemActive(SETTINGS)
+                    ? "bg-white/10 text-white font-semibold"
+                    : "text-white/50 hover:text-white/90 hover:bg-white/5"
+                }`}
+              >
+                <Settings size={15} className="flex-shrink-0" />
+                <span>Settings</span>
+              </Link>
             )}
-            <span className="text-sm">Logout</span>
-          </button>
+
+            {/* PostHog analytics link — super_admin only */}
+            {role === 'super_admin' && (
+              <a
+                href="https://app.posthog.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Analytics (PostHog)"
+                aria-label="Analytics (opens PostHog)"
+                className="flex-1 flex items-center justify-center gap-2 px-2 py-2 rounded-lg text-xs transition-all text-white/50 hover:text-white/90 hover:bg-white/5"
+              >
+                <BarChart2 size={15} className="flex-shrink-0" />
+                <span>Analytics</span>
+              </a>
+            )}
+
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              title="Log out"
+              aria-label="Log out"
+              className="flex items-center justify-center px-2.5 py-2 rounded-lg text-white/50 hover:text-white/90 hover:bg-white/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoggingOut ? (
+                <Loader2 size={15} className="animate-spin flex-shrink-0" />
+              ) : (
+                <LogOut size={15} className="flex-shrink-0" />
+              )}
+            </button>
+          </div>
         </div>
       </aside>
     </>
