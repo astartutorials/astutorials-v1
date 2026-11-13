@@ -309,6 +309,33 @@ body::after {
   }
 }
 
+/* ── Keyboard focus ─────────────────────────────────────────────────────
+   A clear ring for keyboard users only (:focus-visible), never on mouse
+   clicks. Elements with their own focus style can still override it. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--astar-red);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Hidden until focused, then pinned top-left above the navbar. */
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--astar-navy);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  transform: translateY(-200%);
+  transition: transform 150ms ease;
+}
+.skip-link:focus { transform: translateY(0); }
+.dark .skip-link { background: #fff; color: var(--astar-navy); }
+
 @layer components {
   .btn-primary {
     @apply bg-brand text-white hover:bg-brand-hover transition-all duration-300 cursor-pointer;
