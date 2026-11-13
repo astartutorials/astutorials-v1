@@ -10,11 +10,13 @@ import {
 import { programmeOrgId } from '@/lib/programme-org';
 import { SEMESTER_PLANS, isSemesterPlanId } from '@/lib/semester-plan';
 import { recordDiscountRedemption } from '@/lib/discount-codes';
+import { recordSplitPayment, instalmentNumber } from '@/lib/semester-plan-balances';
 
 export interface PaystackTransaction {
   reference: string;
   amount: number;
   status: string;
+  paid_at?: string | null;
   customer?: { email?: string; first_name?: string; phone?: string } | null;
   metadata?: {
     type?: string;
@@ -23,6 +25,9 @@ export interface PaystackTransaction {
     discount_amount?: number;
     code_kind?: string;
     ambassador_id?: string;
+    payment_option?: string;
+    instalment?: number | string;
+    balance_id?: string;
     tutorial_id?: string;
     org_id?: string;
     full_name?: string;
@@ -62,8 +67,18 @@ export async function recordBookingFromTransaction(
     .eq('payment_reference', reference)
     .maybeSingle();
 
+  const splitPayment = {
+    reference,
+    meta,
+    email,
+    fullName,
+    phone: meta.phone ?? tx.customer?.phone ?? null,
+    paidAt: tx.paid_at ?? null,
+  };
+
   if (existing) {
     await recordDiscountRedemption(supabase, reference, meta, amountPaid);
+    await recordSplitPayment(supabase, splitPayment);
     return { outcome: 'already_recorded', reference };
   }
 
@@ -106,6 +121,7 @@ export async function recordBookingFromTransaction(
   }
 
   await recordDiscountRedemption(supabase, reference, meta, amountPaid);
+  const balance = await recordSplitPayment(supabase, splitPayment);
 
   if (sendEmails) {
     await sendNewBookingNotification({
@@ -134,7 +150,19 @@ export async function recordBookingFromTransaction(
         await sendBuccClassesReceipt({ to: email, fullName, amountPaid, reference });
       } else if (isSemesterPlan) {
         const planName = isSemesterPlanId(meta.plan) ? SEMESTER_PLANS[meta.plan].name : (meta.course ?? 'Full Semester Plan');
-        await sendSemesterPlanReceipt({ to: email, fullName, planName, amountPaid, reference });
+        const instalment = instalmentNumber(meta) ?? undefined;
+        await sendSemesterPlanReceipt({
+          to: email,
+          fullName,
+          planName,
+          amountPaid,
+          reference,
+          instalment,
+          balance:
+            instalment === 1 && balance
+              ? { id: balance.id, amountDue: balance.amount_due, dueDate: balance.due_date }
+              : null,
+        });
       } else if (isPrivate) {
         await sendPrivateBookingReceipt({ to: email, fullName, amountPaid, reference });
       } else if (tutorialForEmail) {

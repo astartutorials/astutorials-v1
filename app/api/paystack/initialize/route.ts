@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { upsertPaystackCustomer } from "@/lib/paystack-customer";
-import { SEMESTER_PLANS, isSemesterPlanId } from "@/lib/semester-plan";
+import { SEMESTER_PLANS, isSemesterPlanId, isSplitOpen } from "@/lib/semester-plan";
 import { checkDiscountCode, normaliseCode } from "@/lib/discount-codes";
+import { initializePaystackTransaction } from "@/lib/paystack-transaction";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -36,24 +37,44 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid plan or amount." }, { status: 400 });
     }
 
-    // The discount fields are only ever set below, never taken from the browser.
+    // The discount and instalment fields are only ever set below, never taken
+    // from the browser. The second instalment starts from the balance page, not
+    // here.
     const rest = { ...metadata };
     const discount_code = rest.discount_code;
+    const split = rest.payment_option === "split";
     delete rest.discount_code;
     delete rest.discount_amount;
     delete rest.code_kind;
     delete rest.ambassador_id;
+    delete rest.payment_option;
+    delete rest.instalment;
+    delete rest.balance_id;
+
+    if (split && !isSplitOpen()) {
+      return NextResponse.json(
+        { error: "Paying in 2 has closed for this semester. Please pay in full." },
+        { status: 400 }
+      );
+    }
+    if (split) {
+      rest.payment_option = "split";
+      rest.instalment = 1;
+      rest.notes = rest.notes ? `${rest.notes} | Paying in 2: instalment 1 of 2` : "Paying in 2: instalment 1 of 2";
+    }
     paystackMeta = rest;
-    let expected = SEMESTER_PLANS[plan].price;
+    let expected = split ? SEMESTER_PLANS[plan].instalment : SEMESTER_PLANS[plan].price;
 
     if (normaliseCode(discount_code)) {
-      const discount = await checkDiscountCode(supabase, discount_code, plan, email);
+      const discount = await checkDiscountCode(supabase, discount_code, plan, email, { split });
       if (!discount.ok) {
         return NextResponse.json({ error: discount.error }, { status: 400 });
       }
       expected = discount.price;
       const label = discount.kind === "referral" ? "Referral" : "Discount";
-      const note = `${label}: ${discount.code} (−₦${discount.amountOff.toLocaleString()})`;
+      const note = split
+        ? `${label}: ${discount.code}`
+        : `${label}: ${discount.code} (−₦${discount.amountOff.toLocaleString()})`;
       paystackMeta = {
         ...rest,
         discount_code: discount.code,
@@ -92,27 +113,10 @@ export async function POST(req: NextRequest) {
     phone: metadata?.phone,
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-
-  const res = await fetch("https://api.paystack.co/transaction/initialize", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${secret}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email,
-      amount: amount * 100, // Paystack expects kobo
-      callback_url: `${baseUrl}/api/paystack/verify`,
-      metadata: paystackMeta,
-    }),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok || !data.status) {
-    return NextResponse.json({ error: data.message ?? "Failed to initialise payment" }, { status: 502 });
+  const result = await initializePaystackTransaction({ secret, email, amount, metadata: paystackMeta });
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: 502 });
   }
 
-  return NextResponse.json({ authorization_url: data.data.authorization_url });
+  return NextResponse.json({ authorization_url: result.url });
 }

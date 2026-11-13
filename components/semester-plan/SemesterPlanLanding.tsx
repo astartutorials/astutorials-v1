@@ -30,8 +30,19 @@ import {
   SEMESTER_PLAN_PARENTS_HREF,
   SEMESTER_PLAN_HREF,
   perSessionPrice,
+  SPLIT_DUE_DATE,
+  SPLIT_LAST_DAY,
+  formatDueDate,
   type SemesterPlanId,
 } from "@/lib/semester-plan";
+
+const dayMonth = (iso: string) => formatDueDate(iso).replace(/^\w+ /, "");
+
+/** Facts about paying in 2, shared by both FAQ lists. */
+const PAY_IN_2_ANSWER =
+  `Yes. Pay ₦${SEMESTER_PLANS.group.instalment.toLocaleString()} now and ₦${SEMESTER_PLANS.group.instalment.toLocaleString()} by ${dayMonth(SPLIT_DUE_DATE)} ` +
+  `(₦${SEMESTER_PLANS.private.instalment.toLocaleString()} twice for private). If you join after 30 November, you get two weeks for the second payment. ` +
+  `Paying in 2 costs 10% more than paying in full, discount codes don't apply, and it's open until ${dayMonth(SPLIT_LAST_DAY)}.`;
 import Words from "@/components/shared/Words";
 
 /**
@@ -139,6 +150,10 @@ const FAQS: Record<Audience, { q: string; a: string }[]> = {
       a: "Tap “Send to my parents”. It opens WhatsApp with a short message and a page written for them, where they can pay directly or ask for a call.",
     },
     {
+      q: "Can I pay in two parts?",
+      a: PAY_IN_2_ANSWER,
+    },
+    {
       q: "Which courses are covered?",
       a: "Your 100L first-semester courses. We confirm your exact courses with you on WhatsApp once you sign up.",
     },
@@ -155,6 +170,10 @@ const FAQS: Record<Audience, { q: string; a: string }[]> = {
     {
       q: "Can I pay for my child directly?",
       a: "Yes. Choose a plan, select “Parent / guardian”, and pay securely on Paystack. The receipt comes to your email.",
+    },
+    {
+      q: "Can I pay in two parts?",
+      a: PAY_IN_2_ANSWER,
     },
     {
       q: "I'd like to ask questions before paying.",

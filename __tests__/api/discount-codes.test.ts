@@ -221,3 +221,104 @@ describe('referral codes', () => {
     expect(mockUpsert).not.toHaveBeenCalled();
   });
 });
+
+describe('paying in 2', () => {
+  let ambassadors: Record<string, { id: string; email: string; status: string }>;
+  const realFrom = from;
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: new Date('2026-11-20T10:00:00Z') });
+    ambassadors = { TOLU123: { id: 'amb-1', email: 'tolu@x.com', status: 'approved' } };
+    extraFrom = (table: string) => {
+      if (table === 'ambassador_applications') {
+        return {
+          select: () => ({
+            eq: (_c: string, code: string) => ({ maybeSingle: async () => ({ data: ambassadors[code] ?? null }) }),
+          }),
+        };
+      }
+      if (table === 'referral_redemptions') {
+        return { upsert: async (row: object) => { mockReferralUpsert(row); return { error: null }; } };
+      }
+      return realFrom(table);
+    };
+  });
+
+  afterEach(() => {
+    extraFrom = null;
+    jest.useRealTimers();
+  });
+
+  it('charges the first instalment and marks it as 1 of 2', async () => {
+    for (const [plan, amount] of [['group', 55000], ['private', 165000]] as const) {
+      const res = await pay(amount, { plan, payment_option: 'split', notes: 'Plan: X' });
+      expect(res.status).toBe(200);
+      const body = paystackBody();
+      expect(body.amount).toBe(amount * 100);
+      expect(body.metadata).toMatchObject({ payment_option: 'split', instalment: 1 });
+      expect(body.metadata.notes).toBe('Plan: X | Paying in 2: instalment 1 of 2');
+    }
+  });
+
+  it('refuses the full price, or half the full price, when splitting', async () => {
+    expect((await pay(100000, { plan: 'group', payment_option: 'split' })).status).toBe(400);
+    expect((await pay(50000, { plan: 'group', payment_option: 'split' })).status).toBe(400);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('never takes an instalment number or balance from the browser', async () => {
+    const res = await pay(100000, { plan: 'group', instalment: 2, balance_id: 'b-1' });
+    expect(res.status).toBe(200);
+    const meta = paystackBody().metadata;
+    expect(meta.instalment).toBeUndefined();
+    expect(meta.balance_id).toBeUndefined();
+    expect(meta.payment_option).toBeUndefined();
+  });
+
+  it('refuses a discount code when splitting', async () => {
+    const res = await pay(35000, { plan: 'group', payment_option: 'split', discount_code: 'ASTAR20K' });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/pay in full/);
+    const preview = await check(req('/api/discount-codes/check', { code: 'ASTAR20K', plan: 'group', paymentOption: 'split' }));
+    expect(preview.status).toBe(400);
+  });
+
+  it('accepts a referral code at no discount, so the ambassador is credited', async () => {
+    const preview = await check(req('/api/discount-codes/check', { code: 'TOLU123', plan: 'group', paymentOption: 'split' }));
+    expect(await preview.json()).toEqual({ code: 'TOLU123', amountOff: 0, price: 55000 });
+
+    const res = await pay(55000, { plan: 'group', payment_option: 'split', discount_code: 'TOLU123' });
+    expect(res.status).toBe(200);
+    expect(paystackBody().metadata).toMatchObject({
+      discount_code: 'TOLU123',
+      discount_amount: 0,
+      code_kind: 'referral',
+      ambassador_id: 'amb-1',
+      instalment: 1,
+    });
+  });
+
+  it('closes after 25 January', async () => {
+    jest.setSystemTime(new Date('2027-01-25T22:00:00Z')); // 23:00 in Lagos: still the 25th
+    expect((await pay(55000, { plan: 'group', payment_option: 'split' })).status).toBe(200);
+    jest.setSystemTime(new Date('2027-01-25T23:30:00Z')); // 00:30 on the 26th in Lagos
+    const res = await pay(55000, { plan: 'group', payment_option: 'split' });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/closed/);
+  });
+
+  it('records the commission on the second payment only, against the full amount', async () => {
+    const supabase = (createClient as jest.Mock)();
+    const meta = {
+      type: 'semester-plan', plan: 'private', payment_option: 'split',
+      discount_code: 'TOLU123', discount_amount: 0, code_kind: 'referral', ambassador_id: 'amb-1',
+    };
+    await recordDiscountRedemption(supabase, 'first', { ...meta, instalment: 1 }, 165000);
+    expect(mockReferralUpsert).not.toHaveBeenCalled();
+
+    await recordDiscountRedemption(supabase, 'second', { ...meta, instalment: 2 }, 165000);
+    expect(mockReferralUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ payment_reference: 'second', commission: 15000, amount_paid: 330000, discount_amount: 0 })
+    );
+  });
+});

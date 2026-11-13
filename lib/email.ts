@@ -8,7 +8,12 @@ import {
   BUCC_MEETING_URL,
 } from "@/lib/bucc";
 import type { Playbook } from "@/lib/playbooks";
-import { SEMESTER_PLAN_NAME, SEMESTER_PLAN_TERM } from "@/lib/semester-plan";
+import {
+  SEMESTER_PLAN_NAME,
+  SEMESTER_PLAN_TERM,
+  balancePaymentHref,
+  formatDueDate,
+} from "@/lib/semester-plan";
 import { AMBASSADOR_PROGRAMME_NAME, AMBASSADOR_COMMISSIONS } from "@/lib/ambassador";
 import {
   TFA_EVENT_NAME,
@@ -229,33 +234,123 @@ export async function sendBuccClassesReceipt(opts: {
   await send(to, "BUCC 200L Preparatory Classes — Payment Received", html);
 }
 
+/** The second payment on a plan paid in 2, as the receipt and reminders show it. */
+export interface BalanceDue {
+  id: string;
+  amountDue: number;
+  dueDate: string;
+}
+
+function payBalanceButton(balance: BalanceDue) {
+  return `
+      <p style="margin:24px 0">
+        <a href="${BASE_URL}${balancePaymentHref(balance.id)}" style="display:inline-block;background:#D93025;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px">
+          Pay the second ₦${balance.amountDue.toLocaleString()}
+        </a>
+      </p>`;
+}
+
 export async function sendSemesterPlanReceipt(opts: {
   to: string;
   fullName: string;
   planName: string;
   amountPaid: number;
   reference: string;
+  /** Paying in 2: which payment this was. */
+  instalment?: 1 | 2;
+  /** Paying in 2, first payment: what is still to pay, and by when. */
+  balance?: BalanceDue | null;
 }) {
-  const { to, fullName, planName, amountPaid, reference } = opts;
+  const { to, fullName, planName, amountPaid, reference, instalment, balance } = opts;
+  const first = instalment === 1;
+  const second = instalment === 2;
+
+  const heading = first ? "Your semester has started 🎉" : "Your semester is sorted 🎉";
+  const intro = first
+    ? `Hi ${escapeHtml(fullName)}, we’ve received your first payment for the ${SEMESTER_PLAN_NAME}.`
+    : second
+    ? `Hi ${escapeHtml(fullName)}, we’ve received your second payment. Your ${SEMESTER_PLAN_NAME} is paid in full.`
+    : `Hi ${escapeHtml(fullName)}, your ${SEMESTER_PLAN_NAME} is confirmed.`;
+
+  const balanceRows =
+    first && balance
+      ? `
+        <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Second payment</td>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">₦${balance.amountDue.toLocaleString()} by ${formatDueDate(balance.dueDate)}</td></tr>`
+      : "";
+
+  const balanceBlock =
+    first && balance
+      ? `
+      <p style="font-size:13px;color:#666;line-height:1.6">
+        Your second payment of <strong>₦${balance.amountDue.toLocaleString()}</strong> is due by <strong>${formatDueDate(balance.dueDate)}</strong>.
+        We’ll email you a reminder a week before. You can pay it any time before then:
+      </p>
+      ${payBalanceButton(balance)}`
+      : "";
 
   const html = `
     <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
-      <h2 style="color:#D93025;margin-bottom:4px">Your semester is sorted 🎉</h2>
-      <p style="margin-top:0;color:#666">Hi ${escapeHtml(fullName)}, your ${SEMESTER_PLAN_NAME} is confirmed.</p>
+      <h2 style="color:#D93025;margin-bottom:4px">${heading}</h2>
+      <p style="margin-top:0;color:#666">${intro}</p>
 
       <table style="width:100%;border-collapse:collapse;margin:24px 0;font-size:14px">
         <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888;width:40%">Plan</td>
-            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${planName}</td></tr>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${planName}${first || second ? " (paying in 2)" : ""}</td></tr>
         <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Semester</td>
             <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${SEMESTER_PLAN_TERM}</td></tr>
         <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#888">Amount paid</td>
-            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">₦${amountPaid.toLocaleString()}</td></tr>
+            <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">₦${amountPaid.toLocaleString()}${first ? " (1 of 2)" : second ? " (2 of 2)" : ""}</td></tr>${balanceRows}
         <tr><td style="padding:10px 0;color:#888">Reference</td>
             <td style="padding:10px 0;font-family:monospace;font-size:12px">${reference}</td></tr>
       </table>
-
-      <p style="font-size:13px;color:#666;line-height:1.6">
+${balanceBlock}
+      ${second ? "" : `<p style="font-size:13px;color:#666;line-height:1.6">
         Please message us on WhatsApp so we can confirm your courses, match you with your tutor and share your timetable.
+      </p>`}
+
+      <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
+        Please do not reply to this email.<br/>
+        For help, WhatsApp us on <strong>0916 046 5678</strong> or email <a href="mailto:support@astartutorials.com" style="color:#D93025">support@astartutorials.com</a>.
+      </p>
+      <p style="font-size:12px;color:#aaa">A-Star Tutorials · astartutorials.com</p>
+    </div>
+  `;
+
+  const subject = first
+    ? `${SEMESTER_PLAN_NAME} — First Payment Received`
+    : second
+    ? `${SEMESTER_PLAN_NAME} — Paid in Full`
+    : `${SEMESTER_PLAN_NAME} — Payment Received`;
+  await send(to, subject, html);
+}
+
+/**
+ * Reminder for the second payment on a plan paid in 2: a week before the due
+ * date, and on the day. Returns whether Resend accepted it, so the reminder job
+ * only marks it sent when it was.
+ */
+export async function sendBalanceReminder(opts: {
+  to: string;
+  fullName: string;
+  planName: string;
+  balance: BalanceDue;
+  stage: "week" | "due";
+}): Promise<boolean> {
+  const { to, fullName, planName, balance, stage } = opts;
+  const when = stage === "due" ? "today" : `on ${formatDueDate(balance.dueDate)}`;
+  const firstName = escapeHtml(fullName.split(" ")[0] || fullName);
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#0B1120">
+      <h2 style="color:#D93025;margin-bottom:4px">${stage === "due" ? "Your second payment is due today" : "Your second payment is due next week"}</h2>
+      <p style="margin-top:0;color:#666;line-height:1.6">
+        Hi ${firstName}, a quick reminder that the second payment of <strong>₦${balance.amountDue.toLocaleString()}</strong>
+        for your ${escapeHtml(planName)} is due ${when}.
+      </p>
+      ${payBalanceButton(balance)}
+      <p style="font-size:13px;color:#666;line-height:1.6">
+        Already paid? Thank you, you can ignore this email.
       </p>
 
       <p style="font-size:12px;color:#999;margin-top:32px;line-height:1.8">
@@ -266,7 +361,11 @@ export async function sendSemesterPlanReceipt(opts: {
     </div>
   `;
 
-  await send(to, `${SEMESTER_PLAN_NAME} — Payment Received`, html);
+  const subject =
+    stage === "due"
+      ? `${SEMESTER_PLAN_NAME} — Second Payment Due Today`
+      : `${SEMESTER_PLAN_NAME} — Second Payment Due ${formatDueDate(balance.dueDate)}`;
+  return send(to, subject, html);
 }
 
 /** Admin alert for a Full Semester Plan enquiry — someone who wants a call before paying. */

@@ -5,6 +5,7 @@ import { getPostHogClient } from "@/lib/posthog-server";
 import { programmeOrgId } from "@/lib/programme-org";
 import { SEMESTER_PLANS, isSemesterPlanId } from "@/lib/semester-plan";
 import { recordDiscountRedemption } from "@/lib/discount-codes";
+import { recordSplitPayment, instalmentNumber } from "@/lib/semester-plan-balances";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -110,6 +111,14 @@ export async function GET(req: NextRequest) {
   }
 
   await recordDiscountRedemption(supabase, reference, meta, amountPaid);
+  const balance = await recordSplitPayment(supabase, {
+    reference,
+    meta,
+    email,
+    fullName,
+    phone: meta.phone ?? null,
+    paidAt: tx.paid_at ?? null,
+  });
 
   const posthog = getPostHogClient();
   posthog.capture({
@@ -151,8 +160,21 @@ export async function GET(req: NextRequest) {
   if (meta.type === "semester-plan") {
     const plan: unknown = meta.plan;
     const planName = isSemesterPlanId(plan) ? SEMESTER_PLANS[plan].name : (meta.course ?? "Full Semester Plan");
-    await sendSemesterPlanReceipt({ to: email, fullName, planName, amountPaid, reference });
-    return NextResponse.redirect(`${BASE_URL}/semester-plan/success?ref=${reference}`);
+    const instalment = instalmentNumber(meta) ?? undefined;
+    await sendSemesterPlanReceipt({
+      to: email,
+      fullName,
+      planName,
+      amountPaid,
+      reference,
+      instalment,
+      balance:
+        instalment === 1 && balance
+          ? { id: balance.id, amountDue: balance.amount_due, dueDate: balance.due_date }
+          : null,
+    });
+    const extra = instalment === 1 && balance ? `&balance=${balance.id}` : instalment === 2 ? "&instalment=2" : "";
+    return NextResponse.redirect(`${BASE_URL}/semester-plan/success?ref=${reference}${extra}`);
   }
 
   // BUCC 200L Preparatory Classes → send receipt, then WhatsApp handoff

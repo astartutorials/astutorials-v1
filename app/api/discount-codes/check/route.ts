@@ -13,12 +13,14 @@ const supabase = createClient(
  * code again and sets the price itself.
  */
 export async function POST(req: NextRequest) {
-  const { code, plan, email } = await req.json().catch(() => ({}));
+  const { code, plan, email, paymentOption } = await req.json().catch(() => ({}));
   if (!isSemesterPlanId(plan)) {
     return NextResponse.json({ error: "Choose a plan first." }, { status: 400 });
   }
 
-  const result = await checkDiscountCode(supabase, code, plan, typeof email === "string" ? email : undefined);
+  const result = await checkDiscountCode(supabase, code, plan, typeof email === "string" ? email : undefined, {
+    split: paymentOption === "split",
+  });
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }

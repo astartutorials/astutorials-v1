@@ -15,6 +15,7 @@ export const MONITORED_JOBS = {
   'expire-tutorials': { label: 'Nightly tutorial expiry', staleAfterHours: 48 },
   'reconcile-payments': { label: 'Payment reconciler', staleAfterHours: 48 },
   'paystack-webhook': { label: 'Paystack webhook', staleAfterHours: 24 * 7 },
+  'semester-plan-reminders': { label: 'Semester Plan payment reminders', staleAfterHours: 48 },
 } as const;
 
 export type MonitoredJob = keyof typeof MONITORED_JOBS;
