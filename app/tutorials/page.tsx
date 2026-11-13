@@ -159,6 +159,9 @@ function TutorialsContent() {
                                     </p>
                                 </motion.div>
                             )}
+                            <div className="mt-16 md:mt-24">
+                                <HowItWorks variant="group" />
+                            </div>
                         </motion.div>
                     ) : (
                         <motion.div
@@ -171,7 +174,7 @@ function TutorialsContent() {
                         >
                             <PricingSection orgId={tutorials[0]?.org_id ?? undefined} />
                             <FeaturesGrid />
-                            <HowItWorks />
+                            <HowItWorks variant="private" />
                         </motion.div>
                     )}
                 </AnimatePresence>
