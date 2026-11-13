@@ -1,4 +1,3 @@
-
 const mockServiceFrom = jest.fn();
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({ from: (...args: unknown[]) => mockServiceFrom(...args) })),
@@ -17,7 +16,8 @@ import { asServerClient, makeChain } from '../helpers/supabase';
 
 const mockServerClient = jest.mocked(createSupabaseServerClient);
 
-const SUPER_ADMIN = { id: 'super-id', user_metadata: { role: 'super_admin' } };
+// Friday 13 Nov 2026, 10:00 in Lagos.
+const NOW = new Date('2026-11-13T09:00:00Z');
 
 function mockAuth(user: object | null) {
   mockServerClient.mockResolvedValue(asServerClient({
@@ -30,64 +30,82 @@ function mockAuth(user: object | null) {
   }));
 }
 
-// Universal chainable/awaitable mock for Supabase query builders.
-// The dashboard route builds upcomingQuery, feedbackQuery and recentPaymentsQuery BEFORE Promise.all,
-// so from() is called in this order:
-//   1. from('tutorials')  → upcomingQuery
-//   2. from('feedback')   → feedbackQuery
-//   3. from('bookings')   → recentPaymentsQuery
-//   4. from('organisations')
-//   5. from('tutorials')
-//   6. from('bookings')   (paid)
-//   7. from('bookings')   (all)
-//   8. from('feedback')   (ratings)
-
-const ORG = { id: 'org-1', name: 'Babcock', type: 'university', location: 'Ilishan' };
-const ACTIVE_TUT = { id: 'tut-1', org_id: 'org-1', status: 'active' };
-const DRAFT_TUT = { id: 'tut-2', org_id: 'org-1', status: 'draft' };
-const PAID_BOOKING = { id: 'b1', email: 'ada@test.com', amount_paid: 5000, created_at: '2025-06-01', org_id: 'org-1' };
-const ALL_BOOKING = { id: 'b1', email: 'ada@test.com', org_id: 'org-1', created_at: '2025-06-01' };
-const RECENT_PAYMENT = { id: 'b1', full_name: 'Ada Okonkwo', email: 'ada@test.com', amount_paid: 5000, payment_reference: 'ref_1', created_at: '2025-06-01', org_id: 'org-1', tutorials: { title: 'Calculus' } };
-const FEEDBACK_ROW = { rating: 4, tutorials: { org_id: 'org-1' } };
-const UPCOMING_ROW = { id: 'tut-1', code: 'MTH201', title: 'Calculus', date: '2026-06-01', time: '10am', org_id: 'org-1', organisations: { name: 'Babcock' } };
-const RECENT_FEEDBACK = { full_name: 'Ada', rating: 4, created_at: '2025-06-01', tutorials: { title: 'Calculus', org_id: 'org-1', organisations: { name: 'Babcock' } } };
-
-function setupMocks(opts: {
-  upcoming?: unknown[];
-  recentFeedback?: unknown[];
-  recentPayments?: unknown[];
-  orgs?: unknown[];
-  tutorials?: unknown[];
-  paidBookings?: unknown[];
-  allBookings?: unknown[];
-  feedbackRows?: unknown[];
-} = {}) {
-  const {
-    upcoming = [UPCOMING_ROW],
-    recentFeedback = [RECENT_FEEDBACK],
-    recentPayments = [RECENT_PAYMENT],
-    orgs = [ORG],
-    tutorials = [ACTIVE_TUT, DRAFT_TUT],
-    paidBookings = [PAID_BOOKING],
-    allBookings = [ALL_BOOKING],
-    feedbackRows = [FEEDBACK_ROW],
-  } = opts;
-
-  // Call order matches the route (upcomingQuery, feedbackQuery, recentPaymentsQuery built first)
-  mockServiceFrom
-    .mockReturnValueOnce(makeChain(upcoming))        // 1: tutorials → upcomingQuery
-    .mockReturnValueOnce(makeChain(recentFeedback))  // 2: feedback  → feedbackQuery
-    .mockReturnValueOnce(makeChain(recentPayments))  // 3: bookings  → recentPaymentsQuery
-    .mockReturnValueOnce(makeChain(orgs))            // 4: organisations (Promise.all[0])
-    .mockReturnValueOnce(makeChain(tutorials))       // 5: tutorials  (Promise.all[1])
-    .mockReturnValueOnce(makeChain(paidBookings))    // 6: bookings paid (Promise.all[2])
-    .mockReturnValueOnce(makeChain(allBookings))     // 7: bookings all  (Promise.all[3])
-    .mockReturnValueOnce(makeChain(feedbackRows));   // 8: feedback ratings (Promise.all[4])
+/** A signed-in user whose user_roles row gives `role` in org-1. */
+function mockAuthAs(role: string) {
+  mockServerClient.mockResolvedValue(asServerClient({
+    auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1', user_metadata: {} } }, error: null }) },
+    from: jest.fn(() => ({
+      select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: [{ role, org_id: 'org-1' }] }) }) }) }),
+    })),
+  }));
 }
 
-describe('GET /api/admin/dashboard', () => {
-  beforeEach(() => { mockServerClient.mockReset(); mockServiceFrom.mockReset(); });
+const SUPER_ADMIN = { id: 'super-id', user_metadata: { role: 'super_admin' } };
 
+const booking = (over: object) => ({
+  id: 'b', full_name: 'Ada Okonkwo', email: 'ada@test.com', amount_paid: 5000,
+  payment_reference: 'ref', created_at: '2026-11-05T10:00:00Z', course: null,
+  tutorials: { title: 'Calculus' }, ...over,
+});
+
+const DEFAULT_TABLES: Record<string, unknown[]> = {
+  tutorials: [
+    { id: 't1', code: 'MTH201', title: 'Calculus', date: '2026-11-15', time: '10am', organisations: [{ name: 'Babcock' }] },
+    { id: 't2', code: 'PHY101', title: 'Mechanics', date: '2026-11-30', time: '2pm', organisations: { name: 'Babcock' } },
+  ],
+  bookings: [
+    booking({ id: 'b1', amount_paid: 55000, payment_reference: 'plan-1', course: 'Full Semester Plan: Group' }),
+    booking({ id: 'b2', email: 'bob@test.com', amount_paid: 55000, payment_reference: 'plan-2', course: 'Full Semester Plan: Group' }),
+    booking({ id: 'b3', email: 'ADA@test.com', amount_paid: 5000 }),
+    booking({ id: 'b4', email: 'old@test.com', amount_paid: 20000, created_at: '2026-10-10T10:00:00Z' }),
+    booking({ id: 'b5', amount_paid: 9000, created_at: '2026-09-01T10:00:00Z' }),
+  ],
+  feedback: [
+    { rating: 5, created_at: '2026-11-02T10:00:00Z', tutorials: { org_id: 'org-1' } },
+    { rating: 3, created_at: '2026-11-03T10:00:00Z', tutorials: [{ org_id: 'org-2' }] },
+  ],
+  semester_plan_enquiries: [{ id: 'e1' }, { id: 'e2' }, { id: 'e3' }],
+  student_registrations: [
+    { created_at: '2026-11-01T10:00:00Z' },
+    { created_at: '2026-11-02T10:00:00Z' },
+    { created_at: '2026-10-20T10:00:00Z' },
+  ],
+  tutor_applications: [{ id: 'a1' }, { id: 'a2' }],
+  ambassador_applications: [{ id: 'm1' }],
+  semester_plan_balances: [
+    { due_date: '2026-11-10', paid_at: null, paid_reference: null },          // overdue
+    { due_date: '2026-11-18', paid_at: null, paid_reference: null },          // due this week
+    { due_date: '2026-11-16', paid_at: null, paid_reference: null },          // due this week, sooner
+    { due_date: '2026-12-14', paid_at: null, paid_reference: null },          // later
+    { due_date: '2026-11-12', paid_at: '2026-11-08', paid_reference: 'plan-2' }, // b2 was a second instalment
+  ],
+};
+
+/** Every from(table) returns that table's rows; chains are kept for assertions. */
+const chains: { table: string; chain: ReturnType<typeof makeChain> }[] = [];
+function setupTables(overrides: Record<string, unknown[]> = {}) {
+  const tables = { ...DEFAULT_TABLES, ...overrides };
+  mockServiceFrom.mockImplementation((table: string) => {
+    const chain = makeChain(tables[table] ?? []);
+    chains.push({ table, chain });
+    return chain;
+  });
+}
+const queried = () => chains.map((c) => c.table);
+const scopedTo = (table: string) =>
+  (chains.find((c) => c.table === table)!.chain.eq as jest.Mock).mock.calls.some(
+    ([col, v]) => col === 'org_id' && v === 'org-1'
+  );
+
+beforeAll(() => { jest.useFakeTimers({ now: NOW }); });
+afterAll(() => { jest.useRealTimers(); });
+beforeEach(() => {
+  mockServerClient.mockReset();
+  mockServiceFrom.mockReset();
+  chains.length = 0;
+});
+
+describe('GET /api/admin/dashboard', () => {
   it('returns 401 when not authenticated', async () => {
     mockAuth(null);
     expect((await GET()).status).toBe(401);
@@ -98,170 +116,139 @@ describe('GET /api/admin/dashboard', () => {
     expect((await GET()).status).toBe(403);
   });
 
-  it('returns 200 with the expected response shape', async () => {
+  it('counts what needs attention', async () => {
     mockAuth(SUPER_ADMIN);
-    setupMocks();
+    setupTables();
+    const { attention } = await (await GET()).json();
 
-    const res = await GET();
-    expect(res.status).toBe(200);
-    const data = await res.json();
-
-    expect(data).toHaveProperty('totals');
-    expect(data).toHaveProperty('byOrg');
-    expect(data).toHaveProperty('orgNames');
-    expect(data).toHaveProperty('upcoming');
-    expect(data).toHaveProperty('recentFeedback');
-    expect(data).toHaveProperty('recentPayments');
-    expect(data).toHaveProperty('rawPaidBookings');
-    expect(data).toHaveProperty('rawAllBookings');
-  });
-
-  it('totals.revenue sums all paid bookings for super_admin', async () => {
-    mockAuth(SUPER_ADMIN);
-    setupMocks({ paidBookings: [PAID_BOOKING, { ...PAID_BOOKING, id: 'b2', amount_paid: 3000 }] });
-
-    const res = await GET();
-    const data = await res.json();
-    expect(data.totals.revenue).toBe(8000);
-  });
-
-  it('totals.students counts unique emails', async () => {
-    mockAuth(SUPER_ADMIN);
-    const twoBookings = [
-      { id: 'b1', email: 'ada@test.com', org_id: 'org-1', created_at: '2025-06-01' },
-      { id: 'b2', email: 'ada@test.com', org_id: 'org-1', created_at: '2025-06-02' }, // same email
-      { id: 'b3', email: 'bob@test.com', org_id: 'org-1', created_at: '2025-06-03' },
-    ];
-    setupMocks({ allBookings: twoBookings });
-
-    const res = await GET();
-    const data = await res.json();
-    expect(data.totals.students).toBe(2); // 2 unique emails
-  });
-
-  it('totals.activeTutorials counts only active (not draft) tutorials', async () => {
-    mockAuth(SUPER_ADMIN);
-    setupMocks({ tutorials: [ACTIVE_TUT, DRAFT_TUT, { id: 'tut-3', org_id: 'org-1', status: 'completed' }] });
-
-    const res = await GET();
-    const data = await res.json();
-    expect(data.totals.activeTutorials).toBe(1);
-  });
-
-  it('totals.avgRating is the mean of all feedback ratings', async () => {
-    mockAuth(SUPER_ADMIN);
-    setupMocks({
-      feedbackRows: [
-        { rating: 5, tutorials: { org_id: 'org-1' } },
-        { rating: 3, tutorials: { org_id: 'org-1' } },
-      ],
+    expect(attention).toEqual({
+      instalmentsOverdue: 1,
+      instalmentsDueSoon: { count: 2, nextDue: '2026-11-16' },
+      enquiriesThisWeek: 3,
+      applicationsNew: 2,
+      ambassadorsPending: 1,
+      sessionsThisWeek: 1, // 15 Nov is within 7 days; 30 Nov is not
     });
-
-    const res = await GET();
-    const data = await res.json();
-    expect(data.totals.avgRating).toBe(4);
   });
 
-  it('totals.avgRating is null when there is no feedback', async () => {
+  it('gives this month against last month', async () => {
     mockAuth(SUPER_ADMIN);
-    setupMocks({ feedbackRows: [] });
+    setupTables();
+    const { month } = await (await GET()).json();
 
-    const res = await GET();
-    const data = await res.json();
-    expect(data.totals.avgRating).toBeNull();
+    expect(month.revenue).toEqual({ current: 115000, previous: 20000 });
+    // ada@ and ADA@ are one student.
+    expect(month.students).toEqual({ current: 2, previous: 1 });
+    // b2 settled a balance: a second instalment, not a new sale.
+    expect(month.plansSold).toEqual({ current: 1, previous: 0 });
+    expect(month.registrations).toEqual({ current: 2, previous: 1 });
+    expect(month.rating).toEqual({ average: 4, count: 2 });
   });
 
-  it('byOrg contains one entry per visible organisation', async () => {
+  it('flattens the organisation on upcoming sessions and caps the list', async () => {
     mockAuth(SUPER_ADMIN);
-    setupMocks({ orgs: [ORG, { id: 'org-2', name: 'Test Sec', type: 'secondary' }] });
+    const many = Array.from({ length: 8 }, (_, i) => ({
+      id: `t${i}`, code: 'X', title: 'Y', date: '2026-11-20', time: '1pm', organisations: [{ name: 'Babcock' }],
+    }));
+    setupTables({ tutorials: many });
+    const { upcoming } = await (await GET()).json();
 
-    const res = await GET();
-    const data = await res.json();
-    expect(data.byOrg).toHaveLength(2);
+    expect(upcoming).toHaveLength(5);
+    expect(upcoming[0].organisations).toEqual({ name: 'Babcock' });
   });
 
-  it('byOrg is sorted by revenue descending', async () => {
+  it('lists recent payments with a title, falling back to the course', async () => {
     mockAuth(SUPER_ADMIN);
-    const org2 = { id: 'org-2', name: 'Rich Uni', type: 'university' };
-    const org2PaidBooking = { id: 'b2', email: 'x@test.com', amount_paid: 99000, created_at: '2025-06-01', org_id: 'org-2' };
-    setupMocks({
-      orgs: [ORG, org2],
-      paidBookings: [PAID_BOOKING, org2PaidBooking],
-      allBookings: [ALL_BOOKING, { id: 'b2', email: 'x@test.com', org_id: 'org-2', created_at: '2025-06-01' }],
+    setupTables();
+    const { recentPayments, revenueSeries } = await (await GET()).json();
+
+    expect(recentPayments[0]).toEqual({
+      id: 'b1', full_name: 'Ada Okonkwo', amount_paid: 55000,
+      created_at: '2026-11-05T10:00:00Z', title: 'Calculus',
     });
+    expect(revenueSeries).toHaveLength(5);
 
-    const res = await GET();
-    const data = await res.json();
-    expect(data.byOrg[0].orgName).toBe('Rich Uni');
-    expect(data.byOrg[0].revenue).toBe(99000);
+    mockServiceFrom.mockReset();
+    setupTables({ bookings: [booking({ tutorials: null, course: 'Full Semester Plan: Private' })] });
+    const again = await (await GET()).json();
+    expect(again.recentPayments[0].title).toBe('Full Semester Plan: Private');
   });
 
-  it('upcoming contains the tutorials from upcomingQuery', async () => {
+  it('says so when nothing needs attention', async () => {
     mockAuth(SUPER_ADMIN);
-    setupMocks({ upcoming: [UPCOMING_ROW] });
-
-    const res = await GET();
-    const data = await res.json();
-    expect(data.upcoming).toHaveLength(1);
-    expect(data.upcoming[0].code).toBe('MTH201');
-  });
-
-  it('rawPaidBookings contains amount_paid and org_id for each paid booking', async () => {
-    mockAuth(SUPER_ADMIN);
-    setupMocks();
-
-    const res = await GET();
-    const data = await res.json();
-    expect(data.rawPaidBookings[0].amount_paid).toBe(5000);
-    expect(data.rawPaidBookings[0].org_id).toBe('org-1');
-  });
-
-  it('recentPayments contains full_name, amount_paid, and tutorial title', async () => {
-    mockAuth(SUPER_ADMIN);
-    setupMocks();
-
-    const res = await GET();
-    const data = await res.json();
-    expect(data.recentPayments).toHaveLength(1);
-    expect(data.recentPayments[0].full_name).toBe('Ada Okonkwo');
-    expect(data.recentPayments[0].amount_paid).toBe(5000);
-    expect(data.recentPayments[0].tutorials.title).toBe('Calculus');
+    setupTables({
+      tutorials: [], semester_plan_enquiries: [], tutor_applications: [],
+      ambassador_applications: [], semester_plan_balances: [],
+    });
+    const { attention } = await (await GET()).json();
+    expect(attention).toEqual({
+      instalmentsOverdue: 0,
+      instalmentsDueSoon: { count: 0, nextDue: null },
+      enquiriesThisWeek: 0,
+      applicationsNew: 0,
+      ambassadorsPending: 0,
+      sessionsThisWeek: 0,
+    });
   });
 });
 
-// The dashboard is open to every role, so it must not ship money to roles that
-// cannot see payments — hiding the cards in the UI leaves the numbers in the JSON.
+// Every role gets the dashboard, so each part must reach only roles holding
+// its permission: hiding a card leaves the numbers in the JSON.
 describe('GET /api/admin/dashboard — role-shaped response', () => {
-  beforeEach(() => { mockServerClient.mockReset(); mockServiceFrom.mockReset(); });
-
-  function mockAuthAs(role: string) {
-    mockServerClient.mockResolvedValue(asServerClient({
-      auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1', user_metadata: {} } }, error: null }) },
-      from: jest.fn(() => ({
-        select: () => ({ eq: () => ({ order: () => ({ limit: async () => ({ data: [{ role, org_id: 'org-1' }] }) }) }) }),
-      })),
-    }));
-  }
-
-  it('withholds revenue and payments from a tutor', async () => {
+  it('withholds money, intake and applicants from a tutor, and never queries them', async () => {
     mockAuthAs('tutor');
-    setupMocks();
+    setupTables();
     const data = await (await GET()).json();
 
-    expect(data.totals.revenue).toBe(0);
+    expect(data.month.revenue).toBeNull();
+    expect(data.month.plansSold).toBeNull();
+    expect(data.month.registrations).toBeNull();
+    expect(data.attention.instalmentsOverdue).toBeNull();
+    expect(data.attention.instalmentsDueSoon).toBeNull();
+    expect(data.attention.enquiriesThisWeek).toBeNull();
+    expect(data.attention.applicationsNew).toBeNull();
+    expect(data.attention.ambassadorsPending).toBeNull();
+    expect(data.revenueSeries).toEqual([]);
     expect(data.recentPayments).toEqual([]);
-    expect(data.rawPaidBookings).toEqual([]);
-    expect(data.byOrg.every((o: { revenue: number }) => o.revenue === 0)).toBe(true);
-    // Non-money parts of the dashboard still arrive.
-    expect(data.totals.activeTutorials).toBe(1);
-    expect(data.upcoming).toHaveLength(1);
+
+    for (const t of ['semester_plan_balances', 'semester_plan_enquiries', 'student_registrations', 'tutor_applications', 'ambassador_applications']) {
+      expect(queried()).not.toContain(t);
+    }
+
+    // What a tutor may see still arrives.
+    expect(data.upcoming).toHaveLength(2);
+    expect(data.attention.sessionsThisWeek).toBe(1);
+    expect(data.month.students.current).toBe(2);
+    // Feedback is scoped through the tutorial's org: only the org-1 review.
+    expect(data.month.rating).toEqual({ average: 5, count: 1 });
   });
 
-  it('still sends revenue to a viewer, who holds payments:read', async () => {
+  it('sends money to a viewer, who holds payments:read, but not intake', async () => {
     mockAuthAs('viewer');
-    setupMocks();
+    setupTables();
     const data = await (await GET()).json();
-    expect(data.totals.revenue).toBe(5000);
-    expect(data.recentPayments).toHaveLength(1);
+
+    expect(data.month.revenue.current).toBe(115000);
+    expect(data.recentPayments.length).toBeGreaterThan(0);
+    expect(data.attention.instalmentsOverdue).toBe(1);
+    expect(data.month.registrations).toBeNull();
+  });
+
+  it("scopes an org_admin's org data to their org, but not A-Star-wide tutor applications", async () => {
+    mockAuthAs('org_admin');
+    setupTables();
+    await GET();
+
+    for (const t of ['tutorials', 'bookings', 'semester_plan_enquiries', 'student_registrations', 'ambassador_applications', 'semester_plan_balances']) {
+      expect(scopedTo(t)).toBe(true);
+    }
+    expect(scopedTo('tutor_applications')).toBe(false);
+  });
+
+  it('does not scope a super_admin', async () => {
+    mockAuth(SUPER_ADMIN);
+    setupTables();
+    await GET();
+    expect(scopedTo('bookings')).toBe(false);
   });
 });

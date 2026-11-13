@@ -2,19 +2,112 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { getUserRole, can } from '@/lib/rbac';
+import { lagosDate, SEMESTER_PLAN_NAME } from '@/lib/semester-plan';
 
 const serviceSupabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Without generated DB types, supabase-js infers embedded to-one relations
-// (e.g. feedback → tutorials) as arrays. Normalise to the single related row.
+/** What needs someone's attention. Null means the role may not see it. */
+export interface DashboardAttention {
+  instalmentsOverdue: number | null;
+  instalmentsDueSoon: { count: number; nextDue: string | null } | null;
+  enquiriesThisWeek: number | null;
+  applicationsNew: number | null;
+  ambassadorsPending: number | null;
+  sessionsThisWeek: number;
+}
+
+/** A figure this calendar month (Lagos) next to last month's. */
+export interface MonthFigure {
+  current: number;
+  previous: number;
+}
+
+export interface DashboardResponse {
+  attention: DashboardAttention;
+  month: {
+    revenue: MonthFigure | null;
+    students: MonthFigure;
+    plansSold: MonthFigure | null;
+    registrations: MonthFigure | null;
+    rating: { average: number | null; count: number } | null;
+  };
+  /** Every paid booking's date and amount, for the revenue chart. */
+  revenueSeries: { created_at: string; amount_paid: number }[];
+  upcoming: {
+    id: string;
+    code: string;
+    title: string;
+    date: string;
+    time: string;
+    organisations?: { name: string } | null;
+  }[];
+  recentPayments: {
+    id: string;
+    full_name: string;
+    amount_paid: number;
+    created_at: string;
+    title: string;
+  }[];
+}
+
+type BookingRow = {
+  id: string;
+  full_name: string;
+  email: string;
+  amount_paid: number | null;
+  payment_reference: string | null;
+  created_at: string;
+  course: string | null;
+  tutorials: { title: string } | { title: string }[] | null;
+};
+
+const DAY = 86_400_000;
+
+function addDays(isoDate: string, days: number): string {
+  return new Date(Date.parse(`${isoDate}T00:00:00Z`) + days * DAY).toISOString().slice(0, 10);
+}
+
+/** Midnight in Lagos (UTC+1) on the first of the month `offset` months from `today`. */
+function monthStart(today: string, offset: number): Date {
+  const [y, m] = today.split('-').map(Number);
+  const first = new Date(Date.UTC(y, m - 1 + offset, 1));
+  return new Date(first.getTime() - 60 * 60 * 1000);
+}
+
+function tutorialTitle(t: BookingRow['tutorials']): string | null {
+  const rel = Array.isArray(t) ? t[0] : t;
+  return rel?.title ?? null;
+}
+
 function relOrgId(tutorials: unknown): string | null {
   const rel = Array.isArray(tutorials) ? tutorials[0] : tutorials;
   return (rel as { org_id?: string | null } | null | undefined)?.org_id ?? null;
 }
 
+/** Splits rows into this month and last month by created_at. */
+function byMonth<T extends { created_at: string }>(rows: T[], thisStart: Date, lastStart: Date) {
+  const current: T[] = [];
+  const previous: T[] = [];
+  for (const r of rows) {
+    const at = new Date(r.created_at);
+    if (at >= thisStart) current.push(r);
+    else if (at >= lastStart) previous.push(r);
+  }
+  return { current, previous };
+}
+
+const none = Promise.resolve({ data: null, error: null });
+
+/**
+ * The dashboard: what needs attention today, this month's figures, and the
+ * revenue trend. Open to every role (they all hold tutorials:read); each part
+ * is fetched only for roles holding its permission, and org data is scoped to
+ * the user's org. Withheld parts are null, not zero, so the page can tell
+ * "none" from "not yours to see" — and nothing withheld is in the JSON.
+ */
 export async function GET() {
   const authClient = await createSupabaseServerClient();
   const { data: { user }, error: authError } = await authClient.auth.getUser();
@@ -25,118 +118,154 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const visibleOrgIds = ctx.role === 'super_admin' ? null : (ctx.orgId ? [ctx.orgId] : []);
+  const seesMoney = can(ctx.role, 'payments:read');
+  const seesFeedback = can(ctx.role, 'feedback:read');
+  const seesIntake = can(ctx.role, 'intake:read');
+  const seesApplications = can(ctx.role, 'applications:read');
+  const seesAmbassadors = can(ctx.role, 'ambassadors:read');
 
-  const upcomingBase = serviceSupabase
-    .from('tutorials')
-    .select('id, code, title, date, time, org_id, organisations(name)')
-    .gte('date', new Date().toISOString().split('T')[0])
-    .neq('status', 'draft')
-    .order('date', { ascending: true });
-  const upcomingQuery = visibleOrgIds
-    ? upcomingBase.in('org_id', visibleOrgIds).limit(5)
-    : upcomingBase.limit(5);
+  // Org data is scoped; A-Star-wide data (tutor applications) is not.
+  const scoped = ctx.role !== 'super_admin';
+  const scope = <Q,>(q: Q): Q =>
+    scoped ? (q as unknown as { eq: (col: string, v: unknown) => Q }).eq('org_id', ctx.orgId) : q;
 
-  const feedbackQuery = serviceSupabase
-    .from('feedback')
-    .select('full_name, rating, created_at, tutorials(title, org_id, organisations(name))')
-    .order('created_at', { ascending: false })
-    .limit(visibleOrgIds ? 100 : 5);
-
-  const recentPaymentsBase = serviceSupabase
-    .from('bookings')
-    .select('id, full_name, email, amount_paid, payment_reference, created_at, org_id, tutorials(title)')
-    .eq('payment_status', 'paid')
-    .order('created_at', { ascending: false });
-  const recentPaymentsQuery = visibleOrgIds
-    ? recentPaymentsBase.in('org_id', visibleOrgIds).limit(8)
-    : recentPaymentsBase.limit(8);
+  const today = lagosDate();
+  const weekAhead = addDays(today, 7);
+  const weekAgo = new Date(Date.now() - 7 * DAY).toISOString();
+  const thisMonth = monthStart(today, 0);
+  const lastMonth = monthStart(today, -1);
 
   const [
-    { data: orgs },
-    { data: tutorials },
-    { data: paidBookings },
-    { data: allBookings },
-    { data: feedbackRows },
-    { data: upcoming },
-    { data: recentFeedbackRaw },
-    { data: recentPaymentsRaw },
+    upcomingRes,
+    bookingsRes,
+    feedbackRes,
+    enquiriesRes,
+    registrationsRes,
+    applicationsRes,
+    ambassadorsRes,
+    balancesRes,
   ] = await Promise.all([
-    serviceSupabase.from('organisations').select('id, name, type, location').order('created_at'),
-    serviceSupabase.from('tutorials').select('id, org_id, status'),
-    serviceSupabase.from('bookings').select('id, email, amount_paid, created_at, org_id').eq('payment_status', 'paid'),
-    serviceSupabase.from('bookings').select('id, email, org_id, created_at'),
-    serviceSupabase.from('feedback').select('rating, tutorials(org_id)'),
-    upcomingQuery,
-    feedbackQuery,
-    recentPaymentsQuery,
+    scope(
+      serviceSupabase
+        .from('tutorials')
+        .select('id, code, title, date, time, organisations(name)')
+        .gte('date', today)
+        .neq('status', 'draft')
+    ).order('date', { ascending: true }).limit(100),
+    scope(
+      serviceSupabase
+        .from('bookings')
+        .select('id, full_name, email, amount_paid, payment_reference, created_at, course, tutorials(title)')
+        .eq('payment_status', 'paid')
+    ).order('created_at', { ascending: false }),
+    seesFeedback
+      ? serviceSupabase
+          .from('feedback')
+          .select('rating, created_at, tutorials(org_id)')
+          .gte('created_at', thisMonth.toISOString())
+      : none,
+    seesIntake
+      ? scope(serviceSupabase.from('semester_plan_enquiries').select('id').gte('created_at', weekAgo))
+      : none,
+    seesIntake
+      ? scope(
+          serviceSupabase
+            .from('student_registrations')
+            .select('created_at')
+            .gte('created_at', lastMonth.toISOString())
+        )
+      : none,
+    seesApplications
+      ? serviceSupabase.from('tutor_applications').select('id').eq('status', 'new')
+      : none,
+    seesAmbassadors
+      ? scope(serviceSupabase.from('ambassador_applications').select('id').eq('status', 'pending'))
+      : none,
+    seesMoney
+      ? scope(serviceSupabase.from('semester_plan_balances').select('due_date, paid_at, paid_reference'))
+      : none,
   ]);
 
-  const recentFeedback = visibleOrgIds
-    ? (recentFeedbackRaw ?? []).filter((f) => { const oid = relOrgId(f.tutorials); return oid !== null && visibleOrgIds.includes(oid); }).slice(0, 5)
-    : recentFeedbackRaw;
+  // supabase-js types embedded to-one relations as arrays; take the one row.
+  const upcomingAll: DashboardResponse['upcoming'] = (
+    (upcomingRes.data ?? []) as unknown as (Omit<DashboardResponse['upcoming'][number], 'organisations'> & {
+      organisations: { name: string } | { name: string }[] | null;
+    })[]
+  ).map((t) => ({
+    ...t,
+    organisations: Array.isArray(t.organisations) ? t.organisations[0] ?? null : t.organisations,
+  }));
+  const bookings = (bookingsRes.data ?? []) as unknown as BookingRow[];
+  const balances = (balancesRes.data ?? []) as { due_date: string; paid_at: string | null; paid_reference: string | null }[];
 
-  const filteredOrgs = visibleOrgIds
-    ? (orgs ?? []).filter(o => visibleOrgIds.includes(o.id))
-    : (orgs ?? []);
+  const bookingMonths = byMonth(bookings, thisMonth, lastMonth);
+  const sum = (rows: BookingRow[]) => rows.reduce((s, b) => s + (b.amount_paid ?? 0), 0);
+  const uniqueEmails = (rows: BookingRow[]) => new Set(rows.map((b) => b.email.toLowerCase())).size;
 
-  const filteredPaid = visibleOrgIds
-    ? (paidBookings ?? []).filter(b => b.org_id && visibleOrgIds.includes(b.org_id))
-    : (paidBookings ?? []);
+  // A plan is sold on its first payment; a second instalment is not a new sale.
+  const secondInstalments = new Set(balances.map((b) => b.paid_reference).filter(Boolean));
+  const isPlanSale = (b: BookingRow) =>
+    (b.course?.startsWith(`${SEMESTER_PLAN_NAME}:`) ?? false) &&
+    !secondInstalments.has(b.payment_reference);
 
-  const filteredAll = visibleOrgIds
-    ? (allBookings ?? []).filter(b => b.org_id && visibleOrgIds.includes(b.org_id))
-    : (allBookings ?? []);
+  const unpaid = balances.filter((b) => !b.paid_at);
+  const dueSoon = unpaid
+    .filter((b) => b.due_date >= today && b.due_date <= weekAhead)
+    .sort((a, b) => a.due_date.localeCompare(b.due_date));
 
-  // All-time per-org aggregates (used for stat cards)
-  const byOrg = filteredOrgs.map(org => {
-    const orgTutorials = (tutorials ?? []).filter(t => t.org_id === org.id);
-    const orgPaid = filteredPaid.filter(b => b.org_id === org.id);
-    const orgAll = filteredAll.filter(b => b.org_id === org.id);
-    return {
-      orgId: org.id,
-      orgName: org.name,
-      type: org.type,
-      revenue: orgPaid.reduce((s, b) => s + (b.amount_paid ?? 0), 0),
-      students: new Set(orgAll.map(b => b.email)).size,
-      tutorials: orgTutorials.length,
-      activeTutorials: orgTutorials.filter(t => t.status === 'active').length,
-      bookings: orgAll.length,
-    };
-  }).sort((a, b) => b.revenue - a.revenue);
+  const registrations = byMonth((registrationsRes.data ?? []) as { created_at: string }[], thisMonth, lastMonth);
 
-  // All paid bookings count for super_admin total (includes unattributed)
-  const totalRevenue = ctx.role === 'super_admin'
-    ? (paidBookings ?? []).reduce((s, b) => s + (b.amount_paid ?? 0), 0)
-    : byOrg.reduce((s, o) => s + o.revenue, 0);
-  const totalStudents = ctx.role === 'super_admin'
-    ? new Set((allBookings ?? []).map(b => b.email)).size
-    : byOrg.reduce((s, o) => s + o.students, 0);
-  const totalActiveTutorials = byOrg.reduce((s, o) => s + o.activeTutorials, 0);
-  const filteredFeedbackRows = visibleOrgIds
-    ? (feedbackRows ?? []).filter((f) => { const oid = relOrgId(f.tutorials); return oid !== null && visibleOrgIds.includes(oid); })
-    : (feedbackRows ?? []);
-  const avgRating = filteredFeedbackRows.length
-    ? filteredFeedbackRows.reduce((s, f) => s + f.rating, 0) / filteredFeedbackRows.length
-    : null;
+  // Feedback carries its org through the tutorial, so scope it here.
+  const ratings = ((feedbackRes.data ?? []) as { rating: number; tutorials: unknown }[])
+    .filter((f) => !scoped || relOrgId(f.tutorials) === ctx.orgId);
 
-  // Every role gets the dashboard, but money and feedback only go to roles that
-  // hold those permissions. Hiding the cards in the UI is not enough: the JSON
-  // is readable in the browser's network tab.
-  const showMoney = can(ctx.role, 'payments:read');
-  const showFeedback = can(ctx.role, 'feedback:read');
-
-  return NextResponse.json({
-    totals: { revenue: showMoney ? totalRevenue : 0, students: totalStudents, activeTutorials: totalActiveTutorials, avgRating: showFeedback ? avgRating : null, orgCount: filteredOrgs.length },
-    byOrg: showMoney ? byOrg : byOrg.map(o => ({ ...o, revenue: 0 })),
-    orgNames: filteredOrgs.map(o => o.name),
-    upcoming: upcoming ?? [],
-    recentFeedback: showFeedback ? (recentFeedback ?? []) : [],
-    recentPayments: showMoney ? (recentPaymentsRaw ?? []) : [],
-    // Raw booking streams — client aggregates these for time-period chart views
-    rawPaidBookings: showMoney
-      ? filteredPaid.map(b => ({ created_at: b.created_at, amount_paid: b.amount_paid ?? 0, org_id: b.org_id }))
+  const body: DashboardResponse = {
+    attention: {
+      instalmentsOverdue: seesMoney ? unpaid.filter((b) => b.due_date < today).length : null,
+      instalmentsDueSoon: seesMoney ? { count: dueSoon.length, nextDue: dueSoon[0]?.due_date ?? null } : null,
+      enquiriesThisWeek: seesIntake ? (enquiriesRes.data ?? []).length : null,
+      applicationsNew: seesApplications ? (applicationsRes.data ?? []).length : null,
+      ambassadorsPending: seesAmbassadors ? (ambassadorsRes.data ?? []).length : null,
+      sessionsThisWeek: upcomingAll.filter((t) => t.date <= weekAhead).length,
+    },
+    month: {
+      revenue: seesMoney
+        ? { current: sum(bookingMonths.current), previous: sum(bookingMonths.previous) }
+        : null,
+      students: {
+        current: uniqueEmails(bookingMonths.current),
+        previous: uniqueEmails(bookingMonths.previous),
+      },
+      plansSold: seesMoney
+        ? {
+            current: bookingMonths.current.filter(isPlanSale).length,
+            previous: bookingMonths.previous.filter(isPlanSale).length,
+          }
+        : null,
+      registrations: seesIntake
+        ? { current: registrations.current.length, previous: registrations.previous.length }
+        : null,
+      rating: seesFeedback
+        ? {
+            average: ratings.length ? ratings.reduce((s, f) => s + f.rating, 0) / ratings.length : null,
+            count: ratings.length,
+          }
+        : null,
+    },
+    revenueSeries: seesMoney
+      ? bookings.map((b) => ({ created_at: b.created_at, amount_paid: b.amount_paid ?? 0 }))
       : [],
-    rawAllBookings: filteredAll.map(b => ({ created_at: b.created_at, email: b.email, org_id: b.org_id })),
-  });
+    upcoming: upcomingAll.slice(0, 5),
+    recentPayments: seesMoney
+      ? bookings.slice(0, 6).map((b) => ({
+          id: b.id,
+          full_name: b.full_name,
+          amount_paid: b.amount_paid ?? 0,
+          created_at: b.created_at,
+          title: tutorialTitle(b.tutorials) ?? b.course ?? 'Private session',
+        }))
+      : [],
+  };
+
+  return NextResponse.json(body);
 }
