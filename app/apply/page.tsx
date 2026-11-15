@@ -5,7 +5,7 @@ export const metadata = {
   description:
     "Apply to join A-Star Tutorials as a tutor. Share your expertise, set your own schedule, and help tertiary students achieve academic excellence.",
   alternates: {
-    canonical: "https://astartutorials.com/apply",
+    canonical: "https://www.astartutorials.com/apply",
   },
 };
 

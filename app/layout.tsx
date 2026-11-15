@@ -22,7 +22,7 @@ const caveat = Caveat({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://astartutorials.com"),
+  metadataBase: new URL("https://www.astartutorials.com"),
   title: {
     default: "A-Star Tutorials | Academic Excellence for Tertiary Students",
     template: "%s | A-Star Tutorials",
@@ -38,12 +38,12 @@ export const metadata: Metadata = {
     "group tutorials",
     "university tutoring Nigeria",
   ],
-  authors: [{ name: "A-Star Tutorials", url: "https://astartutorials.com" }],
+  authors: [{ name: "A-Star Tutorials", url: "https://www.astartutorials.com" }],
   creator: "A-Star Tutorials",
   openGraph: {
     type: "website",
     locale: "en_NG",
-    url: "https://astartutorials.com",
+    url: "https://www.astartutorials.com",
     siteName: "A-Star Tutorials",
     title: "A-Star Tutorials | Academic Excellence for Tertiary Students",
     description:

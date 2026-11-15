@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Browse and book expert tutors at A-Star Tutorials. Find one-on-one sessions tailored to your course and schedule.",
   alternates: {
-    canonical: "https://astartutorials.com/tutorials",
+    canonical: "https://www.astartutorials.com/tutorials",
   },
 };
 

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Join the A-Star Tutorials team. Explore open roles and help us empower tertiary students across Nigeria to achieve academic excellence.",
   alternates: {
-    canonical: "https://astartutorials.com/careers",
+    canonical: "https://www.astartutorials.com/careers",
   },
 };
 

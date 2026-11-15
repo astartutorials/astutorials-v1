@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "The Freshers' Advantage 2.0 | A-Star Tutorials",
     description,
-    url: "https://astartutorials.com/tfa",
+    url: "https://www.astartutorials.com/tfa",
     type: "website",
     images: [{ url: TFA_FLYER.src, width: TFA_FLYER.width, height: TFA_FLYER.height, alt: TFA_FLYER.alt }],
   },

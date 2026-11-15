@@ -206,7 +206,7 @@ function SectionHead({ eyebrow, title }: { eyebrow?: string; title: string }) {
 function parentShareUrl() {
   // Not window.location: the link is rendered on the server too, and it must
   // match on hydration.
-  const origin = process.env.NEXT_PUBLIC_BASE_URL ?? "https://astartutorials.com";
+  const origin = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.astartutorials.com";
   const group = SEMESTER_PLANS.group;
   const priv = SEMESTER_PLANS.private;
   const text = [

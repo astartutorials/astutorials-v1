@@ -26,7 +26,7 @@ import {
 } from "@/lib/tfa";
 
 const FROM = "Juyi at A-Star Tutorials <bookings@astartutorials.com>";
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://astartutorials.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.astartutorials.com";
 const RESEND_URL = "https://api.resend.com/emails";
 
 // Never throws — a failed receipt must not roll back a paid booking. But every
@@ -39,7 +39,7 @@ const RESEND_URL = "https://api.resend.com/emails";
  */
 const EMAIL_LOGO = `
     <div style="max-width:520px;margin:0 auto;padding:8px 0 20px">
-      <img src="https://astartutorials.com/brand/email-logo.png" width="228" height="42" alt="A-Star Tutorials" style="display:block;border:0;width:228px;height:42px" />
+      <img src="https://www.astartutorials.com/brand/email-logo.png" width="228" height="42" alt="A-Star Tutorials" style="display:block;border:0;width:228px;height:42px" />
     </div>`;
 
 async function send(to: string, subject: string, html: string): Promise<boolean> {

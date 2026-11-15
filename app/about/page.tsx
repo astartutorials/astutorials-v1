@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   description:
     "A-Star Tutorials is a student-driven academic support system at Babcock University, offering group and one-on-one tutorials taught by students who aced the course.",
   alternates: {
-    canonical: "https://astartutorials.com/about",
+    canonical: "https://www.astartutorials.com/about",
   },
 };
 
