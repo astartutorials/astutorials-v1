@@ -2,7 +2,6 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
   ArrowRight,
   CalendarRange,
@@ -182,11 +181,6 @@ const FAQS: Record<Audience, { q: string; a: string }[]> = {
   ],
 };
 
-const fade = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
-};
-
 /** CSS scroll reveal (`.reveal` in globals.css): no JS, nothing hidden while hydrating. */
 function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <div className={`reveal ${className}`}>{children}</div>;
@@ -258,7 +252,8 @@ export default function SemesterPlanLanding({ audience }: { audience: Audience }
       {/* ── HERO ───────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-28 md:pt-36 pb-14 md:pb-20">
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <motion.div initial="hidden" animate="visible" variants={fade}>
+          {/* CSS fade (.hero-in), not framer-motion: visible on first paint. */}
+          <div className="hero-in">
             <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft border border-brand-soft-border px-4 py-1.5 text-sm font-semibold text-brand-ink">
               <Sparkles size={15} /> {copy.eyebrow} · {SEMESTER_PLAN_TERM}
             </span>
@@ -295,7 +290,7 @@ export default function SemesterPlanLanding({ audience }: { audience: Audience }
                 Parents paying? Send them a page written just for them.
               </p>
             )}
-          </motion.div>
+          </div>
         </div>
       </section>
 

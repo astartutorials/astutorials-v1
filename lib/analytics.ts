@@ -28,6 +28,12 @@ export function loadAnalytics(): Promise<PostHog> {
         ui_host: "https://us.posthog.com",
         defaults: "2026-01-30",
         capture_exceptions: true,
+        // Not used (confirmed 2026-11-15): each is a separate download on
+        // every page (surveys ~48 KB, session recorder ~69 KB). Turn back on
+        // here if A-Star starts running PostHog surveys or watching replays,
+        // and update the privacy policy to mention recordings.
+        disable_surveys: true,
+        disable_session_recording: true,
         debug: process.env.NODE_ENV === "development",
       });
       instance = posthog;

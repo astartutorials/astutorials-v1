@@ -1,15 +1,8 @@
-"use client";
-
-import { motion } from "framer-motion";
-
 export default function CareersHero() {
     return (
         <section className="text-center max-w-2xl mx-auto mb-8">
-            <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-            >
+            {/* CSS fade (.hero-in), not framer-motion: visible on first paint. */}
+            <div className="hero-in">
                 <span className="inline-block px-4 py-1.5 rounded-full border border-[var(--astar-red)] text-brand-ink text-sm font-medium mb-6">
                     We are hiring!
                 </span>
@@ -21,7 +14,7 @@ export default function CareersHero() {
                 <p className="text-fg-muted text-lg leading-relaxed">
                     Join us in building a supportive and inspiring learning community.
                 </p>
-            </motion.div>
+            </div>
         </section>
     );
 }
