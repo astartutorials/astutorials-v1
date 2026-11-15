@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Become an A-Star Ambassador | A-Star Tutorials",
     description,
-    url: "https://astartutorials.com/ambassador",
+    url: "https://www.astartutorials.com/ambassador",
     type: "website",
     images: [OG_IMAGE],
   },

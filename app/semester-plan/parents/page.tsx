@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "Full Semester Plan for Parents | A-Star Tutorials",
     description:
       "One payment covers your child's whole first semester of tutorials. Group ₦100,000 or one-on-one ₦300,000.",
-    url: "https://astartutorials.com/semester-plan/parents",
+    url: "https://www.astartutorials.com/semester-plan/parents",
     type: "website",
     images: [OG_IMAGE],
   },

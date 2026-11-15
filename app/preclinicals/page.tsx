@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "Pre-Clinicals Introductory Online Classes | A-Star Tutorials",
     description:
       "Get tutored by distinction students in Anatomy, Histology, Embryology, Physiology & Biochemistry. Daily & weekly quizzes, cash prizes, community. 3rd – 30th August 2026.",
-    url: "https://astartutorials.com/preclinicals",
+    url: "https://www.astartutorials.com/preclinicals",
     images: [{ ...OG_IMAGE, alt: "A-Star Tutorials Pre-Clinicals Classes" }],
   },
 };

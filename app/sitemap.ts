@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { PLAYBOOKS, playbookHref } from "@/lib/playbooks";
 import { INTAKE_LEVELS, intakeHref } from "@/lib/intakes";
 
-const BASE_URL = "https://astartutorials.com";
+const BASE_URL = "https://www.astartutorials.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

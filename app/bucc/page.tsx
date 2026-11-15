@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: "BUCC 200L Preparatory Online Classes | A-Star Tutorials",
     description:
       "Get tutored by distinction students in SEN 201, MTH 201, COS 201 & IFT 211. Daily & weekly quizzes, cash prizes, community. 7th September – 4th October 2026.",
-    url: "https://astartutorials.com/bucc",
+    url: "https://www.astartutorials.com/bucc",
     type: "website",
     images: [
       {

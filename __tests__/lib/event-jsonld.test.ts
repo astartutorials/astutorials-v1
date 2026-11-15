@@ -10,12 +10,12 @@ describe('eventJsonLd()', () => {
     });
     expect(data).toMatchObject({
       '@type': 'Event',
-      url: 'https://astartutorials.com/tfa',
+      url: 'https://www.astartutorials.com/tfa',
       startDate: '2026-11-08T09:00:00.000Z',
       endDate: '2026-11-08T14:00:00.000Z',
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
       location: { '@type': 'Place', name: 'Auditorium', address: { addressCountry: 'NG' } },
-      image: ['https://astartutorials.com/tfa/flyer.jpg'],
+      image: ['https://www.astartutorials.com/tfa/flyer.jpg'],
       isAccessibleForFree: true,
       offers: { price: 0, priceCurrency: 'NGN' },
     });
@@ -27,7 +27,7 @@ describe('eventJsonLd()', () => {
       images: ['https://cdn.example/x.png'], online: true, platform: 'Google Meet',
     });
     expect(data.eventAttendanceMode).toBe('https://schema.org/OnlineEventAttendanceMode');
-    expect(data.location).toEqual({ '@type': 'VirtualLocation', url: 'https://astartutorials.com/playbooks/law', name: 'Google Meet' });
+    expect(data.location).toEqual({ '@type': 'VirtualLocation', url: 'https://www.astartutorials.com/playbooks/law', name: 'Google Meet' });
     expect(JSON.stringify(data)).not.toContain('meet.google.com');
     expect(data.image).toEqual(['https://cdn.example/x.png']);
     expect(data.endDate).toBe('2026-11-08T10:30:00.000Z');

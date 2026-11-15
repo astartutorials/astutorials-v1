@@ -240,7 +240,7 @@ export const TFA_HEARD_OPTIONS = [
   "Other",
 ];
 
-const TFA_URL = "https://astartutorials.com/tfa";
+const TFA_URL = "https://www.astartutorials.com/tfa";
 const TFA_CAL_DETAILS = `Theme: ${TFA_THEME}. Panel sessions, a keynote address, entertainment and the unveiling of the A-Star Ambassadors. ${TFA_URL}`;
 
 /** 20261108T090000Z — the compact UTC form both Google Calendar and iCalendar use. */

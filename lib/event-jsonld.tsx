@@ -6,7 +6,7 @@
  * or a new Playbook file updates the search data with no further change.
  */
 
-const SITE = "https://astartutorials.com";
+const SITE = "https://www.astartutorials.com";
 
 interface BaseEvent {
   name: string;

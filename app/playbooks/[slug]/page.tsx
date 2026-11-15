@@ -25,7 +25,7 @@ export async function generateMetadata({
   const playbook = getPlaybook(slug);
   if (!playbook) return {};
 
-  const url = `https://astartutorials.com/playbooks/${playbook.slug}`;
+  const url = `https://www.astartutorials.com/playbooks/${playbook.slug}`;
   const title = `${playbook.name} — ${playbook.tagline}`;
 
   return {

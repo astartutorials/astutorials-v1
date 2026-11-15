@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "Full Semester Plan | A-Star Tutorials",
     description:
       "Your whole first semester, sorted. 50 group sessions for ₦100,000 or 50 private sessions for ₦300,000.",
-    url: "https://astartutorials.com/semester-plan",
+    url: "https://www.astartutorials.com/semester-plan",
     type: "website",
     images: [OG_IMAGE],
   },

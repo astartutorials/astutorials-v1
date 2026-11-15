@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: "The BUCC Advantage | A-Star Tutorials",
     description:
       "100 level got you into BUCC. 200 level is where you build your academic reputation. Free 90-minute webinar — Sunday, 30th August 2026, 7:00 pm.",
-    url: "https://astartutorials.com/bucc/advantage",
+    url: "https://www.astartutorials.com/bucc/advantage",
     type: "website",
     images: [
       {

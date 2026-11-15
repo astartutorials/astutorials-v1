@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description:
     "A-Star Tutorials offers personalized one-on-one and group tutoring for tertiary institution students in Nigeria. Achieve academic excellence with expert tutors.",
   alternates: {
-    canonical: "https://astartutorials.com",
+    canonical: "https://www.astartutorials.com",
   },
 };
 
@@ -28,8 +28,8 @@ const organisationJsonLd = {
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
   name: "A-Star Tutorials",
-  url: "https://astartutorials.com",
-  logo: "https://astartutorials.com/brand/icon-512.png",
+  url: "https://www.astartutorials.com",
+  logo: "https://www.astartutorials.com/brand/icon-512.png",
   email: SUPPORT_EMAIL,
   telephone: "+2349160465678",
   address: {
