@@ -1,4 +1,5 @@
 import { can, getUserRole, AppRole } from '@/lib/rbac';
+import { getMfaStatus } from '@/lib/mfa';
 
 import type { Permission } from '@/lib/rbac';
 import { asSupabaseClient } from '../helpers/supabase';
@@ -142,5 +143,38 @@ describe('getUserRole()', () => {
     // Even though metadata says super_admin, DB says tutor
     const result = await getUserRole(supabase, 'user-1', { role: 'super_admin' });
     expect(result?.role).toBe('tutor');
+  });
+});
+
+// Every API route checks access through getUserRole, so this is where a
+// password-only session is stopped from reaching data.
+describe('getUserRole() — two-step sign-in', () => {
+  const mockStatus = jest.mocked(getMfaStatus);
+  function client(role: string, orgId: string | null) {
+    const limit = jest.fn().mockResolvedValue({ data: [{ role, org_id: orgId }] });
+    return asSupabaseClient({
+      from: () => ({ select: () => ({ eq: () => ({ order: () => ({ limit }) }) }) }),
+    });
+  }
+  afterEach(() => mockStatus.mockResolvedValue({ verified: true, hasFactor: true }));
+
+  it('refuses a session that still owes its code', async () => {
+    mockStatus.mockResolvedValue({ verified: false, hasFactor: true });
+    expect(await getUserRole(client('tutor_manager', 'org-1'), 'u1')).toBeNull();
+  });
+
+  it('refuses an org_admin who has not set up an authenticator', async () => {
+    mockStatus.mockResolvedValue({ verified: false, hasFactor: false });
+    expect(await getUserRole(client('org_admin', 'org-1'), 'u1')).toBeNull();
+  });
+
+  it('lets a tutor without an authenticator through', async () => {
+    mockStatus.mockResolvedValue({ verified: false, hasFactor: false });
+    expect((await getUserRole(client('tutor', 'org-1'), 'u1'))?.role).toBe('tutor');
+  });
+
+  it('skips the check only when asked (middleware and login)', async () => {
+    mockStatus.mockResolvedValue({ verified: false, hasFactor: true });
+    expect((await getUserRole(client('super_admin', null), 'u1', undefined, { mfa: false }))?.role).toBe('super_admin');
   });
 });

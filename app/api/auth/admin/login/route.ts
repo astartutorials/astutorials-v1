@@ -50,7 +50,9 @@ export async function POST(request: NextRequest) {
     const roleCtx = await getUserRole(
       supabase,
       data.user.id,
-      data.user.user_metadata as Record<string, unknown>
+      data.user.user_metadata as Record<string, unknown>,
+      // The password step only; the middleware then sends them to /admin/mfa.
+      { mfa: false }
     );
 
     const adminRoles = ['super_admin', 'org_admin', 'tutor_manager'];

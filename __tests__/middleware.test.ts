@@ -13,6 +13,7 @@ process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test_anon_key';
 
 import { middleware } from '@/middleware';
 import { createServerClient } from '@supabase/ssr';
+import { getMfaStatus } from '@/lib/mfa';
 
 const MOCK_USER = { id: 'admin-id', email: 'admin@astar.com', user_metadata: { role: 'super_admin' } };
 
@@ -80,6 +81,38 @@ describe('Admin middleware', () => {
       expect(mockGetSession).toHaveBeenCalled();
       // getUser should not exist on the client — it's not called
       expect(mockClient?.auth?.getUser).toBeUndefined();
+    });
+  });
+
+  describe('two-step sign-in', () => {
+    const mockStatus = jest.mocked(getMfaStatus);
+    beforeEach(() => {
+      mockGetSession.mockResolvedValue({ data: { session: { user: MOCK_USER } } });
+    });
+    afterEach(() => mockStatus.mockResolvedValue({ verified: true, hasFactor: true }));
+
+    it('sends a session that owes its code to /admin/mfa', async () => {
+      mockStatus.mockResolvedValue({ verified: false, hasFactor: true });
+      const res = await middleware(makeRequest('/admin/payments'));
+      expect(res.status).toBe(307);
+      expect(res.headers.get('location')).toContain('/admin/mfa');
+    });
+
+    it('sends a super_admin with no authenticator to /admin/mfa to set one up', async () => {
+      mockStatus.mockResolvedValue({ verified: false, hasFactor: false });
+      const res = await middleware(makeRequest('/admin/dashboard'));
+      expect(res.headers.get('location')).toContain('/admin/mfa');
+    });
+
+    it('lets that session open /admin/mfa itself', async () => {
+      mockStatus.mockResolvedValue({ verified: false, hasFactor: true });
+      const res = await middleware(makeRequest('/admin/mfa'));
+      expect(res.status).not.toBe(307);
+    });
+
+    it('sends a verified session away from /admin/mfa', async () => {
+      const res = await middleware(makeRequest('/admin/mfa'));
+      expect(res.headers.get('location')).toContain('/admin/dashboard');
     });
   });
 });
