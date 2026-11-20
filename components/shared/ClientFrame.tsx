@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
+import CookieNotice from "@/components/shared/CookieNotice";
 
 export default function ClientFrame({
   children,
@@ -22,6 +23,8 @@ export default function ClientFrame({
           here too would nest two mains with the same id. */}
       {isAdmin ? children : <main id="main-content" tabIndex={-1} className="outline-none">{children}</main>}
       {!hideChrome && <Footer />}
+      {/* The public site only: the admin is for signed-in staff, not visitors. */}
+      {!pathname?.startsWith("/admin") && <CookieNotice />}
     </>
   );
 }

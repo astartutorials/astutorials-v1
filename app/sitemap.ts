@@ -81,5 +81,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.6,
     },
+    ...["/privacy", "/terms", "/refund-policy"].map((path) => ({
+      url: `${BASE_URL}${path}`,
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    })),
   ];
 }
