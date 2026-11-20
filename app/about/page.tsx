@@ -181,10 +181,9 @@ export default function AboutPage() {
             underperforming, and good academic help was hard to find.
           </p>
           <p>
-            Our early sessions were mostly with computing students through BUCC, the Babcock
-            University Computer Club. Today we support students across several departments, from
-            computing to medical and health sciences. In October 2025 Ad Astra became A-Star
-            Tutorials.
+            We started with a handful of courses and a few students who needed help. Today we
+            support students across several departments, and in October 2025 Ad Astra became
+            A-Star Tutorials.
           </p>
         </div>
       </section>
