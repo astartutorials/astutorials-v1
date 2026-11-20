@@ -27,7 +27,7 @@ import ProgrammeRecord from "@/components/about/ProgrammeRecord";
  * the people behind it. History and team come from Paul's About draft
  * (2026-11-20). Left out on purpose: the "7,000+" figure (WhatsApp group
  * members, with duplicates) and Dr. Ajibade, until he agrees to be named.
- * Co-founders get equal portrait cards; managers and tutors share the navy band.
+ * One team grid: co-founders (photos), then managers and tutors, all the same card.
  */
 
 export const metadata: Metadata = {
@@ -182,69 +182,50 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Co-founders */}
-      <section className="max-w-[1100px] mx-auto px-6 mt-16 md:mt-24">
-        <div className="text-center max-w-2xl mx-auto">
-          <span className="text-xs font-bold tracking-widest uppercase text-brand-ink">The team</span>
-          <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-fg-strong">
-            The people who co-founded and built <span className="whitespace-nowrap">A-Star</span>
-          </h2>
-        </div>
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Team: co-founders, managers and tutors, one grid */}
+      <section className="max-w-[1100px] mx-auto px-6 mt-16 md:mt-20">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg-strong">The team</h2>
+        <p className="mt-3 text-fg-muted max-w-2xl">
+          The people who co-founded and built A-Star, and the managers and tutors who run it with them.
+        </p>
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {cofounders.map(({ name, role, photo, does }) => (
             <div
               key={name}
-              className="flex flex-col items-center text-center p-6 rounded-3xl bg-surface-raised border border-line-subtle"
+              className="flex flex-col items-center text-center p-6 rounded-2xl bg-surface-raised border border-line-subtle"
             >
-              <Image
-                src={photo}
-                alt={name}
-                width={480}
-                height={480}
-                sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 90vw"
-                className="w-full aspect-square rounded-2xl object-cover"
-              />
-              <h3 className="mt-6 text-lg font-bold text-fg-strong">{name}</h3>
-              <p className="text-xs font-bold tracking-widest uppercase text-brand-ink mt-1.5">{role}</p>
-              <p className="text-sm text-fg-subtle leading-relaxed mt-3 max-w-xs">{does}</p>
+              <Image src={photo} alt={name} width={160} height={160} className="w-20 h-20 rounded-full object-cover mb-5" />
+              <h3 className="font-bold text-fg-strong">{name}</h3>
+              <p className="text-xs font-bold tracking-widest uppercase text-brand-ink mt-1">{role}</p>
+              <p className="text-sm text-fg-subtle leading-relaxed mt-3">{does}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Managers and tutors */}
-      <section className="w-full bg-[var(--astar-navy)] py-16 md:py-20 mt-16 md:mt-24">
-        <div className="max-w-[1100px] mx-auto px-6">
-          <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#F4A9A3] mb-3">Behind every session</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              Managers and tutors who keep it running
-            </h2>
-          </div>
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {crew.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-                <Icon size={22} className="text-[#F4A9A3]" />
-                <h3 className="mt-5 font-bold text-white">{title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-white/60">{desc}</p>
+          {crew.map(({ icon: Icon, title, desc }) => (
+            <div
+              key={title}
+              className="flex flex-col items-center text-center p-6 rounded-2xl bg-surface-raised border border-line-subtle"
+            >
+              <div className="w-20 h-20 rounded-full bg-brand-soft flex items-center justify-center mb-5">
+                <Icon className="w-7 h-7 text-brand-ink" />
               </div>
-            ))}
-          </div>
+              <h3 className="font-bold text-fg-strong">{title}</h3>
+              <p className="text-sm text-fg-subtle leading-relaxed mt-3">{desc}</p>
+            </div>
+          ))}
           <Link
             href="/apply"
-            className="group mt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl bg-white/[0.07] border border-white/10 p-6 md:p-7 hover:bg-white/[0.1] transition-colors"
+            className="group flex flex-col items-center text-center p-6 rounded-2xl bg-surface-raised border border-line-subtle hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
           >
-            <div className="flex items-start gap-4">
-              <GraduationCap size={26} className="text-[#F4A9A3] shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-bold text-white text-lg">Our tutors</h3>
-                <p className="mt-1 text-sm text-white/60">
-                  Students who aced the courses they teach. They&apos;re who you&apos;ll actually meet.
-                </p>
-              </div>
+            <div className="w-20 h-20 rounded-full bg-brand-soft flex items-center justify-center mb-5">
+              <GraduationCap className="w-7 h-7 text-brand-ink" />
             </div>
-            <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#F4A9A3] shrink-0">
-              Become a tutor <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            <h3 className="font-bold text-fg-strong">Tutors</h3>
+            <p className="text-sm text-fg-subtle leading-relaxed mt-3">
+              Students who aced the courses they teach. They&apos;re who you&apos;ll actually meet.
+            </p>
+            <span className="mt-4 inline-flex items-center text-xs font-bold tracking-widest uppercase text-brand-ink">
+              Become a tutor
+              <ArrowRight className="w-3 h-3 ml-2 transition-transform group-hover:translate-x-1" />
             </span>
           </Link>
         </div>
