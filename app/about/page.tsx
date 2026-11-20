@@ -18,16 +18,17 @@ import {
 import ProgrammeRecord from "@/components/about/ProgrammeRecord";
 
 /*
- * Every claim on this page is one the site already makes elsewhere (Who We Are,
- * Services, FAQ, Footer, the programmes registry). Nothing here is new copy
- * about the company's history, founders or numbers. Add those once the team
- * confirms them, not before.
+ * Order: what students get, who teaches them, track record, then the story and
+ * the people behind it. History and team come from Paul's About draft
+ * (2026-11-20). Left out on purpose: the "7,000+" figure (WhatsApp group
+ * members, with duplicates) and Dr. Ajibade, until he agrees to be named.
+ * Everyone on the team is shown the same way: name, role, what they do.
  */
 
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "A-Star Tutorials is a student-driven academic support system at Babcock University, offering group and one-on-one tutorials taught by students who aced the course.",
+    "A-Star Tutorials runs group and one-on-one tutorials at Babcock University, taught by students who aced the course. Started in 2023 as AD Astra.",
   alternates: {
     canonical: "https://www.astartutorials.com/about",
   },
@@ -39,6 +40,32 @@ const values = [
   { icon: Target, title: "Student-First Approach", desc: "Tailored approaches for individual success." },
   { icon: Award, title: "Academic Discipline", desc: "Building strong foundations for excellence." },
 ];
+
+const team = [
+  {
+    name: "Paul Olabode Upah",
+    role: "Founder & CEO",
+    does: "Started A-Star as AD Astra in 2023 and leads the company.",
+  },
+  {
+    name: "Dr. Uchenna Agbocha",
+    role: "Chief Financial Officer",
+    does: "Looks after A-Star's finances and runs the ambassador programme.",
+  },
+  {
+    name: "Olorundamisi Dunmade",
+    role: "Chief Technology Officer",
+    does: "Built and runs the A-Star site, bookings and payments.",
+  },
+];
+
+const initials = (name: string) =>
+  name
+    .replace(/^Dr\.\s*/, "")
+    .split(" ")
+    .filter((_, i, a) => i === 0 || i === a.length - 1)
+    .map((w) => w[0])
+    .join("");
 
 const services = [
   {
@@ -71,24 +98,29 @@ export default function AboutPage() {
           Tutorials by students who&apos;ve already passed the course.
         </h1>
         <p className="mt-6 text-lg text-fg-muted leading-relaxed max-w-2xl">
-          A-Star Tutorials is a student-driven academic support system built to help tertiary
-          institution students excel. We provide structured tutorials, easy-to-understand guidance,
-          and a supportive learning community.
+          A-Star Tutorials runs group tutorials, one-on-one sessions and exam mocks for Babcock
+          University students, taught by students who earned an A in the course.
         </p>
       </section>
 
-      {/* Values */}
+      {/* Services */}
       <section className="max-w-[1100px] mx-auto px-6 mt-16 md:mt-20">
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg-strong">What we stand for</h2>
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {values.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="p-6 rounded-2xl bg-surface-raised border border-line-subtle">
-              <div className="w-11 h-11 rounded-full bg-brand-soft flex items-center justify-center mb-5">
-                <Icon className="w-5 h-5 text-brand-ink" />
-              </div>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg-strong">What we offer</h2>
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-5">
+          {services.map(({ icon: Icon, title, desc, href }) => (
+            <Link
+              key={title}
+              href={href}
+              className="group p-6 rounded-2xl bg-surface-raised border border-line-subtle hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
+            >
+              <Icon className="w-6 h-6 text-brand-ink mb-4" />
               <h3 className="font-bold text-fg-strong mb-2">{title}</h3>
-              <p className="text-sm text-fg-subtle leading-relaxed">{desc}</p>
-            </div>
+              <p className="text-sm text-fg-subtle leading-relaxed mb-5">{desc}</p>
+              <span className="inline-flex items-center text-xs font-bold tracking-widest uppercase text-brand-ink">
+                Learn more
+                <ArrowRight className="w-3 h-3 ml-2 transition-transform group-hover:translate-x-1" />
+              </span>
+            </Link>
           ))}
         </div>
       </section>
@@ -122,30 +154,78 @@ export default function AboutPage() {
         </ul>
       </section>
 
-      {/* Services */}
-      <section className="max-w-[1100px] mx-auto px-6 mt-16 md:mt-20">
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg-strong">What we offer</h2>
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-5">
-          {services.map(({ icon: Icon, title, desc, href }) => (
-            <Link
-              key={title}
-              href={href}
-              className="group p-6 rounded-2xl bg-surface-raised border border-line-subtle hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
-            >
-              <Icon className="w-6 h-6 text-brand-ink mb-4" />
-              <h3 className="font-bold text-fg-strong mb-2">{title}</h3>
-              <p className="text-sm text-fg-subtle leading-relaxed mb-5">{desc}</p>
-              <span className="inline-flex items-center text-xs font-bold tracking-widest uppercase text-brand-ink">
-                Learn more
-                <ArrowRight className="w-3 h-3 ml-2 transition-transform group-hover:translate-x-1" />
-              </span>
-            </Link>
-          ))}
+      {/* Programmes track record */}
+      <ProgrammeRecord />
+
+      {/* Story */}
+      <section className="max-w-[1100px] mx-auto px-6 mt-16 md:mt-20 grid grid-cols-1 md:grid-cols-[1fr_1.4fr] gap-10 items-start">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg-strong">How it started</h2>
+        <div className="space-y-4 text-fg-muted leading-relaxed">
+          <p>
+            A-Star began in November 2023 as AD Astra, a tutorial initiative at Babcock started by
+            Paul Upah. The aim was simple: too many capable students were underperforming, and good
+            academic help was hard to find.
+          </p>
+          <p>
+            We started with medical and health sciences students and still work closely with them.
+            Today we support students across several departments. In October 2025 AD Astra became
+            A-Star Tutorials.
+          </p>
         </div>
       </section>
 
-      {/* Programmes track record */}
-      <ProgrammeRecord />
+      {/* Team */}
+      <section className="max-w-[1100px] mx-auto px-6 mt-16 md:mt-20">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg-strong">The team</h2>
+        <p className="mt-3 text-fg-muted max-w-2xl">
+          The people who run A-Star, and the tutors who do the teaching.
+        </p>
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {team.map(({ name, role, does }) => (
+            <div key={name} className="p-6 rounded-2xl bg-surface-raised border border-line-subtle">
+              <div className="w-12 h-12 rounded-full bg-brand-soft flex items-center justify-center mb-5 font-bold text-brand-ink">
+                {initials(name)}
+              </div>
+              <h3 className="font-bold text-fg-strong">{name}</h3>
+              <p className="text-xs font-bold tracking-widest uppercase text-brand-ink mt-1">{role}</p>
+              <p className="text-sm text-fg-subtle leading-relaxed mt-3">{does}</p>
+            </div>
+          ))}
+          <Link
+            href="/apply"
+            className="group p-6 rounded-2xl bg-surface-raised border border-line-subtle hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
+          >
+            <div className="w-12 h-12 rounded-full bg-brand-soft flex items-center justify-center mb-5">
+              <GraduationCap className="w-5 h-5 text-brand-ink" />
+            </div>
+            <h3 className="font-bold text-fg-strong">Our tutors</h3>
+            <p className="text-xs font-bold tracking-widest uppercase text-brand-ink mt-1">Teaching</p>
+            <p className="text-sm text-fg-subtle leading-relaxed mt-3">
+              Students who aced the courses they teach. They&apos;re who you&apos;ll actually meet.
+            </p>
+            <span className="mt-4 inline-flex items-center text-xs font-bold tracking-widest uppercase text-brand-ink">
+              Become a tutor
+              <ArrowRight className="w-3 h-3 ml-2 transition-transform group-hover:translate-x-1" />
+            </span>
+          </Link>
+        </div>
+      </section>
+
+      {/* Values */}
+      <section className="max-w-[1100px] mx-auto px-6 mt-16 md:mt-20">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg-strong">What we stand for</h2>
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {values.map(({ icon: Icon, title, desc }) => (
+            <div key={title} className="p-6 rounded-2xl bg-surface-raised border border-line-subtle">
+              <div className="w-11 h-11 rounded-full bg-brand-soft flex items-center justify-center mb-5">
+                <Icon className="w-5 h-5 text-brand-ink" />
+              </div>
+              <h3 className="font-bold text-fg-strong mb-2">{title}</h3>
+              <p className="text-sm text-fg-subtle leading-relaxed">{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Contact */}
       <section className="max-w-[1100px] mx-auto px-6 mt-16 md:mt-20">
