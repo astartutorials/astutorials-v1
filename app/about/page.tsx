@@ -15,10 +15,7 @@ import {
   ArrowRight,
   BadgeCheck,
   Monitor,
-  UserCheck,
-  Library,
-  Wallet,
-  Megaphone,
+  Briefcase,
 } from "lucide-react";
 import ProgrammeRecord from "@/components/about/ProgrammeRecord";
 
@@ -27,7 +24,7 @@ import ProgrammeRecord from "@/components/about/ProgrammeRecord";
  * the people behind it. History and team come from Paul's About draft
  * (2026-11-20). Left out on purpose: the "7,000+" figure (WhatsApp group
  * members, with duplicates) and Dr. Ajibade, until he agrees to be named.
- * One team grid: co-founders (photos), then managers and tutors, all the same card.
+ * One team grid: co-founder cards, then wider tinted cards for managers and tutors.
  */
 
 export const metadata: Metadata = {
@@ -51,28 +48,37 @@ const cofounders = [
     name: "Paul Olabode Upah",
     role: "Chief Executive Officer",
     photo: "/tfa/panellists/upah.jpg",
-    does: "Biochemistry student at Babcock. Leads A-Star day to day and sets where it goes next.",
+    does: "Biochemistry student at Babcock. Leads and manages A-Star's day-to-day operations.",
   },
   {
     name: "Dr. Uchenna Aguocha-Ohiagbaji",
     role: "Chief Financial Officer",
     photo: "/tfa/panellists/aguocha.jpg",
-    does: "Medical doctor, Babcock alum and finance coach. Runs A-Star's money and the ambassador programme.",
+    does: "Medical doctor, Babcock alum and finance coach. Manages A-Star's finances and the finance team.",
   },
   {
     name: "Majuyi O. D. Dunmade",
     role: "Chief Technology Officer",
     photo: "/about/dunmade.jpg",
-    does: "First-class Computer Science graduate from Babcock. Built the platform students book and pay on.",
+    does: "Babcock CS grad. Manages A-Star's technology and the technical team.",
   },
 ];
 
-/* Roles for now; names and photos once each manager agrees to be listed. */
-const crew = [
-  { icon: UserCheck, title: "Tutor Manager", desc: "Recruits and vets tutors, and matches them to courses." },
-  { icon: Library, title: "Resource Manager", desc: "Puts together the notes, past questions and mock papers." },
-  { icon: Wallet, title: "Finance Manager", desc: "Handles payments, tutor payouts and day-to-day spending." },
-  { icon: Megaphone, title: "Media Manager", desc: "Runs our socials, flyers and event coverage." },
+const groups = [
+  {
+    icon: Briefcase,
+    title: "Managers",
+    desc: "Our tutor, resource, finance and media managers keep sessions, materials, payments and socials running.",
+    href: "/careers",
+    cta: "See open roles",
+  },
+  {
+    icon: GraduationCap,
+    title: "Tutors",
+    desc: "Students who aced the courses they teach. They're who you'll actually meet.",
+    href: "/apply",
+    cta: "Become a tutor",
+  },
 ];
 
 const services = [
@@ -188,11 +194,11 @@ export default function AboutPage() {
         <p className="mt-3 text-fg-muted max-w-2xl">
           The people who co-founded and built A-Star, and the managers and tutors who run it with them.
         </p>
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-5">
           {cofounders.map(({ name, role, photo, does }) => (
             <div
               key={name}
-              className="flex flex-col items-center text-center p-6 rounded-2xl bg-surface-raised border border-line-subtle"
+              className="lg:col-span-2 flex flex-col items-center text-center p-6 rounded-2xl bg-surface-raised border border-line-subtle"
             >
               <Image src={photo} alt={name} width={160} height={160} className="w-20 h-20 rounded-full object-cover mb-5" />
               <h3 className="font-bold text-fg-strong">{name}</h3>
@@ -200,34 +206,25 @@ export default function AboutPage() {
               <p className="text-sm text-fg-subtle leading-relaxed mt-3">{does}</p>
             </div>
           ))}
-          {crew.map(({ icon: Icon, title, desc }) => (
-            <div
+          {groups.map(({ icon: Icon, title, desc, href, cta }) => (
+            <Link
               key={title}
-              className="flex flex-col items-center text-center p-6 rounded-2xl bg-surface-raised border border-line-subtle"
+              href={href}
+              className="group lg:col-span-3 flex items-start gap-5 p-6 rounded-2xl bg-brand-soft border border-line-subtle hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
             >
-              <div className="w-20 h-20 rounded-full bg-brand-soft flex items-center justify-center mb-5">
-                <Icon className="w-7 h-7 text-brand-ink" />
+              <div className="w-14 h-14 rounded-full bg-surface-raised flex items-center justify-center shrink-0">
+                <Icon className="w-6 h-6 text-brand-ink" />
               </div>
-              <h3 className="font-bold text-fg-strong">{title}</h3>
-              <p className="text-sm text-fg-subtle leading-relaxed mt-3">{desc}</p>
-            </div>
+              <div>
+                <h3 className="font-bold text-fg-strong">{title}</h3>
+                <p className="text-sm text-fg-muted leading-relaxed mt-1.5">{desc}</p>
+                <span className="mt-3 inline-flex items-center text-xs font-bold tracking-widest uppercase text-brand-ink">
+                  {cta}
+                  <ArrowRight className="w-3 h-3 ml-2 transition-transform group-hover:translate-x-1" />
+                </span>
+              </div>
+            </Link>
           ))}
-          <Link
-            href="/apply"
-            className="group flex flex-col items-center text-center p-6 rounded-2xl bg-surface-raised border border-line-subtle hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
-          >
-            <div className="w-20 h-20 rounded-full bg-brand-soft flex items-center justify-center mb-5">
-              <GraduationCap className="w-7 h-7 text-brand-ink" />
-            </div>
-            <h3 className="font-bold text-fg-strong">Tutors</h3>
-            <p className="text-sm text-fg-subtle leading-relaxed mt-3">
-              Students who aced the courses they teach. They&apos;re who you&apos;ll actually meet.
-            </p>
-            <span className="mt-4 inline-flex items-center text-xs font-bold tracking-widest uppercase text-brand-ink">
-              Become a tutor
-              <ArrowRight className="w-3 h-3 ml-2 transition-transform group-hover:translate-x-1" />
-            </span>
-          </Link>
         </div>
       </section>
 
