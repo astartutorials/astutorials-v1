@@ -44,18 +44,18 @@ const values = [
 const team = [
   {
     name: "Paul Olabode Upah",
-    role: "Founder & CEO",
-    does: "Started A-Star as AD Astra in 2023 and leads the company.",
+    role: "Chief Executive Officer",
+    does: "Sets where A-Star is going and leads the company day to day.",
   },
   {
     name: "Dr. Uchenna Agbocha",
     role: "Chief Financial Officer",
-    does: "Looks after A-Star's finances and runs the ambassador programme.",
+    does: "Built A-Star's finances and runs the ambassador programme.",
   },
   {
     name: "Olorundamisi Dunmade",
     role: "Chief Technology Officer",
-    does: "Built and runs the A-Star site, bookings and payments.",
+    does: "Built the platform students book and pay on, and keeps it running.",
   },
 ];
 
@@ -162,9 +162,9 @@ export default function AboutPage() {
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg-strong">How it started</h2>
         <div className="space-y-4 text-fg-muted leading-relaxed">
           <p>
-            A-Star began in November 2023 as AD Astra, a tutorial initiative at Babcock started by
-            Paul Upah. The aim was simple: too many capable students were underperforming, and good
-            academic help was hard to find.
+            We started A-Star in November 2023 as AD Astra, Latin for &ldquo;to the stars&rdquo;, a
+            tutorial initiative at Babcock. The aim was simple: too many capable students were
+            underperforming, and good academic help was hard to find.
           </p>
           <p>
             We started with medical and health sciences students and still work closely with them.
@@ -178,7 +178,7 @@ export default function AboutPage() {
       <section className="max-w-[1100px] mx-auto px-6 mt-16 md:mt-20">
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg-strong">The team</h2>
         <p className="mt-3 text-fg-muted max-w-2xl">
-          The people who run A-Star, and the tutors who do the teaching.
+          The people who built A-Star and still run it, and the tutors who do the teaching.
         </p>
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {team.map(({ name, role, does }) => (
