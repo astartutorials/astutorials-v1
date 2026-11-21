@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { getUserRole, can } from "@/lib/rbac";
-import { SEMESTER_PLAN_NAME, lagosDate, isSemesterPlanId, splitTotal, SEMESTER_PLANS } from "@/lib/semester-plan";
+import { SEMESTER_PLAN_NAME, lagosDate, isSemesterPlanId, splitTotal, SEMESTER_PLANS, parseSemesterPlanNotes, type SemesterPlanSignupDetails } from "@/lib/semester-plan";
 import {
   BALANCE_COLUMNS,
   balanceStatus,
@@ -31,6 +31,8 @@ export interface SemesterPlanPaymentRow {
   secondReference: string | null;
   firstPaidAt: string;
   notes: string | null;
+  /** What they filled in at checkout: course of study, parent, etc. */
+  details: SemesterPlanSignupDetails;
 }
 
 type BookingRow = {
@@ -114,6 +116,7 @@ export async function GET() {
       secondReference: b.paid_reference,
       firstPaidAt: first?.created_at ?? b.created_at,
       notes: first?.notes ?? null,
+      details: parseSemesterPlanNotes(first?.notes ?? null),
     };
   });
 
@@ -140,6 +143,7 @@ export async function GET() {
       secondReference: null,
       firstPaidAt: b.created_at,
       notes: b.notes,
+      details: parseSemesterPlanNotes(b.notes),
     });
   }
 
