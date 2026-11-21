@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import {
-  User, GraduationCap, BellRing, CreditCard, Shield,
+  User, Shield,
   Save, Lock, UserPlus, X, Loader2, CheckCircle2, AlertCircle,
 } from "lucide-react";
 import { useAdminUser } from "@/lib/admin-context";
@@ -24,27 +24,12 @@ const inputClass =
 const selectClass =
   "w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-gray-800 bg-white text-sm cursor-pointer";
 
-type TabId = "profile" | "tutorials" | "notifications" | "payments" | "security";
+type TabId = "profile" | "security";
 
 const ALL_TABS: { id: TabId; name: string; icon: typeof User; superAdminOnly?: boolean }[] = [
   { id: "profile",       name: "Profile",       icon: User },
-  { id: "tutorials",     name: "Tutorials",     icon: GraduationCap, superAdminOnly: true },
-  { id: "notifications", name: "Notifications", icon: BellRing,      superAdminOnly: true },
-  { id: "payments",      name: "Payments",      icon: CreditCard,    superAdminOnly: true },
   { id: "security",      name: "Security",      icon: Shield,        superAdminOnly: true },
 ];
-
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${checked ? "bg-[#0B1120]" : "bg-gray-200"}`}
-    >
-      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${checked ? "translate-x-6" : "translate-x-1"}`} />
-    </button>
-  );
-}
 
 function Toast({ message, type }: { message: string; type: "success" | "error" }) {
   return (
@@ -69,20 +54,6 @@ export default function AdminSettingsPage() {
     adminName: "",
     email: "",
     phone: "",
-    groupPrice: "15000",
-    privatePrice: "6000",
-    sessionDuration: "120",
-    maxStudents: "30",
-    bookingDeadline: "24",
-    emailNotifications: true,
-    smsNotifications: false,
-    newBookings: true,
-    cancellations: true,
-    feedbackAlerts: true,
-    digestFrequency: "real-time",
-    paymentGateway: "paystack",
-    currency: "NGN",
-    taxRate: "0",
   });
 
   const [passwordForm, setPasswordForm] = useState({ current: "", newPass: "", confirm: "" });
@@ -108,7 +79,7 @@ export default function AdminSettingsPage() {
     setTimeout(() => setToast(null), 3500);
   }
 
-  const set = (key: string, value: string | boolean) =>
+  const set = (key: string, value: string) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
 
   async function handleSave() {
@@ -205,7 +176,7 @@ export default function AdminSettingsPage() {
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Manage your admin preferences and system configuration.</p>
+        <p className="text-sm text-gray-500 mt-0.5">Your profile, password and admin accounts.</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 p-1.5 mb-6 flex flex-wrap gap-1">
@@ -248,127 +219,6 @@ export default function AdminSettingsPage() {
                 <button onClick={() => setShowPasswordModal(true)} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 hover:border-gray-300 transition-all text-left text-sm text-gray-600 bg-white">
                   Change Password →
                 </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tutorials */}
-        {activeTab === "tutorials" && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-0.5">Tutorial Settings</h2>
-              <p className="text-sm text-gray-500">Configure default tutorial pricing and parameters.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700">Group Tutorial Price (₦)</label>
-                <input type="number" value={formData.groupPrice} onChange={(e) => set("groupPrice", e.target.value)} className={inputClass} />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700">Private Tutorial Price (₦)</label>
-                <input type="number" value={formData.privatePrice} onChange={(e) => set("privatePrice", e.target.value)} className={inputClass} />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700">Default Session Duration</label>
-                <select value={formData.sessionDuration} onChange={(e) => set("sessionDuration", e.target.value)} className={selectClass}>
-                  <option value="60">60 minutes</option>
-                  <option value="90">90 minutes</option>
-                  <option value="120">120 minutes</option>
-                  <option value="180">180 minutes</option>
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700">Max Students per Group</label>
-                <input type="number" value={formData.maxStudents} onChange={(e) => set("maxStudents", e.target.value)} className={inputClass} />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700">Booking Deadline (hours before)</label>
-                <input type="number" value={formData.bookingDeadline} onChange={(e) => set("bookingDeadline", e.target.value)} className={inputClass} />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Notifications */}
-        {activeTab === "notifications" && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-0.5">Notification Preferences</h2>
-              <p className="text-sm text-gray-500">Manage how you receive notifications.</p>
-            </div>
-            <div className="space-y-3">
-              {[
-                { key: "emailNotifications", title: "Email Notifications", desc: "Receive notifications via email", val: formData.emailNotifications },
-                { key: "smsNotifications", title: "SMS Notifications", desc: "Receive notifications via SMS", val: formData.smsNotifications },
-              ].map((item) => (
-                <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">{item.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
-                  </div>
-                  <Toggle checked={item.val} onChange={(v) => set(item.key, v)} />
-                </div>
-              ))}
-            </div>
-            <div className="border-t border-gray-100 pt-5">
-              <h3 className="font-bold text-gray-900 text-sm mb-3">Alert Types</h3>
-              <div className="space-y-2.5">
-                {[
-                  { key: "newBookings", label: "New bookings", val: formData.newBookings },
-                  { key: "cancellations", label: "Cancellations", val: formData.cancellations },
-                  { key: "feedbackAlerts", label: "Student feedback", val: formData.feedbackAlerts },
-                ].map((item) => (
-                  <label key={item.key} className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" checked={item.val} onChange={(e) => set(item.key, e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-[#D93025]" />
-                    <span className="text-sm text-gray-700">{item.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-700">Digest Frequency</label>
-              <select value={formData.digestFrequency} onChange={(e) => set("digestFrequency", e.target.value)} className={selectClass}>
-                <option value="real-time">Real-time</option>
-                <option value="daily">Daily digest</option>
-                <option value="weekly">Weekly digest</option>
-              </select>
-            </div>
-          </div>
-        )}
-
-        {/* Payments */}
-        {activeTab === "payments" && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-0.5">Payment Configuration</h2>
-              <p className="text-sm text-gray-500">Configure payment gateway and preferences.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700">Payment Gateway</label>
-                <select value={formData.paymentGateway} onChange={(e) => set("paymentGateway", e.target.value)} className={selectClass}>
-                  <option value="paystack">Paystack</option>
-                  <option value="flutterwave">Flutterwave</option>
-                  <option value="stripe">Stripe</option>
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700">Currency</label>
-                <select value={formData.currency} onChange={(e) => set("currency", e.target.value)} className={selectClass}>
-                  <option value="NGN">Nigerian Naira (₦)</option>
-                  <option value="USD">US Dollar ($)</option>
-                  <option value="GBP">British Pound (£)</option>
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700">Tax / VAT Rate (%)</label>
-                <input type="number" value={formData.taxRate} onChange={(e) => set("taxRate", e.target.value)} placeholder="0" className={inputClass} />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700">API Key</label>
-                <input type="password" value="••••••••••••••••" disabled className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-400 text-sm cursor-not-allowed" />
-                <p className="text-[10px] text-gray-400">Managed via environment variables.</p>
               </div>
             </div>
           </div>
