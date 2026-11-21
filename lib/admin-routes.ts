@@ -52,7 +52,7 @@ const ROUTE_PERMISSIONS: { href: string; permission: Permission | null }[] = [
   { href: '/admin/applications',      permission: 'applications:read' },
   { href: '/admin/audit-logs',        permission: 'audit:read' },
   // Everyone may manage their own profile and password. The page gates its
-  // platform tabs (Tutorials/Notifications/Payments/Security) to super_admin.
+  // Security tab (register a new admin) to super_admin.
   { href: '/admin/settings',          permission: null },
 ];
 
