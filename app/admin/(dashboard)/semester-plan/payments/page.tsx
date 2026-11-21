@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, type ReactNode } from "react";
 import { Search, Loader2, Wallet, Link2, Check } from "lucide-react";
 import SemesterPlanTabs from "@/components/admin/SemesterPlanTabs";
 import { SEMESTER_PLANS, isSemesterPlanId, balancePaymentHref, formatDueDate } from "@/lib/semester-plan";
@@ -30,6 +30,63 @@ function waLink(phone: string) {
 
 function naira(n: number) {
   return `₦${n.toLocaleString()}`;
+}
+
+function Detail({ label, children, wide }: { label: string; children: ReactNode; wide?: boolean }) {
+  return (
+    <div className={wide ? "sm:col-span-2" : undefined}>
+      <dt className="text-gray-400">{label}</dt>
+      <dd className="text-[#0B1120] mt-0.5 break-words">{children}</dd>
+    </div>
+  );
+}
+
+/** What they filled in at checkout, unpacked from the booking's notes. */
+function SignupDetails({ row }: { row: SemesterPlanPaymentRow }) {
+  const d = row.details;
+  const studentEmail = d.studentEmail && d.studentEmail !== row.email ? d.studentEmail : null;
+  const hasParent = d.parentName || d.parentPhone || d.parentEmail;
+  if (!d.courseOfStudy && !d.matric && !d.paidBy && !studentEmail && !hasParent && !d.message && !d.discount) {
+    return null;
+  }
+  return (
+    <dl className="mt-4 pt-4 border-t border-gray-100 grid sm:grid-cols-2 gap-x-6 gap-y-3 text-xs">
+      {d.courseOfStudy && <Detail label="Course of study">{d.courseOfStudy}</Detail>}
+      {d.matric && <Detail label="Matric number">{d.matric}</Detail>}
+      {d.paidBy && <Detail label="Paid by">{d.paidBy}</Detail>}
+      {studentEmail && (
+        <Detail label="Student's email">
+          <a href={`mailto:${studentEmail}`} className="hover:text-[#D93025]">{studentEmail}</a>
+        </Detail>
+      )}
+      {hasParent && (
+        <Detail label="Parent/guardian">
+          {d.parentName}
+          {d.parentPhone && (
+            <>
+              {d.parentName && <span className="text-gray-300 mx-1.5">·</span>}
+              {d.parentPhone}{" "}
+              <a href={waLink(d.parentPhone)} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#D93025]">
+                (WhatsApp)
+              </a>
+            </>
+          )}
+          {d.parentEmail && (
+            <>
+              <br />
+              <a href={`mailto:${d.parentEmail}`} className="text-gray-500 hover:text-[#D93025]">{d.parentEmail}</a>
+            </>
+          )}
+        </Detail>
+      )}
+      {d.discount && <Detail label="Code used">{d.discount}</Detail>}
+      {d.message && (
+        <Detail label="Anything else?" wide>
+          <span className="whitespace-pre-wrap">{d.message}</span>
+        </Detail>
+      )}
+    </dl>
+  );
 }
 
 /**
@@ -79,7 +136,11 @@ export default function AdminSemesterPlanPaymentsPage() {
     const q = query.trim().toLowerCase();
     if (!q) return source;
     return source.filter((r) =>
-      [r.fullName, r.email, r.phone, r.firstReference].some((f) => (f ?? "").toLowerCase().includes(q))
+      [
+        r.fullName, r.email, r.phone, r.firstReference,
+        r.details.courseOfStudy, r.details.matric, r.details.studentEmail,
+        r.details.parentName, r.details.parentPhone, r.details.parentEmail,
+      ].some((f) => (f ?? "").toLowerCase().includes(q))
     );
   }, [all, filter, query]);
 
@@ -137,7 +198,7 @@ export default function AdminSemesterPlanPaymentsPage() {
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
         <input
           type="text"
-          placeholder="Search name, email, phone or reference..."
+          placeholder="Search name, course, matric, phone, email or reference..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-[#D93025] focus:ring-2 focus:ring-red-500/10 outline-none transition-all text-[#0B1120] bg-white text-sm"
@@ -194,8 +255,9 @@ export default function AdminSemesterPlanPaymentsPage() {
                   {r.phone && (
                     <>
                       <span className="text-gray-300 mx-1.5">·</span>
+                      <span className="text-[#0B1120]">{r.phone}</span>{" "}
                       <a href={waLink(r.phone)} target="_blank" rel="noopener noreferrer" className="hover:text-[#D93025]">
-                        WhatsApp
+                        (WhatsApp)
                       </a>
                     </>
                   )}
@@ -205,6 +267,8 @@ export default function AdminSemesterPlanPaymentsPage() {
                   {r.secondReference && <> + {r.secondReference}</>}
                 </span>
               </div>
+
+              <SignupDetails row={r} />
 
               {r.balanceId && r.status !== "paid_in_full" && (
                 <button

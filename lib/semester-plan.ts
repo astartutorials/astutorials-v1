@@ -161,3 +161,69 @@ export function formatDueDate(isoDate: string): string {
 export function balancePaymentHref(balanceId: string): string {
   return `/semester-plan/balance/${balanceId}`;
 }
+
+/** What the checkout form collected, unpacked from the booking's notes. */
+export interface SemesterPlanSignupDetails {
+  paidBy: string | null;
+  courseOfStudy: string | null;
+  matric: string | null;
+  parentName: string | null;
+  parentPhone: string | null;
+  parentEmail: string | null;
+  studentEmail: string | null;
+  message: string | null;
+  discount: string | null;
+}
+
+const NOTE_KEYS: Record<string, keyof SemesterPlanSignupDetails | "parent" | null> = {
+  "Plan": null,
+  "Paid by": "paidBy",
+  "Course of study": "courseOfStudy",
+  "Matric": "matric",
+  "Parent": "parent",
+  "Student email": "studentEmail",
+  "Notes": "message",
+  "Paying in 2 instalments": null,
+  "First payment": null,
+  "Discount": "discount",
+  "Referral": "discount",
+};
+
+/**
+ * The plan's checkout (components/semester-plan/PlanModal.tsx) packs the form
+ * into one notes string: "Plan: … | Paid by: … | Course of study: … | …",
+ * and initialize appends the instalment and any discount code. This reads it
+ * back. A segment with no known key is part of the previous field, so a " | "
+ * typed into "Anything else?" stays in the message.
+ */
+export function parseSemesterPlanNotes(notes: string | null): SemesterPlanSignupDetails {
+  const out: SemesterPlanSignupDetails = {
+    paidBy: null, courseOfStudy: null, matric: null, parentName: null, parentPhone: null,
+    parentEmail: null, studentEmail: null, message: null, discount: null,
+  };
+  if (!notes) return out;
+
+  const fields: { key: string; value: string }[] = [];
+  for (const seg of notes.split(" | ")) {
+    const colon = seg.indexOf(": ");
+    const key = colon > 0 ? seg.slice(0, colon) : "";
+    if (key in NOTE_KEYS) fields.push({ key, value: seg.slice(colon + 2) });
+    else if (fields.length) fields[fields.length - 1].value += ` | ${seg}`;
+  }
+
+  for (const { key, value } of fields) {
+    const target = NOTE_KEYS[key];
+    const v = value.trim();
+    if (!target || !v) continue;
+    if (target === "parent") {
+      // "Name (phone, email)"
+      const m = v.match(/^(.*?) \(([^,]*), ([^)]*)\)$/);
+      out.parentName = (m ? m[1] : v).trim() || null;
+      out.parentPhone = m?.[2].trim() || null;
+      out.parentEmail = m?.[3].trim() || null;
+    } else {
+      out[target] = key === "Referral" ? `Referral: ${v}` : v;
+    }
+  }
+  return out;
+}

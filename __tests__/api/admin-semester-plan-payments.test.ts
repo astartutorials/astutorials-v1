@@ -109,5 +109,6 @@ describe('GET /api/admin/semester-plan-payments', () => {
     expect(byKey.b1).toMatchObject({ option: 'split', status: 'paid_in_full', amountPaid: 110000, total: 110000, secondReference: 's1b' });
     expect(byKey.b2).toMatchObject({ status: 'overdue', amountPaid: 55000, dueDate: '2026-12-14', balanceId: 'b2' });
     expect(byKey.b3).toMatchObject({ status: 'part_paid', dueDate: '2026-12-24' });
+    expect(byKey.full.details).toMatchObject({ courseOfStudy: null });
   });
 });

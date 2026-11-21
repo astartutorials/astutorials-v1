@@ -8,6 +8,7 @@ import {
   isSplitOpen,
   daysUntil,
   formatDueDate,
+  parseSemesterPlanNotes,
 } from '@/lib/semester-plan';
 
 describe('semester plan', () => {
@@ -69,5 +70,38 @@ describe('paying in 2', () => {
 
   it('formats the due date for people', () => {
     expect(formatDueDate('2026-12-14')).toBe('Monday 14 December');
+  });
+});
+
+describe('parseSemesterPlanNotes', () => {
+  it('unpacks what the checkout form packed into notes', () => {
+    const notes = [
+      'Plan: Group Semester Plan',
+      'Paid by: Parent/guardian',
+      'Course of study: Nursing Science',
+      'Matric: 26/1234',
+      'Parent: Ada Obi (08012345678, ada@x.com)',
+      'Student email: kid@x.com',
+      'Notes: Help with ANA 201 | PHS 203, weekends please',
+      'Paying in 2 instalments: 1 of 2',
+      'Discount: ASTAR20K',
+    ].join(' | ');
+    expect(parseSemesterPlanNotes(notes)).toEqual({
+      paidBy: 'Parent/guardian',
+      courseOfStudy: 'Nursing Science',
+      matric: '26/1234',
+      parentName: 'Ada Obi',
+      parentPhone: '08012345678',
+      parentEmail: 'ada@x.com',
+      studentEmail: 'kid@x.com',
+      message: 'Help with ANA 201 | PHS 203, weekends please',
+      discount: 'ASTAR20K',
+    });
+  });
+
+  it('leaves missing fields null and labels referral codes', () => {
+    const d = parseSemesterPlanNotes('Plan: Private | Course of study: Law | Referral: UCHE20 (−₦20,000)');
+    expect(d).toMatchObject({ courseOfStudy: 'Law', matric: null, parentName: null, message: null, discount: 'Referral: UCHE20 (−₦20,000)' });
+    expect(parseSemesterPlanNotes(null).courseOfStudy).toBeNull();
   });
 });
