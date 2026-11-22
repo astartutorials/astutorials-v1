@@ -19,9 +19,9 @@ import Words from "@/components/shared/Words";
 /** A fresher's to-do list. The last item is the one we want ticked. */
 // A fresher's progression: settled in, matriculated (ticked 2026-11-22), then
 // A-Star (the open box, ticked on hover), then where it all leads.
-const BEFORE = [
+const BEFORE: { item: string; emoji?: string; done: boolean }[] = [
   { item: "Settle in", done: true },
-  { item: "Matriculate 🎉", done: true },
+  { item: "Matriculate", emoji: "🥳", done: true },
 ];
 const AFTER = [
   // Getting a first class / 5.0 CGPA was one of the most asked questions at
@@ -29,7 +29,7 @@ const AFTER = [
   { item: "Achieve a 5.0", done: false },
 ];
 
-function ToDoItem({ item, done, delay, reduce }: { item: string; done: boolean; delay: number; reduce: boolean }) {
+function ToDoItem({ item, emoji, done, delay, reduce }: { item: string; emoji?: string; done: boolean; delay: number; reduce: boolean }) {
   return (
     <li className="flex items-center gap-2">
       <span className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border-2 border-fg-faint">
@@ -48,6 +48,8 @@ function ToDoItem({ item, done, delay, reduce }: { item: string; done: boolean; 
           />
         )}
       </span>
+      {/* Outside the struck-through text, so the line doesn't cross its face. */}
+      {emoji && <span className="-ml-0.5">{emoji}</span>}
     </li>
   );
 }
@@ -69,7 +71,7 @@ function ToDoCard({ href, ticked }: { href: string; ticked: boolean }) {
           <span aria-hidden className="absolute -top-3 left-1/2 h-6 w-20 -translate-x-1/2 rotate-[-3deg] rounded-sm bg-red-200/70 dark:bg-red-400/30" />
           <p className="font-note text-2xl font-bold text-fg">My 100L to-do</p>
           <ul className="mt-2 font-note text-xl leading-8 text-fg-muted">
-            {BEFORE.map(({ item, done }, i) => <ToDoItem key={item} item={item} done={done} delay={0.3 + i * 0.35} reduce={!!reduce} />)}
+            {BEFORE.map(({ item, emoji, done }, i) => <ToDoItem key={item} item={item} emoji={emoji} done={done} delay={0.3 + i * 0.35} reduce={!!reduce} />)}
             <li className="flex items-center gap-2 text-fg">
               <span className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border-2 border-[var(--astar-red)]">
                 {ticked && <RedPenTick className="absolute -top-1.5 left-0 h-5 w-5" />}
