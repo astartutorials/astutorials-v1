@@ -17,11 +17,13 @@ import Words from "@/components/shared/Words";
  * and the band disappears whenever no 100 level intake is open.
  */
 /** A fresher's to-do list. The last item is the one we want ticked. */
-// A fresher's progression: settled in, then A-Star (the open box, ticked on
-// hover), then matriculation, then where it all leads (user, 2026-11-12).
-const BEFORE = [{ item: "Settle in", done: true }];
+// A fresher's progression: settled in, matriculated (ticked 2026-11-22), then
+// A-Star (the open box, ticked on hover), then where it all leads.
+const BEFORE = [
+  { item: "Settle in", done: true },
+  { item: "Matriculate 🎉", done: true },
+];
 const AFTER = [
-  { item: "Matriculate 🎉", done: false },
   // Getting a first class / 5.0 CGPA was one of the most asked questions at
   // The Freshers' Advantage (15 of 134 submitted questions).
   { item: "Achieve a 5.0", done: false },
