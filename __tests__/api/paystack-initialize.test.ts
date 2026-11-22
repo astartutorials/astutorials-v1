@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 
-const mockSingle = jest.fn().mockResolvedValue({ data: { seats_total: 30, seats_booked: 0 } });
+const mockSingle = jest.fn().mockResolvedValue({ data: { seats_total: 30, seats_booked: 0, price: 5000 } });
 const mockEq = jest.fn(() => ({ single: mockSingle }));
 const mockSelect = jest.fn(() => ({ eq: mockEq }));
 jest.mock('@supabase/supabase-js', () => ({
@@ -30,7 +30,7 @@ function makeRequest(body: object) {
 describe('POST /api/paystack/initialize', () => {
   beforeEach(() => {
     (global.fetch as jest.Mock).mockReset();
-    mockSingle.mockReset().mockResolvedValue({ data: { seats_total: 30, seats_booked: 0 } });
+    mockSingle.mockReset().mockResolvedValue({ data: { seats_total: 30, seats_booked: 0, price: 5000 } });
     mockVerifyTurnstile.mockResolvedValue(true);
   });
 
@@ -61,7 +61,7 @@ describe('POST /api/paystack/initialize', () => {
       }),
     });
 
-    const res = await POST(makeRequest({ email: 'test@example.com', amount: 5000 }));
+    const res = await POST(makeRequest({ email: 'test@example.com', amount: 5000, metadata: { tutorial_id: 'tut-1' } }));
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.authorization_url).toBe('https://checkout.paystack.com/abc123');
@@ -73,14 +73,14 @@ describe('POST /api/paystack/initialize', () => {
       json: async () => ({ status: true, data: { authorization_url: 'https://paystack.com/pay/x' } }),
     });
 
-    await POST(makeRequest({ email: 'test@example.com', amount: 5075 }));
+    await POST(makeRequest({ email: 'test@example.com', amount: 6090, metadata: { type: 'private' } }));
 
     const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
-    expect(body.amount).toBe(507500);
+    expect(body.amount).toBe(609000);
   });
 
   it('returns 409 when the tutorial is fully booked', async () => {
-    mockSingle.mockResolvedValueOnce({ data: { seats_total: 30, seats_booked: 30 } });
+    mockSingle.mockResolvedValueOnce({ data: { seats_total: 30, seats_booked: 30, price: 5000 } });
 
     const res = await POST(makeRequest({
       email: 'test@example.com',
@@ -98,7 +98,7 @@ describe('POST /api/paystack/initialize', () => {
       json: async () => ({ message: 'Invalid secret key' }),
     });
 
-    const res = await POST(makeRequest({ email: 'test@example.com', amount: 5000 }));
+    const res = await POST(makeRequest({ email: 'test@example.com', amount: 5000, metadata: { tutorial_id: 'tut-1' } }));
     expect(res.status).toBe(502);
   });
 
@@ -106,7 +106,7 @@ describe('POST /api/paystack/initialize', () => {
     const saved = process.env.PAYSTACK_SECRET_KEY;
     delete process.env.PAYSTACK_SECRET_KEY;
 
-    const res = await POST(makeRequest({ email: 'test@example.com', amount: 5000 }));
+    const res = await POST(makeRequest({ email: 'test@example.com', amount: 5000, metadata: { tutorial_id: 'tut-1' } }));
     expect(res.status).toBe(500);
 
     process.env.PAYSTACK_SECRET_KEY = saved;
@@ -122,7 +122,7 @@ describe('POST /api/paystack/initialize', () => {
 
     const res = await POST(makeRequest({
       email: 'ada@example.com',
-      amount: 5000,
+      amount: 6090,
       metadata: { type: 'private', full_name: 'Ada Obi', phone: '+2348012345678' },
     }));
     expect(res.status).toBe(200);
@@ -152,7 +152,7 @@ describe('POST /api/paystack/initialize', () => {
 
     const res = await POST(makeRequest({
       email: 'ada@example.com',
-      amount: 5000,
+      amount: 6090,
       metadata: { type: 'private', full_name: 'Ada Obi' },
     }));
 
@@ -160,20 +160,78 @@ describe('POST /api/paystack/initialize', () => {
     expect((await res.json()).authorization_url).toBe('https://paystack.com/pay/x');
   });
 
-  it('allows a private booking through even when the tutorial is fully booked', async () => {
-    mockSingle.mockResolvedValueOnce({ data: { seats_total: 30, seats_booked: 30 } });
+  describe('price checks', () => {
+    const okPaystack = () =>
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ status: true, data: { authorization_url: 'https://paystack.com/pay/x' } }),
+      });
+    const sent = () => JSON.parse((global.fetch as jest.Mock).mock.calls.at(-1)[1].body);
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ status: true, data: { authorization_url: 'https://paystack.com/pay/x' } }),
+    it.each([
+      ['a private session', 6090, { type: 'private' }],
+      ['Pre-Clinicals', 60000, { type: 'preclinicals' }],
+      ['BUCC classes', 60000, { type: 'bucc-classes' }],
+      ['a group tutorial', 5000, { tutorial_id: 'tut-1' }],
+    ])('accepts the listed price for %s and refuses any other', async (_label, price, metadata) => {
+      okPaystack();
+      for (const amount of [100, price - 1, price + 1, -price, String(price)]) {
+        const res = await POST(makeRequest({ email: 'p@example.com', amount, metadata }));
+        expect(res.status).toBe(400);
+      }
+      expect(global.fetch).not.toHaveBeenCalled();
+
+      const res = await POST(makeRequest({ email: 'p@example.com', amount: price, metadata }));
+      expect(res.status).toBe(200);
+      expect(sent().amount).toBe(price * 100);
     });
 
-    const res = await POST(makeRequest({
-      email: 'test@example.com',
-      amount: 5000,
-      metadata: { tutorial_id: 'tut-1', type: 'private' },
-    }));
-    expect(res.status).toBe(200);
+    it.each([
+      ['no metadata', undefined],
+      ['empty metadata', {}],
+      ['an unknown type', { type: 'vip' }],
+      ['an unknown type on a tutorial', { type: 'vip', tutorial_id: 'tut-1' }],
+      ['an inherited object key as the type', { type: 'constructor' }],
+    ])('refuses %s', async (_label, metadata) => {
+      const res = await POST(makeRequest({ email: 'p@example.com', amount: 100, metadata }));
+      expect(res.status).toBe(400);
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('refuses a tutorial that does not exist', async () => {
+      mockSingle.mockResolvedValueOnce({ data: null });
+      const res = await POST(makeRequest({ email: 'p@example.com', amount: 100, metadata: { tutorial_id: 'nope' } }));
+      expect(res.status).toBe(404);
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('does not let a fixed-price booking or a plan carry a tutorial seat', async () => {
+      okPaystack();
+      for (const [amount, metadata] of [
+        [6090, { type: 'private', tutorial_id: 'tut-1' }],
+        [60000, { type: 'preclinicals', tutorial_id: 'tut-1' }],
+        [100000, { type: 'semester-plan', plan: 'group', tutorial_id: 'tut-1' }],
+      ] as const) {
+        const res = await POST(makeRequest({ email: 'p@example.com', amount, metadata }));
+        expect(res.status).toBe(200);
+        expect(sent().metadata).not.toHaveProperty('tutorial_id');
+      }
+    });
+
+    it('drops payment fields the browser must not set, and keeps the payer details', async () => {
+      okPaystack();
+      await POST(makeRequest({
+        email: 'p@example.com',
+        amount: 6090,
+        metadata: {
+          type: 'private', full_name: 'Ada Obi', phone: '1', course: 'PHY 102', notes: 'n', org_id: 'org-1',
+          payment_option: 'split', instalment: 2, balance_id: 'b', discount_code: 'X', ambassador_id: 'a',
+        },
+      }));
+      expect(sent().metadata).toEqual({
+        type: 'private', full_name: 'Ada Obi', phone: '1', course: 'PHY 102', notes: 'n', org_id: 'org-1',
+      });
+    });
   });
 
   describe('full semester plan', () => {

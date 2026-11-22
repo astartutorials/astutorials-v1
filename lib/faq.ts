@@ -1,5 +1,6 @@
 import { SEMESTER_PLANS, SEMESTER_PLAN_TERM, perSessionPrice } from '@/lib/semester-plan';
 import { AMBASSADOR_COMMISSIONS, referralDiscount } from '@/lib/ambassador';
+import { PRIVATE_SESSION_PRICE_LABEL } from '@/lib/private-tutorials';
 
 /**
  * Every FAQ answer on the site. The homepage shows the ones marked `home`;
@@ -40,7 +41,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
       {
         question: 'How do private (one-on-one) tutorials work?',
         answer:
-          'Pay ₦6,090 for a session, then fill in a short form with your course, goals and preferred times. We’ll match you with a tutor who fits and set things up with you on WhatsApp.',
+          `Pay ${PRIVATE_SESSION_PRICE_LABEL} for a session, then fill in a short form with your course, goals and preferred times. We’ll match you with a tutor who fits and set things up with you on WhatsApp.`,
       },
       {
         question: 'Who are the tutors?',

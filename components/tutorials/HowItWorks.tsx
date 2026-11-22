@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Check, CreditCard, Mail, MessageCircle } from "lucide-react";
 import Words from "@/components/shared/Words";
+import { PRIVATE_SESSION_PRICE_LABEL } from "@/lib/private-tutorials";
 
 /**
  * How booking works, per tab, each step with a small picture of what it looks
@@ -81,8 +82,8 @@ function GroupSteps() {
 function PrivateSteps() {
   return (
     <>
-      <StepCard n="01" title="Pay for a session" desc="₦6,090 a session, paid online with Paystack by card, bank transfer or USSD.">
-        <PaidCard label="₦6,090" />
+      <StepCard n="01" title="Pay for a session" desc={`${PRIVATE_SESSION_PRICE_LABEL} a session, paid online with Paystack by card, bank transfer or USSD.`}>
+        <PaidCard label={PRIVATE_SESSION_PRICE_LABEL} />
       </StepCard>
       <StepCard n="02" title="Tell us what you need" desc="A short form: your course, your level, and the times that suit you.">
         <div className="w-full max-w-[15rem] space-y-2 rounded-2xl bg-surface-raised p-4 shadow-sm text-xs">
