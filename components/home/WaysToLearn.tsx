@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, CalendarRange, User, Users } from "lucide-react";
 import Words from "@/components/shared/Words";
+import { PRIVATE_SESSION_PRICE_LABEL } from "@/lib/private-tutorials";
 import { SEMESTER_PLANS, SEMESTER_PLAN_HREF } from "@/lib/semester-plan";
 
 const g = SEMESTER_PLANS.group;
@@ -77,7 +78,7 @@ export default function WaysToLearn() {
           </Link>
 
           <SmallCard icon={Users} title="Group tutorials" desc="Small classes with coursemates, focused on one course at a time." price="Priced per session" cta="View schedule" href="/tutorials" />
-          <SmallCard icon={User} title="Private 1-on-1" desc="A tutor matched to you, at your pace and around your timetable." price="₦6,090 / session" cta="Find a tutor" href="/tutorials?type=private" />
+          <SmallCard icon={User} title="Private 1-on-1" desc="A tutor matched to you, at your pace and around your timetable." price={`${PRIVATE_SESSION_PRICE_LABEL} / session`} cta="Find a tutor" href="/tutorials?type=private" />
           <SmallCard icon={BookOpen} title="Exam mock sessions" desc="Timed practice and revision on the topics that come up, before tests and exams." price="Priced per session" cta="Start prep" href="/tutorials" />
           <div className="reveal hidden lg:flex flex-col justify-center rounded-3xl border border-dashed border-white/15 p-6 text-sm text-white/60">
             Not sure which fits?{" "}

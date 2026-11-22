@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { X, ArrowRight, Loader2 } from "lucide-react";
 import { validateBookingForm } from "@/lib/validate";
 import posthog from "@/lib/analytics";
+import { PRIVATE_SESSION_PRICE, PRIVATE_SESSION_PRICE_LABEL } from "@/lib/private-tutorials";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 interface EmailModalProps {
@@ -50,7 +51,7 @@ export default function EmailModal({ onClose, orgId }: EmailModalProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: form.email,
-          amount: 6090,
+          amount: PRIVATE_SESSION_PRICE,
           turnstileToken,
           metadata: {
             type: "private",
@@ -71,7 +72,7 @@ export default function EmailModal({ onClose, orgId }: EmailModalProps) {
       posthog.identify(form.email, { name: form.fullName, phone: form.phone, email: form.email });
       posthog.capture("private_booking_initiated", {
         course: form.course,
-        amount: 6090,
+        amount: PRIVATE_SESSION_PRICE,
       });
       window.location.href = data.authorization_url;
     } catch (err) {
@@ -102,7 +103,7 @@ export default function EmailModal({ onClose, orgId }: EmailModalProps) {
           </button>
           <h2 className="text-2xl font-bold text-fg">Request Private Tutorial</h2>
           <p className="text-fg-subtle text-sm mt-1">
-            Fill in your details and pay ₦6,090 to secure your session. We&apos;ll connect on WhatsApp after payment.
+            Fill in your details and pay {PRIVATE_SESSION_PRICE_LABEL} to secure your session. We&apos;ll connect on WhatsApp after payment.
           </p>
         </div>
 
@@ -165,7 +166,7 @@ export default function EmailModal({ onClose, orgId }: EmailModalProps) {
             {loading ? (
               <><Loader2 size={18} className="animate-spin" /> Redirecting to payment…</>
             ) : (
-              <>Pay ₦6,090 &amp; Continue <ArrowRight size={18} /></>
+              <>Pay {PRIVATE_SESSION_PRICE_LABEL} &amp; Continue <ArrowRight size={18} /></>
             )}
           </button>
 
