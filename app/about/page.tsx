@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Users,
-  TrendingUp,
-  Target,
-  Award,
+  Tag,
+  MessageCircle,
+  Gift,
   GraduationCap,
   User,
   BookOpen,
@@ -36,11 +35,29 @@ export const metadata: Metadata = {
   },
 };
 
-const values = [
-  { icon: Users, title: "Supportive Community", desc: "A welcoming environment where every student matters." },
-  { icon: TrendingUp, title: "Growth Mindset", desc: "Fostering continuous learning and improvement." },
-  { icon: Target, title: "Student-First Approach", desc: "Tailored approaches for individual success." },
-  { icon: Award, title: "Academic Discipline", desc: "Building strong foundations for excellence." },
+// Promises a student could catch us breaking, not adjectives (picked by the
+// user, 2026-11-22). Keep each one true: if one stops being so, change it here.
+const promises = [
+  {
+    icon: Tag,
+    title: "The price you see is the price you pay",
+    desc: "Every session and plan shows its price before you book.",
+  },
+  {
+    icon: GraduationCap,
+    title: "We won't promise you a grade",
+    desc: "Nobody can honestly sell you an A. We teach the course properly and help you prepare for it.",
+  },
+  {
+    icon: MessageCircle,
+    title: "You can reach a person",
+    desc: "Message us on WhatsApp before or after you pay, and someone on the team replies.",
+  },
+  {
+    icon: Gift,
+    title: "Some help should be free",
+    desc: "The Freshers' Advantage, the BUCC Advantage and the Playbook webinars have all been free to attend.",
+  },
 ];
 
 const cofounders = [
@@ -228,11 +245,11 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Values */}
+      {/* Promises */}
       <section className="max-w-[1100px] mx-auto px-6 mt-16 md:mt-20">
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg-strong">What we stand for</h2>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-fg-strong">What you can hold us to</h2>
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {values.map(({ icon: Icon, title, desc }) => (
+          {promises.map(({ icon: Icon, title, desc }) => (
             <div key={title} className="p-6 rounded-2xl bg-surface-raised border border-line-subtle">
               <div className="w-11 h-11 rounded-full bg-brand-soft flex items-center justify-center mb-5">
                 <Icon className="w-5 h-5 text-brand-ink" />
