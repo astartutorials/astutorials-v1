@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import CountUp from "@/components/shared/CountUp";
 import HeroVideo from "@/components/home/HeroVideo";
 import { Underline } from "@/components/shared/fun/RedPen";
 import { ArrowRight, CalendarRange } from "lucide-react";
@@ -58,30 +57,6 @@ export default function HeroSection() {
           <div className="relative w-full max-w-lg aspect-square rounded-3xl overflow-hidden shadow-2xl shadow-gray-200/60 border border-line-subtle">
             <HeroVideo />
           </div>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="w-full max-w-5xl mx-auto mb-10 md:mb-14">
-        <p className="text-xs md:text-sm text-fg-faint mb-10 font-medium uppercase tracking-wider text-center">
-          Trusted by students globally
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8 items-center justify-center opacity-80">
-          {[
-            { val: "7000+", label: "Active Students" },
-            { val: "95%",   label: "Pass Rate" },
-            { val: "50+",   label: "Expert Tutors" },
-            { val: "24/7",  label: "Support", static: true },
-          ].map((stat, i) => (
-            <div key={i} className="flex flex-col items-center">
-              <span className="text-3xl md:text-4xl font-bold text-fg tracking-tight">
-                {stat.static ? stat.val : <CountUp value={stat.val} />}
-              </span>
-              <span className="text-[10px] md:text-xs uppercase tracking-widest text-fg-faint mt-2 font-semibold">
-                {stat.label}
-              </span>
-            </div>
-          ))}
         </div>
       </div>
     </section>
