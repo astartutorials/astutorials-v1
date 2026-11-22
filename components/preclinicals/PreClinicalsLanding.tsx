@@ -793,8 +793,7 @@ export default function PreClinicalsLanding() {
             </h2>
             <p className="mt-4 text-fg-muted md:text-lg max-w-2xl mx-auto leading-relaxed">
               The best medical students don’t wait until resumption to prepare — they begin before
-              everyone else. Join hundreds of ambitious students choosing to resume pre-clinicals
-              with confidence, clarity and a competitive edge.
+              everyone else.
             </p>
 
             <div className="mt-8">

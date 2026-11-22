@@ -129,9 +129,8 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-white/5 px-6 py-5">
-        <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600">
+        <div className="max-w-[1440px] mx-auto text-center sm:text-left text-xs text-gray-600">
           <p>© 2026 A-Star Tutorials. All rights reserved.</p>
-          <p>Built for academic excellence.</p>
         </div>
       </div>
     </footer>

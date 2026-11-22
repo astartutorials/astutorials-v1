@@ -19,8 +19,6 @@ const t = {
   checkWrap: "bg-white/10 text-[#F4A9A3]",
   item: "text-white/90",
   button: "bg-white text-[#7A1A21] shadow-black/30 hover:bg-red-50",
-  fade: "from-[#2A080C]/90",
-  badgeLabel: "text-white/60",
 };
 
 export default function BecomeTutor() {
@@ -37,15 +35,6 @@ export default function BecomeTutor() {
               sizes="(min-width: 1024px) 50vw, 100vw"
               className="object-cover"
             />
-            <div className={`absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t ${t.fade} to-transparent`}>
-              <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 inline-flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center text-green-950 font-bold">A+</div>
-                <div>
-                  <p className={`text-xs font-medium uppercase ${t.badgeLabel}`}>Tutor Rating</p>
-                  <p className="font-bold text-white">Top 1% Performers</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
