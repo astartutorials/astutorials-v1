@@ -87,7 +87,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
     items: [
       {
         question: 'Can I earn money with A-Star?',
-        answer: `Yes. Become an A-Star Ambassador. Apply at astartutorials.com/ambassador; once you’re approved, you get your own referral code. Anyone who uses it gets 10% off, and you earn ${naira(AMBASSADOR_COMMISSIONS.group)} for every Group Semester Plan and ${naira(AMBASSADOR_COMMISSIONS.private)} for every Private Semester Plan bought with it, paid monthly.`,
+        answer: `Yes. Become an A-Star Ambassador. Apply at astartutorials.com/ambassador; once you’re approved, you get your own referral code. Anyone who uses it gets 10% off, and you earn a 10% commission: ${naira(AMBASSADOR_COMMISSIONS.group)} for every Group Semester Plan and ${naira(AMBASSADOR_COMMISSIONS.private)} for every Private Semester Plan bought with it, paid monthly.`,
         home: true,
       },
       {

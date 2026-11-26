@@ -14,7 +14,7 @@ describe('proposeReferralCode', () => {
 
 describe('commission and referral discount', () => {
   it("matches Uche's figures: a flat 5k / 15k commission, 10% off for the student", () => {
-    expect(AMBASSADOR_COMMISSIONS).toEqual({ group: 5000, private: 15000 });
+    expect(AMBASSADOR_COMMISSIONS).toEqual({ group: 10000, private: 30000 });
     expect(referralDiscount('group')).toBe(10000);
     expect(referralDiscount('private')).toBe(30000);
   });

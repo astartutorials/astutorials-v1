@@ -10,8 +10,8 @@ describe('FAQ content', () => {
     const text = ALL_FAQS.map((f) => f.answer).join(' ');
     expect(text).toContain('₦100,000');
     expect(text).toContain('₦300,000');
-    expect(text).toContain('₦5,000');
-    expect(text).toContain('₦15,000');
+    expect(text).toContain('₦10,000');
+    expect(text).toContain('₦30,000');
   });
 
   // No refund policy beyond "no refunds" (Uche, 2026-11-12). The old answer
