@@ -216,7 +216,7 @@ describe('referral codes', () => {
       90000
     );
     expect(mockReferralUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({ payment_reference: 'ref9', ambassador_id: 'amb-1', commission: 5000, amount_paid: 90000 })
+      expect.objectContaining({ payment_reference: 'ref9', ambassador_id: 'amb-1', commission: 10000, amount_paid: 90000 })
     );
     expect(mockUpsert).not.toHaveBeenCalled();
   });
@@ -318,7 +318,7 @@ describe('paying in 2', () => {
 
     await recordDiscountRedemption(supabase, 'second', { ...meta, instalment: 2 }, 165000);
     expect(mockReferralUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({ payment_reference: 'second', commission: 15000, amount_paid: 330000, discount_amount: 0 })
+      expect.objectContaining({ payment_reference: 'second', commission: 30000, amount_paid: 330000, discount_amount: 0 })
     );
   });
 });
