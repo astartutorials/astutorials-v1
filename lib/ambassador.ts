@@ -8,7 +8,8 @@ import { SEMESTER_PLANS } from '@/lib/semester-plan';
  * from Uche, 2026-11-12. Babcock is the test market.
  *
  * A student who pays with an ambassador's code gets 10% off; the ambassador
- * earns a flat commission per plan, whatever the discount. One code per
+ * earns 10% of the plan's list price, whatever the student paid (Paul,
+ * 2026-11-26; was a flat 5%). One code per
  * checkout, and an ambassador can't use their own (Uche, 2026-11-12).
  * Payouts are manual and monthly. Not built yet: a dashboard for ambassadors.
  */
@@ -16,12 +17,16 @@ export const AMBASSADOR_PROGRAMME_NAME = 'A-Star Ambassadors';
 export const AMBASSADOR_HREF = '/ambassador';
 
 /**
- * Flat commission per referred plan. Uche described it as 5% of the list
- * price, but confirmed it stays flat when the student pays less.
+ * Commission per referred plan: 10% of the list price (Paul, 2026-11-26).
+ * It stays flat when the student pays less, as Uche set for the original 5%.
+ * Recorded on each referral_redemptions row when the plan is paid, so a
+ * change here only affects referrals paid after it ships.
  */
+export const AMBASSADOR_COMMISSION_RATE = 0.1;
+
 export const AMBASSADOR_COMMISSIONS = {
-  group: 5000,
-  private: 15000,
+  group: Math.round(SEMESTER_PLANS.group.price * AMBASSADOR_COMMISSION_RATE),
+  private: Math.round(SEMESTER_PLANS.private.price * AMBASSADOR_COMMISSION_RATE),
 } as const;
 
 /** What a student saves by paying with an ambassador's referral code. */
@@ -69,8 +74,8 @@ export const AMBASSADOR_ROLE = [
 /** Benefits, from Uche's list (2026-11-12). */
 export const AMBASSADOR_BENEFITS = [
   {
-    title: 'Commission on every referral',
-    desc: `Up to ₦${AMBASSADOR_COMMISSIONS.private.toLocaleString()} per sign-up: ₦${AMBASSADOR_COMMISSIONS.group.toLocaleString()} for each Group Semester Plan and ₦${AMBASSADOR_COMMISSIONS.private.toLocaleString()} for each Private Semester Plan bought with your code. Paid monthly.`,
+    title: '10% commission on every referral',
+    desc: `10% of every plan, up to ₦${AMBASSADOR_COMMISSIONS.private.toLocaleString()} per sign-up: ₦${AMBASSADOR_COMMISSIONS.group.toLocaleString()} for each Group Semester Plan and ₦${AMBASSADOR_COMMISSIONS.private.toLocaleString()} for each Private Semester Plan bought with your code. Paid monthly.`,
   },
   {
     title: 'Your friends save 10%',

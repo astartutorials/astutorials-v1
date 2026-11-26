@@ -27,7 +27,7 @@ export default function AmbassadorLanding() {
               Get paid for every referral
             </h1>
             <p className="mt-6 max-w-xl text-base md:text-lg text-fg-subtle leading-relaxed">
-              Earn ₦{AMBASSADOR_COMMISSIONS.group.toLocaleString()} to ₦{AMBASSADOR_COMMISSIONS.private.toLocaleString()} for
+              Earn a 10% commission (₦{AMBASSADOR_COMMISSIONS.group.toLocaleString()} to ₦{AMBASSADOR_COMMISSIONS.private.toLocaleString()}) for
               every student who joins A-Star&apos;s Semester Plan with your code.
             </p>
 
